@@ -23,8 +23,8 @@ export default async function handler(req, res) {
         start_url: asset("/"),
         scope: asset("/"),
         display: "standalone",
-        background_color: "#f7f2cd",
-        theme_color: "#f7f2cd",
+        background_color: "#d5f2e6",
+        theme_color: "#d5f2e6",
         // ההגדרות בשרת נשמרות כנתיב יחסי ("/logo/..."), ולכן חייבות את הקידומת
         icons: [
             ...(favicon

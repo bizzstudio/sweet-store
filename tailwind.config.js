@@ -50,19 +50,19 @@ module.exports = {
           dark: '#845333',
         },
         customGreen: {
-          superLight: 'rgb(252, 255, 244)',
-          light: 'rgb(244, 252, 223)',
-          DEFAULT: '#3c6d16',
-          dark: '#2c510f',
-          leaf: '#afdc34'
+          superLight: '#f2fbf7',
+          light: '#d5f2e6',
+          DEFAULT: '#006300',
+          dark: '#004b00',
+          leaf: '#0d9e6d'
         },
         mainColor: {
-          superLight: '#f9f6ee',
-          light: '#f7f2cd',
-          DEFAULT: '#ffde16',
-          dark: '#c09c0f',
-          superDark: '#735d09',
-          leaf: '#fff49e'
+          superLight: '#f2fbf7',
+          light: '#d5f2e6',
+          DEFAULT: '#0d9e6d',
+          dark: '#0a7b55',
+          superDark: '#064e35',
+          leaf: '#a5e5cb'
         },
         customRed: {
           superLight: '#ffd6d6',
@@ -87,7 +87,7 @@ module.exports = {
         fadeOut: 'fadeOut 1s ease-out forwards',
       },
       boxShadow: {
-        popup: "#ffde16 0 3px 0, #ffde16 3px 0px 0, #ffde16 3px 3px 0, rgba(0, 0, 0, 0.432) 3px 3px 3px",
+        popup: "#0d9e6d 0 3px 0, #0d9e6d 3px 0px 0, #0d9e6d 3px 3px 0, rgba(0, 0, 0, 0.432) 3px 3px 3px",
       },
       screens: {
         xs: "420px",

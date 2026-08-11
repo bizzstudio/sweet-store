@@ -30,10 +30,10 @@ const City = ({ setValue, placeholder }) => {
   const customStyles = {
     control: (provided, state) => ({
       ...provided,
-      borderColor: state.isFocused ? '#ffde16' : provided.borderColor,
-      boxShadow: state.isFocused ? '0 0 0 1px #ffde16' : provided.boxShadow,
+      borderColor: state.isFocused ? '#0d9e6d' : provided.borderColor,
+      boxShadow: state.isFocused ? '0 0 0 1px #0d9e6d' : provided.boxShadow,
       '&:hover': {
-        borderColor: state.isFocused ? '#ffde16' : provided.borderColor,
+        borderColor: state.isFocused ? '#0d9e6d' : provided.borderColor,
       },
       padding: '5px',
       direction: 'rtl',
@@ -47,9 +47,10 @@ const City = ({ setValue, placeholder }) => {
     option: (provided, state) => ({
       ...provided,
       textAlign: 'right',
-      backgroundColor: state.isSelected ? '#ffde16' : state.isFocused ? '#f9f6ee' : provided.backgroundColor,
+      backgroundColor: state.isSelected ? '#0d9e6d' : state.isFocused ? '#f2fbf7' : provided.backgroundColor,
+      color: state.isSelected ? '#ffffff' : provided.color,
       '&:active': {
-        backgroundColor: '#ffde16', // צבע הרקע כאשר לוחצים על האופציות
+        backgroundColor: '#0d9e6d', // צבע הרקע כאשר לוחצים על האופציות
         color: 'white',
       },
     }),

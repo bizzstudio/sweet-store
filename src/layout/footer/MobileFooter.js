@@ -60,7 +60,7 @@ const MobileFooter = () => {
         }}
       >
         {/* בר עליון מעוגל עם קו עליון בצבע המותג */}
-        <div className="relative bg-mainColor-superLight text-[#2a2100] w-full px-4 sm:px-8 pt-3 pb-2 border-t-0 border-[#2a2100] rounded-t-3xl">
+        <div className="relative bg-mainColor-superLight text-[#064e35] w-full px-4 sm:px-8 pt-3 pb-2 border-t-0 border-[#064e35] rounded-t-3xl">
           {/* גריד של 5 – העגלה באמצע ומוגבהת */}
           <div className="grid grid-cols-5 items-end gap-1 text-center">
             {/* 1. כל המוצרים – אותה פונקציונליות של כפתור הקטגוריות */}
@@ -95,7 +95,7 @@ const MobileFooter = () => {
               style={{ marginTop: 'calc(-1 * (15vw + 12px))' }}
             >
               <div
-                className="rounded-full bg-mainColor text-[#2a2100] ring-[0px] ring-[#2a2100] shadow-md flex items-center justify-center"
+                className="rounded-full bg-mainColor text-white ring-[0px] ring-[#064e35] shadow-md flex items-center justify-center"
                 style={{
                   width: 'clamp(55px, 15vw, 75px)',
                   height: 'clamp(55px, 15vw, 75px)',

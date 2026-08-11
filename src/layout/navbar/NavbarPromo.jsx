@@ -150,7 +150,7 @@ const NavbarPromo = ({ logoHeight }) => {
   };
 
   // צבע רקע הסרגל – משמש ל-gradient שמאחורי חצי הגלילה כדי לדהות את האייקון שמתחתם
-  const barBg = asPath === "/" ? "#f9f6ee" : "#ffffff";
+  const barBg = asPath === "/" ? "#f2fbf7" : "#ffffff";
 
   return (
     <>

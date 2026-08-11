@@ -39,7 +39,7 @@ const Discount = ({
       {title && (
         <span
           ref={containerRef}
-          className={`inline-flex items-center gap-0.5 sm:gap-1 py-0.5 sm:py-1 text-xs sm:text-sm font-medium text-black bg-mainColor rounded-lg shadow-sm overflow-hidden ${modal
+          className={`inline-flex items-center gap-0.5 sm:gap-1 py-0.5 sm:py-1 text-xs sm:text-sm font-medium text-white bg-mainColor rounded-lg shadow-sm overflow-hidden ${modal
             ? 'absolute end-3 top-3 ms-3 outline outline-[8px] outline-white'
             : slug
               ? 'outline outline-[8px] outline-white'
