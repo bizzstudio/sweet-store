@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import dynamic from "next/dynamic";
 import useTranslation from "next-translate/useTranslation";
 
@@ -469,7 +469,7 @@ const Footer = () => {
               rel="noopener noreferrer"
               className="text-mainColor-dark"
             >
-              לתמרים בתומר
+              להמתוקים של בני
             </Link>
           </span>
           <hr className="sm:h-4 sm:w-[1px] h-[1px] w-7 bg-gray-400" />

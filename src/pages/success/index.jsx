@@ -136,13 +136,11 @@ const Success = () => {
     scrollUp();
     Cookies.remove("couponInfo");
     sessionStorage.removeItem("products");
-    sessionStorage.removeItem("customerNote");
     emptyCart();
 
     return () => {
       Cookies.remove("couponInfo");
       sessionStorage.removeItem("products");
-      sessionStorage.removeItem("customerNote");
       emptyCart();
     }
   }, [])

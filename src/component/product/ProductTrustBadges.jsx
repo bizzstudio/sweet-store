@@ -1,5 +1,5 @@
 // src/component/product/ProductTrustBadges.jsx
-import Image from "next/image";
+import Image from "@component/common/Img";
 import useTranslation from "next-translate/useTranslation";
 
 const BADGES = [

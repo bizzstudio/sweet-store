@@ -1,7 +1,7 @@
 // src/component/category/Category.js
 import { useContext } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import { IoClose } from "react-icons/io5";
 import useTranslation from "next-translate/useTranslation";
 

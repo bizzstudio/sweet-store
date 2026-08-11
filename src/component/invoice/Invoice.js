@@ -2,7 +2,7 @@
 import dayjs from "dayjs";
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import Cookies from "js-cookie";
 import 'dayjs/locale/he'; // ייבוא תאריכים בעברית
 

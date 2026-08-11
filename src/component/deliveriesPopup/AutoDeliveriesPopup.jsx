@@ -1,6 +1,6 @@
 // src/component/deliveriesPopup/AutoDeliveriesPopup.jsx
 import React from "react";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import useAsync from "@hooks/useAsync";
 import DeliveryServices from "@services/DeliveryServices";
 import useGetSetting from "@hooks/useGetSetting";

@@ -1,55 +1,9 @@
 /* src/styles/custom.css */
-/* פונט Assistant — מוטמע ישירות (במקום @import של קובץ חיצוני) כדי להסיר
-   request חוסם-רינדור, עם font-display: swap כדי שהטקסט יוצג מיד בפונט גיבוי. */
-@font-face {
-  font-family: 'Assistant';
-  src: url('/fonts/assistant/Assistant-ExtraLight.woff2') format('woff2');
-  font-weight: 200;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Assistant';
-  src: url('/fonts/assistant/Assistant-Light.woff2') format('woff2');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Assistant';
-  src: url('/fonts/assistant/Assistant-Regular.woff2') format('woff2');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Assistant';
-  src: url('/fonts/assistant/Assistant-Medium.woff2') format('woff2');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Assistant';
-  src: url('/fonts/assistant/Assistant-SemiBold.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Assistant';
-  src: url('/fonts/assistant/Assistant-Bold.woff2') format('woff2');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Assistant';
-  src: url('/fonts/assistant/Assistant-ExtraBold.woff2') format('woff2');
-  font-weight: 800;
-  font-style: normal;
-  font-display: swap;
-}
+/* פונט Assistant — הצהרות ה-@font-face עברו ל-src/pages/_document.js.
+   הסיבה: Next אינו מוסיף את ה-basePath ל-url() בתוך CSS, ולכן כשהחנות מוגשת
+   מתת-נתיב (‎/sweet-store) כתובת כמו url('/fonts/...') מחזירה 404 והטקסט נופל
+   לפונט גיבוי. ב-_document אפשר לבנות את הכתובת מ-BASE_PATH ולכן זה נשאר נכון
+   גם בפיתוח (basePath ריק) וגם בשרת. הקבצים עצמם נשארו ב-public/fonts/assistant. */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -2377,7 +2331,9 @@ p:not(:last-of-type) {
 
 @media only screen and (min-width: 600px) {
   .bgship {
-    background-image: url(/_next/image?url=https%3A%2F%2Fres.cloudinary.com%2Fahossain%2Fimage%2Fupload%2Fv1697688032%2Fsettings%2Fdelivery-boy_rluuoq.webp&w=384&q=75);
+    /* ישירות מ-Cloudinary (עם w_384 משלו) ולא דרך ‎/_next/image: נתיב שמתחיל
+       ב-"/" בתוך CSS אינו מקבל את ה-basePath, ולכן היה נשבר תחת ‎/sweet-store. */
+    background-image: url(https://res.cloudinary.com/ahossain/image/upload/w_384,q_75/v1697688032/settings/delivery-boy_rluuoq.webp);
     background-position: left;
     background-repeat: no-repeat;
     min-height: 300px;

@@ -5,6 +5,7 @@ import { AiOutlineClose } from 'react-icons/ai';
 import useTranslation from 'next-translate/useTranslation';
 import requests from '@services/httpServices';
 import Image from 'next/image';
+import { asset } from "@utils/basePath";
 
 const Uploader = ({ setImageUrl, imageUrl }) => {
   const { t } = useTranslation();
@@ -53,7 +54,7 @@ const Uploader = ({ setImageUrl, imageUrl }) => {
         alt={file.name}
       />
       <img
-        src="/loader/spinner.gif"
+        src={asset("/loader/spinner.gif")}
         alt="Loading"
         width={40}
         height={40}

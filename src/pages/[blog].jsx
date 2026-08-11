@@ -1,6 +1,6 @@
 // src/pages/[blog].jsx
 import React from "react";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import Link from "next/link";
 import { FaUserCircle } from "react-icons/fa";
 import { IoNewspaperOutline } from "react-icons/io5";

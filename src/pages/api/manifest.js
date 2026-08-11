@@ -1,6 +1,8 @@
 // src/pages/api/manifest.js
 import SettingServices from "@services/SettingServices";
 
+import { asset, assetFromSetting } from "@utils/basePath";
+
 export default async function handler(req, res) {
     const setting = await SettingServices.getStoreSeoSetting().catch(() => null);
     const seo = setting?.seo || {};
@@ -13,21 +15,28 @@ export default async function handler(req, res) {
     const meta_img = toHttps(seo.meta_img);
 
     const manifest = {
-        name: seo.meta_title || "תמרים בתומר",
-        short_name: seo.meta_title || "תמרים בתומר",
+        name: seo.meta_title || "המתוקים של בני",
+        short_name: seo.meta_title || "המתוקים של בני",
         description: seo.meta_description || "",
-        start_url: "/",
+        // start_url ו-scope חייבים לכלול את תת-הנתיב שממנו החנות מוגשת, אחרת
+        // הדפדפן פוסל את ה-manifest (scope מחוץ לתחום) והתקנת ה-PWA נכשלת.
+        start_url: asset("/"),
+        scope: asset("/"),
         display: "standalone",
         background_color: "#f7f2cd",
         theme_color: "#f7f2cd",
+        // ההגדרות בשרת נשמרות כנתיב יחסי ("/logo/..."), ולכן חייבות את הקידומת
         icons: [
             ...(favicon
-                ? [{ src: favicon, sizes: "any", type: "image/png" }]
-                : [{ src: "/Tomer dates.png", sizes: "any", type: "image/png" }]),
+                ? [{ src: assetFromSetting(favicon), sizes: "any", type: "image/png" }]
+                : [
+                    { src: asset("/logo/logo-square-192.png"), sizes: "192x192", type: "image/png" },
+                    { src: asset("/logo/logo-square.png"), sizes: "512x512", type: "image/png" },
+                ]),
             ...(meta_img
                 ? [
-                    { src: meta_img, sizes: "192x192", type: "image/png", purpose: "any maskable" },
-                    { src: meta_img, sizes: "512x512", type: "image/png", purpose: "any maskable" },
+                    { src: assetFromSetting(meta_img), sizes: "192x192", type: "image/png", purpose: "any maskable" },
+                    { src: assetFromSetting(meta_img), sizes: "512x512", type: "image/png", purpose: "any maskable" },
                 ]
                 : []),
         ],

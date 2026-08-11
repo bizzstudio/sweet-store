@@ -1,5 +1,6 @@
 import React from 'react'
 import useTranslation from "next-translate/useTranslation";
+import { asset } from "@utils/basePath";
 
 export default function Calculating({ showText = true }) {
     const { t } = useTranslation();
@@ -7,7 +8,7 @@ export default function Calculating({ showText = true }) {
     return (
         <span className="flex flex-row justify-center items-center gap-1 text-center">
             <img
-                src="/loader/spinner.gif"
+                src={asset("/loader/spinner.gif")}
                 alt="Loading"
                 width={20}
                 height={10}

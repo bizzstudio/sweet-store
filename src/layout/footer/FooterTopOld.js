@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import Image from "@component/common/Img";
 
 // Internal import
 import useGetSetting from "@hooks/useGetSetting";

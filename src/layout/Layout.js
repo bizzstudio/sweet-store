@@ -26,16 +26,21 @@ import LotteryPopup, {
 import StickyCart from "@component/cart/StickyCart";
 import FreeShippingBar from "@component/common/FreeShippingBar";
 import useCart from "@hooks/useCart";
+import useRegisterSuccessFlag from "@hooks/useRegisterSuccessFlag";
 import { UserContext } from "@context/UserContext";
 import useGetSetting from "@hooks/useGetSetting";
 import FloatingWhatsApp from "@component/common/FloatingWhatsApp";
 import CustomerServices from "@services/CustomerServices";
 import RewardOffersManager from "@component/reward-offers/RewardOffersManager";
 import WelcomeGiftManager from "@component/welcome-gift/WelcomeGiftManager";
+import { STORE_CLOSED } from "@utils/storeMode";
 
 const Layout = ({ title, description, children, cashierPage = false }) => {
 
   const { state: { userInfo }, dispatch } = useContext(UserContext);
+
+  // כיבוי רכיבי ההזמנה כשהחנות סגורה ללקוחות. עמדת הקופה ממשיכה לעבוד כרגיל
+  const storeUiOff = STORE_CLOSED && !cashierPage;
 
   // console.log('userInfo layout :>> ', userInfo);
 
@@ -105,31 +110,9 @@ const Layout = ({ title, description, children, cashierPage = false }) => {
     }
   }, [localStorage.firstTime]);
 
-  const [showRegisterSuccess, setShowRegisterSuccess] = useState(false);
-  useEffect(() => {
-    const handleStorageChange = () => {
-      if (localStorage.showRegisterSuccess && JSON.parse(localStorage.showRegisterSuccess)) {
-        setShowRegisterSuccess(true);
-        localStorage.removeItem('showRegisterSuccess');
-      }
-    };
-
-    handleStorageChange();
-    window.addEventListener("customLocalStorageChange", handleStorageChange);
-
-    return () => {
-      window.removeEventListener("customLocalStorageChange", handleStorageChange);
-    };
-  }, []);
-
-  useEffect(() => {
-    const originalSetItem = localStorage.setItem;
-    localStorage.setItem = function (key, value) {
-      const event = new Event('customLocalStorageChange');
-      originalSetItem.apply(this, arguments);
-      window.dispatchEvent(event);
-    };
-  }, []);
+  // האזנה לדגל ההרשמה המוצלחת. הועבר להוק משותף כדי שגם עמוד ההתחברות
+  // העצמאי (‎/login), שאינו עטוף ב-Layout, יציג את אותו פופאפ
+  const [showRegisterSuccess, setShowRegisterSuccess] = useRegisterSuccessFlag();
 
 
   // פופאפ הגרלה פעילה — מופיע ראשון, שאר הפופאפים ממתינים לסגירתו
@@ -162,7 +145,7 @@ const Layout = ({ title, description, children, cashierPage = false }) => {
 
     // עמוד מוצר
     if (pathname.startsWith('/product/')) {
-      const productName = title?.replace(` | ${meta_title || "תמרים בתומר"}`, '') || '';
+      const productName = title?.replace(` | ${meta_title || "המתוקים של בני"}`, '') || '';
       return {
         productName
       };
@@ -182,7 +165,7 @@ const Layout = ({ title, description, children, cashierPage = false }) => {
 
     // עמוד הזמנה
     if (pathname.startsWith('/order/')) {
-      const orderNumber = title?.replace(` | ${meta_title || "תמרים בתומר"}`, '') || '';
+      const orderNumber = title?.replace(` | ${meta_title || "המתוקים של בני"}`, '') || '';
       return {
         orderNumber
       };
@@ -279,8 +262,8 @@ const Layout = ({ title, description, children, cashierPage = false }) => {
         <Head>
           <title>
             {title
-              ? `${title} | ${meta_title || "תמרים בתומר"}`
-              : meta_title || "תמרים בתומר"}
+              ? `${title} | ${meta_title || "המתוקים של בני"}`
+              : meta_title || "המתוקים של בני"}
           </title>
           {description && <meta name="description" content={description} />}
         </Head>
@@ -291,15 +274,17 @@ const Layout = ({ title, description, children, cashierPage = false }) => {
           <Navbar cashierPage={cashierPage} />
         ) : (
           <div ref={headerRef} className="sticky top-0 z-20">
-            <FreeShippingBar />
+            {/* פס משלוח חינם, העגלה הצפה והתפריט התחתון שייכים כולם לתהליך
+                ההזמנה — כשהחנות סגורה אין מה להזמין והם יורדים */}
+            {!storeUiOff && <FreeShippingBar />}
             <Navbar cashierPage={cashierPage} disableSticky />
           </div>
         )}
         <div className="bg-mainColor-superLight min-h-[calc(100vh-127px)]">
-          <StickyCart />
+          {!storeUiOff && <StickyCart />}
           {children}
         </div>
-        {!cashierPage && <MobileFooter />}
+        {!storeUiOff && !cashierPage && <MobileFooter />}
         {!cashierPage &&
           <div className="w-full max-w-full overflow-hidden">
             <FooterTop />
@@ -316,19 +301,24 @@ const Layout = ({ title, description, children, cashierPage = false }) => {
         {/* כפתור וואטסאפ צף עם props דינאמיים */}
         <FloatingWhatsApp {...getWhatsAppProps()} />
 
-        {/* Reward Offers Manager - מנהל את כל פופאפי המוצרי מתנה */}
-        <RewardOffersManager
-          addressPopup={addressPopup}
-          showRegisterSuccess={showRegisterSuccess}
-          currentPopup={currentPopup}
-        />
+        {/* Reward Offers Manager - מנהל את כל פופאפי המוצרי מתנה.
+            מוצרי המתנה נכנסים לעגלה, ולכן אינם רלוונטיים בחנות סגורה */}
+        {!storeUiOff && (
+          <>
+            <RewardOffersManager
+              addressPopup={addressPopup}
+              showRegisterSuccess={showRegisterSuccess}
+              currentPopup={currentPopup}
+            />
 
-        <WelcomeGiftManager
-          addressPopup={addressPopup}
-          showRegisterSuccess={showRegisterSuccess}
-          currentPopup={currentPopup}
-          lotteryPopupOpen={lotteryPopupOpen}
-        />
+            <WelcomeGiftManager
+              addressPopup={addressPopup}
+              showRegisterSuccess={showRegisterSuccess}
+              currentPopup={currentPopup}
+              lotteryPopupOpen={lotteryPopupOpen}
+            />
+          </>
+        )}
       </div>
     </>
   );

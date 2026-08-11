@@ -17,6 +17,7 @@ import useGetSetting from "@hooks/useGetSetting";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 import City from "@component/select/City";
 import MainBT from "@component/button/MainBT";
+import { asset } from "@utils/basePath";
 
 const UpdateProfile = () => {
   const [imageUrl, setImageUrl] = useState("");
@@ -309,7 +310,7 @@ const UpdateProfile = () => {
                         >
                           <div className="flex items-center justify-center gap-1">
                             <img
-                              src="/loader/spinner.gif"
+                              src={asset("/loader/spinner.gif")}
                               alt="Loading"
                               width={20}
                               height={10}

@@ -1,6 +1,6 @@
 // src/pages/product-category/[categoryName].jsx
 import React, { useContext, useEffect, useState } from "react";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import useTranslation from "next-translate/useTranslation";
 
 // Internal import

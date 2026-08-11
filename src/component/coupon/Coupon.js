@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import dayjs from "dayjs";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 

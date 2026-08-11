@@ -3,7 +3,7 @@ import { useState, useEffect, useContext } from "react";
 import { FiGift } from "react-icons/fi";
 import { useRouter } from "next/router";
 import useTranslation from "next-translate/useTranslation";
-import Image from "next/image";
+import Image from "@component/common/Img";
 
 import MainBT from "@component/button/MainBT";
 import ProductServices from "@services/ProductServices";
@@ -12,6 +12,7 @@ import useCart from "@hooks/useCart";
 import { UserContext } from "@context/UserContext";
 import { notifySuccess } from "@utils/toast";
 import MainModal from "@component/modal/MainModal";
+import { asset } from "@utils/basePath";
 
 const WelcomeGiftModal = ({ isOpen, onClose }) => {
     const { t } = useTranslation();
@@ -110,7 +111,7 @@ const WelcomeGiftModal = ({ isOpen, onClose }) => {
                             {/* Product Image - Large (Header) */}
                             <div className="relative w-full h-36 md:h-44 lg:h-72">
                                 <img
-                                    src="/gift_silan.png"
+                                    src={asset("/gift_silan.png")}
                                     alt={giftProduct.title?.he}
                                     className="w-full h-full object-cover"
                                 />

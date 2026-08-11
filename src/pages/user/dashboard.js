@@ -26,6 +26,7 @@ import { SidebarContext } from "@context/SidebarContext";
 import Loading from "@component/preloader/Loading";
 import useGetSetting from "@hooks/useGetSetting";
 import useUtilsFunction from "@hooks/useUtilsFunction";
+import { STORE_CLOSED, LOGIN_PATH } from "@utils/storeMode";
 import MyOrders from "./my-orders";
 
 const Dashboard = ({ title, description, children }) => {
@@ -61,17 +62,20 @@ const Dashboard = ({ title, description, children }) => {
       });
   }, [currentPage]);
 
+  // כשהחנות סגורה אין דף בית לחזור אליו — היציאה מובילה לעמוד ההתחברות
+  const exitPath = STORE_CLOSED ? LOGIN_PATH : "/";
+
   const handleLogOut = () => {
     dispatch({ type: "USER_LOGOUT" });
     Cookies.remove("userInfo");
     Cookies.remove("couponInfo");
-    window.location = "/";
+    window.location = exitPath;
   };
 
   useEffect(() => {
     setIsLoading(false);
     if (!userInfo) {
-      router.push("/");
+      router.push(exitPath);
     }
   }, [userInfo]);
 

@@ -21,7 +21,7 @@ import UserAddressUpdate from "@component/userAddressUpdate/UserAddressUpdate";
 import LoginModal from "@component/modal/LoginModal";
 import MissingProductsModal from "@component/modal/MissingProductsModal";
 import websiteClose from 'public/websiteClose2.svg'
-import Image from "next/image";
+import Image from "@component/common/Img";
 import PriceUpdatedModal from "@component/modal/PriceUpdatedModal";
 import CouponModal from "@component/modal/CouponModal";
 import { SidebarContext } from "@context/SidebarContext";
@@ -33,7 +33,6 @@ import OrderCosts from "@component/checkout/OrderCosts";
 import CheckoutCartProducts from "@component/checkout/CheckoutCartProducts";
 import PersonalDetails from "@component/checkout/PersonalDetails";
 import DeliveryOptions from "@component/checkout/DeliveryOptions";
-import CustomerNotes from "@component/checkout/CustomerNotes";
 import CheckoutActions from "@component/checkout/CheckoutActions";
 import CheckoutPrompts from "@component/checkout/CheckoutPrompts";
 
@@ -53,7 +52,6 @@ const Checkout = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [isDeliveryOpen, setIsDeliveryOpen] = useState(true);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(true);
-  const [isNoteOpen, setIsNoteOpen] = useState(true);
   const [missingProductsState, setMissingProductsState] = useState([]);
   const [keySequence, setKeySequence] = useState([]);
   const [deliveriesPopupOpen, setDeliveriesPopupOpen] = useState(false);
@@ -115,7 +113,6 @@ const Checkout = () => {
 
   const selectedShippingOption = watch("shippingOption"); // עוקב אחרי הבחירה
   const selectedCallOnArrival = watch("callOnArrival"); // עוקב אחרי בחירת אופן המשלוח
-  const customerNote = watch("customer_note"); // עוקב אחרי ההערות
 
   // מעקב אחרי כל שדות האורח
   const guestName = watch("guestName");
@@ -162,12 +159,6 @@ const Checkout = () => {
       } catch (error) {
         console.error("Error loading delivery preferences from localStorage:", error);
       }
-    }
-
-    // טעינת הערות (לכל המשתמשים)
-    const savedNote = localStorage.getItem('checkoutCustomerNote');
-    if (savedNote) {
-      setValue("customer_note", savedNote);
     }
 
     // טעינת פרטי אורח (רק אם המשתמש לא מחובר)
@@ -237,17 +228,6 @@ const Checkout = () => {
       localStorage.setItem('checkoutDeliveryPrefs', JSON.stringify(deliveryPrefs));
     }
   }, [selectedCallOnArrival, selectedShippingOption]);
-
-  // שמירת הערות ב-localStorage
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (customerNote) {
-        localStorage.setItem('checkoutCustomerNote', customerNote);
-      } else {
-        localStorage.removeItem('checkoutCustomerNote');
-      }
-    }
-  }, [customerNote]);
 
   // בעת שחזור הזמנה הודעה על מוצרים לא זמינים
   useEffect(() => {
@@ -714,14 +694,6 @@ const Checkout = () => {
                               isDeliverable={isDeliverable}
                             />
 
-                            {/* 4. הערות לקוח */}
-                            <CustomerNotes
-                              register={register}
-                              watch={watch}
-                              isNoteOpen={isNoteOpen}
-                              setIsNoteOpen={setIsNoteOpen}
-                            />
-
                             {/* סיכום עלויות (כולל סיכום ההזמנה - רשימת המוצרים) */}
                             <OrderCosts
                               storeCustomizationSetting={storeCustomizationSetting}
@@ -800,14 +772,6 @@ const Checkout = () => {
                               register={register}
                               selectedCallOnArrival={selectedCallOnArrival}
                               isDeliverable={isDeliverable}
-                            />
-
-                            {/* 4. הערות לקוח */}
-                            <CustomerNotes
-                              register={register}
-                              watch={watch}
-                              isNoteOpen={isNoteOpen}
-                              setIsNoteOpen={setIsNoteOpen}
                             />
 
                             {/* סיכום עלויות (כולל סיכום ההזמנה - רשימת המוצרים) */}

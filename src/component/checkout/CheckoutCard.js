@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "@component/common/Img";
 import { FiPlus, FiMinus } from "react-icons/fi";
 import SettingServices from "@services/SettingServices";
 import useAsync from "@hooks/useAsync";

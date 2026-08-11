@@ -1,6 +1,6 @@
 // src/component/modal/ProductModal.js
 import useTranslation from "next-translate/useTranslation";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";

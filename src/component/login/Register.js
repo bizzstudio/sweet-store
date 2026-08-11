@@ -9,6 +9,7 @@ import InputArea from "@component/form/InputArea";
 import useLoginSubmit from "@hooks/useLoginSubmit";
 import MinimalTitle from "@component/common/MinimalTitle";
 import MainBT from "@component/button/MainBT";
+import { asset } from "@utils/basePath";
 
 const Register = ({ setShowResetPassword, setModalOpen, newsletterOptIn = false, initialPhone = "" }) => {
   const {
@@ -191,7 +192,7 @@ const Register = ({ setShowResetPassword, setModalOpen, newsletterOptIn = false,
             >
               <div className="flex items-center justify-center gap-1">
                 <img
-                  src="/loader/spinner.gif"
+                  src={asset("/loader/spinner.gif")}
                   alt="Loading"
                   width={20}
                   height={10}

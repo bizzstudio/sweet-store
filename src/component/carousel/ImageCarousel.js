@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import { useRef } from "react";
 import { IoChevronBackOutline, IoChevronForward } from "react-icons/io5"; // requires a loader
 import { Navigation } from "swiper";

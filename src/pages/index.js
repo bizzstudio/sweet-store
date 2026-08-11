@@ -26,6 +26,7 @@ import useTranslation from "next-translate/useTranslation";
 import MinimalTitle from "@component/common/MinimalTitle";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 import useFilter from "@hooks/useFilter";
+import { STORE_CLOSED, CLOSED_HOME, LOGIN_PATH } from "@utils/storeMode";
 
 const Home = ({ popularProducts, discountProducts, attributes, blogs, totalBlogs }) => {
   const router = useRouter();
@@ -306,6 +307,18 @@ const Home = ({ popularProducts, discountProducts, attributes, blogs, totalBlogs
 export const getServerSideProps = async (context) => {
   const { cookies } = context.req;
   const { query, _id } = context.query;
+
+  // חסימת דף הבית כשהחנות סגורה. ה-middleware חוסם כאן כל בקשה ישירה, אבל
+  // בקשת ה-data של דף הבית (ניווט פנימי בתוך האתר) עוקפת אותו - זו הנקודה
+  // היחידה שבה זה קורה, ולכן החסימה חוזרת כאן. בונוס: חוסך שלוש קריאות API
+  if (STORE_CLOSED) {
+    return {
+      redirect: {
+        destination: cookies?.userInfo ? CLOSED_HOME : LOGIN_PATH,
+        permanent: false,
+      },
+    };
+  }
 
   const fallbackProps = {
     popularProducts: [],

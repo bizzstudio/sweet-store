@@ -1,6 +1,6 @@
 // ScrollOfferCard.jsx
 import dynamic from "next/dynamic";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import { useContext, useState } from "react";
 import { IoAdd, IoBagAddSharp, IoRemove } from "react-icons/io5";
 

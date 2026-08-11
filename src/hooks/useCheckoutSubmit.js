@@ -412,7 +412,6 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
             user_info: userDetails,
             shippingOption: data.shippingOption,
             callOnArrival: data.callOnArrival,
-            customer_note: data.customer_note,
             paymentMethod: "creditCard",
             status: "Pending",
             cart: items.sort((a, b) => a.barcode - b.barcode) || items,
@@ -444,7 +443,6 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
             // פרטי ההזמנה
             shippingOption: data.shippingOption || "2",
             callOnArrival: data.callOnArrival,
-            customer_note: data.customer_note || '',
             paymentMethod: "creditCard",
             status: "Pending",
             cart: items.sort((a, b) => a.barcode - b.barcode) || items,

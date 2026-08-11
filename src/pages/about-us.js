@@ -1,6 +1,6 @@
 // src/pages/about-us.js
 import React from "react";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import useTranslation from "next-translate/useTranslation";
 
 // ייבוא רכיבים פנימיים מהאפליקציה

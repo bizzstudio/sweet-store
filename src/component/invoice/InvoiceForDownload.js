@@ -10,6 +10,10 @@ import {
 import dayjs from "dayjs";
 import Cookies from "js-cookie";
 
+// ה-Image של react-pdf מוריד את הקובץ בעצמו מה-URL, ולכן — בניגוד ל-next/image —
+// הוא אינו מקבל את ה-basePath אוטומטית וחייב את asset().
+import { asset } from "@utils/basePath";
+
 Font.register({
   family: "Assistant",
   fonts: [
@@ -305,7 +309,7 @@ const InvoiceForDownload = ({
                 }}
               >
                 <Image
-                  src="https://res.cloudinary.com/ahossain/image/upload/v1681454665/logo/logo-color_qw1trc.png"
+                  src={asset("/logo/logo-mark.png")}
                   alt="Invoice"
                   style={{ width: 80, textAlign: "right" }}
                 />

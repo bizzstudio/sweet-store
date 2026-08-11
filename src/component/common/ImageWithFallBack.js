@@ -1,6 +1,6 @@
 // src/component/common/ImageWithFallBack.js
 import { useState, useRef } from "react";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import useTranslation from "next-translate/useTranslation";
 
 const ImageWithFallback = ({

@@ -8,6 +8,7 @@ import { set, useForm } from "react-hook-form";
 import { UserContext } from "@context/UserContext";
 import { notifyError, notifyInfo, notifySuccess } from "@utils/toast";
 import CustomerServices from "@services/CustomerServices";
+import { STORE_CLOSED, CLOSED_HOME, safeInternalPath } from "@utils/storeMode";
 import useTranslation from "next-translate/useTranslation";
 import { trackNewsletterSignup } from "@services/flashy";
 import notifyApiResponse from "@utils/notifyApiResponse";
@@ -31,11 +32,17 @@ const useLoginSubmit = (setModalOpen, newsletterOptIn = false) => {
 
   const cookieTimeOut = 10;
 
+  // אותו כלל סניטציה שה-middleware מפעיל: יעד פנימי בלבד, לא ניווט החוצה
+  const safeRedirect = safeInternalPath(redirect);
+
   // לאן מנווטים אחרי כניסה מוצלחת. בצ'קאאוט אין פרמטר redirect, ולכן ברירת המחדל "/"
   // הייתה זורקת לדף הבית לקוח שהתחבר באמצע הקנייה - כאן נשארים בעמוד. שאר העמודים
-  // מתנהגים בדיוק כמקודם
-  const postLoginPath = () =>
-    redirect || (router.pathname === "/checkout" ? router.asPath : "/");
+  // מתנהגים בדיוק כמקודם. כשהחנות סגורה אין לאן לחזור בחנות - תמיד לאזור האישי
+  const postLoginPath = () => {
+    if (safeRedirect) return safeRedirect;
+    if (STORE_CLOSED) return CLOSED_HOME;
+    return router.pathname === "/checkout" ? router.asPath : "/";
+  };
 
   const submitHandler = ({
     name,
@@ -79,12 +86,15 @@ const useLoginSubmit = (setModalOpen, newsletterOptIn = false) => {
             if (!res.address.city) {
               localStorage.setItem("firstTime", true);
             }
-            router.push(postLoginPath());
-            notifySuccess(t("common:loginSuccess"));
+            // העוגייה נכתבת לפני הניווט: הניווט מפעיל בדיקת הרשאה בשרת
+            // (middleware), ואם העוגייה עדיין לא קיימת ברגע הזה הבקשה נדחית
+            // חזרה למסך ההתחברות
             dispatch({ type: "USER_LOGIN", payload: res });
             Cookies.set("userInfo", JSON.stringify(res), {
               expires: cookieTimeOut,
             });
+            notifySuccess(t("common:loginSuccess"));
+            router.push(postLoginPath());
 
             // רישום לניוזלטר אם המשתמש סימן את הצ'קבוקס
             if (newsletterOptIn && res.email) {
@@ -261,12 +271,13 @@ const useLoginSubmit = (setModalOpen, newsletterOptIn = false) => {
       })
         .then((res) => {
           setModalOpen(false);
-          notifySuccess(t("common:loginSuccess"));
-          router.push(postLoginPath());
+          // גם כאן: העוגייה קודמת לניווט, אחרת ה-middleware יחזיר להתחברות
           dispatch({ type: "USER_LOGIN", payload: res });
           Cookies.set("userInfo", JSON.stringify(res), {
             expires: cookieTimeOut,
           });
+          notifySuccess(t("common:loginSuccess"));
+          router.push(postLoginPath());
 
           // רישום לניוזלטר אם המשתמש סימן את הצ'קבוקס
           if (newsletterOptIn && res.email) {

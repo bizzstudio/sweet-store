@@ -12,7 +12,7 @@ import { notifyError } from "@utils/toast";
 import useGetSetting from "@hooks/useGetSetting";
 import { SidebarContext } from "@context/SidebarContext";
 import useUtilsFunction from "@hooks/useUtilsFunction";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import LoginModal from "@component/modal/LoginModal";
 
 const NavbarPromo = ({ logoHeight }) => {

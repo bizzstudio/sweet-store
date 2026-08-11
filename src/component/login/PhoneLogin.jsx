@@ -8,6 +8,7 @@ import useLoginSubmit from "@hooks/useLoginSubmit";
 import { notifyError } from "@utils/toast";
 import MainBT from "@component/button/MainBT";
 import MinimalTitle from "@component/common/MinimalTitle";
+import { asset } from "@utils/basePath";
 
 // עיצוב זהה לשדות של InputArea, אך כאן השדות מבוקרים (controlled) ולא דרך react-hook-form,
 // כי הטופס דו-שלבי והערכים נדרשים גם בין השלבים
@@ -144,7 +145,7 @@ const PhoneLogin = ({ setModalOpen, newsletterOptIn = false, onNoAccount }) => {
             {loading ? (
               <div className="flex items-center justify-center gap-2 whitespace-nowrap">
                 <img
-                  src="/loader/spinner.gif"
+                  src={asset("/loader/spinner.gif")}
                   alt="Loading"
                   width={20}
                   height={10}

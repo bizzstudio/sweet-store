@@ -16,6 +16,7 @@ import useUtilsFunction from "@hooks/useUtilsFunction";
 import City from "@component/select/City";
 import MinimalTitle from "@component/common/MinimalTitle";
 import MainBT from "@component/button/MainBT";
+import { asset } from "@utils/basePath";
 
 const UserAddressUpdate = () => {
   const [imageUrl, setImageUrl] = useState("");
@@ -292,7 +293,7 @@ const UserAddressUpdate = () => {
                     >
                       <div className="flex items-center justify-center gap-1">
                         <img
-                          src="/loader/spinner.gif"
+                          src={asset("/loader/spinner.gif")}
                           alt="Loading"
                           width={20}
                           height={10}

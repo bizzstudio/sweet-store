@@ -1,6 +1,6 @@
 // src/pages/contact-us.js
 import React, { useState } from "react";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import { useForm } from "react-hook-form";
 import useTranslation from "next-translate/useTranslation";
 import { FiMail, FiMapPin, FiPhone } from "react-icons/fi";
@@ -17,6 +17,7 @@ import useUtilsFunction from "@hooks/useUtilsFunction";
 import CustomerServices from "@services/CustomerServices";
 import notifyApiResponse from "@utils/notifyApiResponse";
 import MainBT from "@component/button/MainBT";
+import { asset } from "@utils/basePath";
 
 const ContactUs = () => {
   const { t } = useTranslation();
@@ -266,7 +267,7 @@ const ContactUs = () => {
                       >
                         <div className="flex items-center justify-center gap-2 whitespace-nowrap">
                           <img
-                            src="/loader/spinner.gif"
+                            src={asset("/loader/spinner.gif")}
                             alt="Loading"
                             width={20}
                             height={10}

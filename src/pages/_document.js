@@ -2,6 +2,27 @@
 import SettingServices from "@services/SettingServices";
 import Document, { Html, Head, Main, NextScript } from "next/document";
 
+import { asset, assetFromSetting } from "@utils/basePath";
+
+// משקלי הפונט Assistant. ההצהרות נבנות כאן ולא ב-custom.css כי Next אינו מוסיף
+// את ה-basePath ל-url() בתוך CSS — ראה ההערה בראש src/styles/custom.css.
+const FONT_WEIGHTS = [
+  [200, "ExtraLight"],
+  [300, "Light"],
+  [400, "Regular"],
+  [500, "Medium"],
+  [600, "SemiBold"],
+  [700, "Bold"],
+  [800, "ExtraBold"],
+];
+
+// font-display: swap — הטקסט מוצג מיד בפונט גיבוי ולא ממתין להורדה.
+const fontFaceCss = FONT_WEIGHTS.map(
+  ([weight, name]) => `@font-face{font-family:'Assistant';src:url('${asset(
+    `/fonts/assistant/Assistant-${name}.woff2`
+  )}') format('woff2');font-weight:${weight};font-style:normal;font-display:swap}`
+).join("");
+
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
     const initialProps = await Document.getInitialProps(ctx);
@@ -61,24 +82,25 @@ class MyDocument extends Document {
       name: meta_title,
       short_name: meta_title,
       description: meta_description,
-      start_url: "/",
+      start_url: asset("/"),
       display: "standalone",
       background_color: "#ffffff",
       theme_color: "#ffffff",
+      // ההגדרות בשרת נשמרות כנתיב יחסי ("/logo/..."), ולכן חייבות את הקידומת
       icons: [
         {
-          src: favicon,
+          src: assetFromSetting(favicon),
           sizes: "any",
           type: "image/x-icon"
         },
         {
-          src: meta_img,
+          src: assetFromSetting(meta_img),
           sizes: "192x192",
           type: "image/png",
           purpose: "any maskable"
         },
         {
-          src: meta_img,
+          src: assetFromSetting(meta_img),
           sizes: "512x512",
           type: "image/png",
           purpose: "any maskable"
@@ -142,16 +164,18 @@ class MyDocument extends Document {
             rel="preload"
             as="font"
             type="font/woff2"
-            href="/fonts/assistant/Assistant-Regular.woff2"
+            href={asset("/fonts/assistant/Assistant-Regular.woff2")}
             crossOrigin="anonymous"
           />
+          {/* הצהרות ה-@font-face עצמן — חייבות לרדת עם ה-HTML כדי שה-preload ינוצל */}
+          <style dangerouslySetInnerHTML={{ __html: fontFaceCss }} />
 
-          <link rel="icon" href={favicon || "/Tomer dates.png"} />
-          <link rel="shortcut icon" href={favicon || "/Tomer dates.png"} />
-          <link rel="apple-touch-icon" href={favicon || "/Tomer dates.png"} />
-          <link rel="apple-touch-icon" sizes="180x180" href={favicon || "/Tomer dates.png"} />
-          <link rel="icon" type="image/png" sizes="32x32" href={favicon || "/Tomer dates.png"} />
-          <link rel="icon" type="image/png" sizes="16x16" href={favicon || "/Tomer dates.png"} />
+          <link rel="icon" href={assetFromSetting(favicon, "/logo/logo-square.png")} />
+          <link rel="shortcut icon" href={assetFromSetting(favicon, "/logo/logo-square.png")} />
+          <link rel="apple-touch-icon" href={assetFromSetting(favicon, "/logo/logo-square-180.png")} />
+          <link rel="apple-touch-icon" sizes="180x180" href={assetFromSetting(favicon, "/logo/logo-square-180.png")} />
+          <link rel="icon" type="image/png" sizes="32x32" href={assetFromSetting(favicon, "/logo/logo-square-64.png")} />
+          <link rel="icon" type="image/png" sizes="16x16" href={assetFromSetting(favicon, "/logo/logo-square-64.png")} />
 
           {/* Regular meta tags that Google prefers */}
           <title>{meta_title}</title>
@@ -198,7 +222,7 @@ class MyDocument extends Document {
           />
 
           {/* עדכון הקישור ל-manifest */}
-          <link rel="manifest" href="/api/manifest" />
+          <link rel="manifest" href={asset("/api/manifest")} />
 
           {/* בפיתוח מדלגים על סקריפטים מה-API (פרסומות/GTM) — חוסך Mixed Content ו-SyntaxError מ-HTML במקום JS */}
           {!isDev && head && (

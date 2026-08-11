@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "@component/common/Img";
 import { useRouter } from "next/router";
 import React, { useContext, useRef } from "react";
 import { IoChevronBackOutline, IoChevronForward } from "react-icons/io5";

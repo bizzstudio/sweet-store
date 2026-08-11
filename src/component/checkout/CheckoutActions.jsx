@@ -5,6 +5,7 @@ import { IoReturnUpBackOutline, IoCheckmarkCircle } from "react-icons/io5";
 import useTranslation from "next-translate/useTranslation";
 import Cookies from "js-cookie";
 import Calculating from "@component/cart/Calculating";
+import { asset } from "@utils/basePath";
 
 const CheckoutActions = ({
     isEmpty,
@@ -40,7 +41,7 @@ const CheckoutActions = ({
                         {t("common:processing")}
                     </span>
                     <img
-                        src="/loader/spinner.gif"
+                        src={asset("/loader/spinner.gif")}
                         alt="Loading"
                         width={20}
                         height={20}

@@ -1,12 +1,25 @@
 // next.config.js
 const runtimeCaching = require("next-pwa/cache");
 const nextTranslate = require("next-translate-plugin");
+
+// תת-הנתיב שממנו החנות מוגשת (ראה src/utils/basePath.js — אותו משתנה בדיוק).
+// ריק = שורש הדומיין. חייב להתחיל ב-"/" ולא להסתיים ב-"/".
+const basePath = (process.env.NEXT_PUBLIC_BASE_PATH || "").replace(/\/$/, "");
+
 const withPWA = require("next-pwa")({
   dest: "public",
   register: true,
   runtimeCaching,
   buildExcludes: [/middleware-manifest\.json$/],
-  scope: "/",
+  // ה-scope חייב לכלול את תת-הנתיב, אחרת הדפדפן פוסל את הרישום של ה-service
+  // worker (scope רחב מהנתיב שממנו הקובץ הוגש).
+  scope: `${basePath}/`,
+  // next-pwa 5.6.0 מזהה את src/pages/_offline.js לבדו וקובע את נתיב הגיבוי ל-
+  // "/_offline" קשיח, בלי ה-basePath (build-fallback-worker.js). התוצאה: הכתובת
+  // נכנסת ל-precache, מחזירה 404 בהתקנה, וכשל של רשומה אחת מפיל את התקנת ה-
+  // service worker כולה — כלומר גם המטמון וגם עמוד ה-offline מתים בשקט.
+  // הגדרה מפורשת גוברת על הזיהוי האוטומטי ומשמשת גם ל-precache וגם ל-caches.match.
+  fallbacks: { document: `${basePath}/_offline` },
   sw: "service-worker.js",
   skipWaiting: true,
   disable: process.env.NODE_ENV === "development",
@@ -14,6 +27,7 @@ const withPWA = require("next-pwa")({
 
 const baseConfig = {
   reactStrictMode: true,
+  basePath,
   eslint: { ignoreDuringBuilds: true },
   i18n: { locales: ["he"], defaultLocale: "he" },
 
@@ -37,6 +51,9 @@ const baseConfig = {
   assetPrefix: undefined,
 
   images: {
+    // אין להגדיר כאן loader מותאם: כל ערך שאינו "default" מכבה את endpoint
+    // המיטוב המובנה ‎/_next/image, וכל התמונות באתר מחזירות 404.
+    // תיקון ה-basePath ל-src נעשה ב-@component/common/Img במקום.
     remotePatterns: [{ protocol: "https", hostname: "**" }],
     // הגשת פורמטים מודרניים (קטנים ב-25%-50% מ-JPEG/PNG) — משפר LCP ומשקל תמונות.
     formats: ["image/avif", "image/webp"],

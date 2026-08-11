@@ -1,5 +1,5 @@
 // shapira-store/src/component/category/FeatureCategory.js
-import Image from "next/image";
+import Image from "@component/common/Img";
 import { useContext, useState, Fragment } from "react";
 import { IoChevronBackSharp } from "react-icons/io5";
 import { IoRemoveSharp } from "react-icons/io5";

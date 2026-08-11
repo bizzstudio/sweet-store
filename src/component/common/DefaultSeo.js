@@ -4,6 +4,7 @@ import { DefaultSeo as NextSeo } from "next-seo";
 
 // Internal import
 import useGetSetting from "@hooks/useGetSetting";
+import { asset } from "@utils/basePath";
 
 const DefaultSeo = () => {
   const { storeCustomizationSetting } = useGetSetting() || {};
@@ -12,12 +13,12 @@ const DefaultSeo = () => {
 
   return (
     <NextSeo
-      title={meta_title || "תמרים בתומר"}
+      title={meta_title || "המתוקים של בני"}
       openGraph={{
         type: "website",
         locale: "he_IL",
         url: meta_url || "https://tmarim-betomer.com",
-        site_name: meta_title || "תמרים בתומר",
+        site_name: meta_title || "המתוקים של בני",
       }}
       twitter={{
         handle: "@handle",
@@ -46,11 +47,11 @@ const DefaultSeo = () => {
       additionalLinkTags={[
         {
           rel: "apple-touch-icon",
-          href: "/Tomer dates.png",
+          href: asset("/logo/logo-square-180.png"),
         },
         {
           rel: "manifest",
-          href: "/api/manifest",
+          href: asset("/api/manifest"),
         },
       ]}
     />

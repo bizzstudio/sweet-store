@@ -7,6 +7,7 @@ import Cookies from "js-cookie";
 //internal import
 import MinimalTitle from "@component/common/MinimalTitle";
 import MainBT from "@component/button/MainBT";
+import { asset } from "@utils/basePath";
 
 const CouponModal = ({ handleCouponCode, setModalOpen, couponRef }) => {
     const { t } = useTranslation();
@@ -87,7 +88,7 @@ const CouponModal = ({ handleCouponCode, setModalOpen, couponRef }) => {
                         {loading ? (
                             <div className="flex items-center justify-center gap-2 whitespace-nowrap">
                                 <img
-                                    src="/loader/spinner.gif"
+                                    src={asset("/loader/spinner.gif")}
                                     alt="Loading"
                                     width={20}
                                     height={10}

@@ -1,7 +1,7 @@
 // src/layout/footer/FooterTop.js
 import React, { useContext, useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { useRouter } from "next/router";

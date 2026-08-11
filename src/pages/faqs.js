@@ -1,6 +1,6 @@
 // src/pages/faqs.js
 import React from "react";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import { Disclosure } from "@headlessui/react";
 import { ChevronUpIcon } from "@heroicons/react/solid";
 

@@ -1,5 +1,5 @@
 // src/component/category/CategoryCard.js
-import Image from "next/image";
+import Image from "@component/common/Img";
 import Link from "next/link";
 import { useContext, useState } from "react";
 import { useRouter } from "next/router";

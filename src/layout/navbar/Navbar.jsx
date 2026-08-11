@@ -1,8 +1,8 @@
 // src/layout/navbar/Navbar.jsx
-import { useContext, useEffect, useState, useRef } from "react";
+import { useCallback, useContext, useEffect, useState, useRef } from "react";
 import Cookies from "js-cookie";
 import Link from "next/link";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { IoHome, IoNewspaperOutline, IoSearchOutline } from "react-icons/io5";
@@ -32,10 +32,15 @@ import VoiceSearchButton from "@component/voice-search/VoiceSearchButton";
 import DropdownMenu from "@component/menu/DropdownMenu";
 import MainModal from "@component/modal/MainModal";
 import AutoDeliveriesPopup from "@component/deliveriesPopup/AutoDeliveriesPopup";
+import { STORE_CLOSED, CLOSED_HOME, LOGIN_PATH } from "@utils/storeMode";
 
 const Navbar = ({ cashierPage = false, disableSticky = false }) => {
   const { t } = useTranslation();
   const router = useRouter();
+
+  // כיבוי כלי החנות (חיפוש, עגלה, פס קטגוריות) כשהחנות סגורה ללקוחות.
+  // עמדת הקופה ממשיכה לעבוד כרגיל - הקופאי מזין שם הזמנות בחנות
+  const storeUiOff = STORE_CLOSED && !cashierPage;
 
   const [imageUrl, setImageUrl] = useState("");
   const [searchText, setSearchText] = useState("");
@@ -102,18 +107,18 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
   }, []);
 
   // מדידת גובה הNavbar והגדרת גובה הלוגו
-  useEffect(() => {
-    const updateLogoDimensions = () => {
-      if (navbarRef.current) {
-        const navbarHeight = navbarRef.current.offsetHeight;
-        setLogoHeight(navbarHeight * 1.35);
-      }
-      if (logoRef.current) {
-        const width = logoRef.current.offsetWidth;
-        setLogoWidth(width);
-      }
-    };
+  const updateLogoDimensions = useCallback(() => {
+    if (navbarRef.current) {
+      const navbarHeight = navbarRef.current.offsetHeight;
+      setLogoHeight(navbarHeight * 1.35);
+    }
+    if (logoRef.current) {
+      const width = logoRef.current.offsetWidth;
+      setLogoWidth(width);
+    }
+  }, []);
 
+  useEffect(() => {
     updateLogoDimensions();
     window.addEventListener('resize', updateLogoDimensions);
 
@@ -126,7 +131,7 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
       clearTimeout(timer);
       clearTimeout(timer2);
     };
-  }, [cashierPage]);
+  }, [cashierPage, updateLogoDimensions]);
 
   return (
     <>
@@ -138,7 +143,7 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
         </MainModal>
       )}
 
-      <CartDrawer />
+      {!storeUiOff && <CartDrawer />}
       {modalOpen && (
         <LoginModal modalOpen={modalOpen} setModalOpen={setModalOpen} />
       )}
@@ -151,9 +156,17 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
           {/* logo - בצד ימין, בגובה 1.3 כפול מה-navbar כך שהחלק התחתון חורג */}
           <Link
             ref={logoRef}
-            href={cashierPage ? "/cashier-desk" : "/"}
+            href={
+              cashierPage
+                ? "/cashier-desk"
+                : STORE_CLOSED
+                  ? CLOSED_HOME
+                  : "/"
+            }
             className="absolute right-0 top-0 flex items-start overflow-visible pointer-events-auto z-10"
-            style={{ height: logoHeight ? `${logoHeight}px` : '130%' }}
+            // תקרת רוחב: לוגו הטקסט רחב פי ~4 מגובהו, ובלעדיה הוא בלע במסך
+            // צר כמעט את כל ההידר והשאיר לשורת החיפוש כמה עשרות פיקסלים
+            style={{ height: logoHeight ? `${logoHeight}px` : '130%', maxWidth: '45%' }}
           >
             <Image
               width={160}
@@ -162,21 +175,30 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
               alt="logo"
               priority
               sizes="160px"
-              className="h-full w-auto object-contain"
+              className="h-full w-auto max-w-full object-contain"
               style={{ objectPosition: 'center top' }}
+              // מדידה מחדש ברגע שהתמונה נטענה: עד אז רוחב הלוגו הוא 0 ושורת
+              // החיפוש מקבלת רוחב שגוי. הטיימרים לבדם לא מכסים טעינה איטית
+              onLoad={updateLogoDimensions}
             />
           </Link>
 
           {/* חיפוש + תפריט */}
           <div
             className="w-full"
-            style={{ paddingRight: logoHeight > 0 ? `${logoHeight}px` : '180px' }}
+            // הרוחב האמיתי של הלוגו ולא גובהו: הלוגו רחב בהרבה מגובהו, ושמירת
+            // מקום לפי הגובה בלבד הניחה את שורת החיפוש מתחתיו
+            style={{ paddingRight: logoWidth > 0 ? `${logoWidth}px` : '180px' }}
           >
             <div className="w-full flex flex-col-reverse md:flex-row items-center md:gap-3 gap-0">
               <div className="w-full">
                 <div className="h-auto sm:h-16 lg:h-auto flex items-center justify-between mx-auto py-2.5 lg:py-5 2xl:py-3">
 
-                  {/* Search Bar */}
+                  {/* Search Bar — כשהחנות סגורה אין קטלוג לחפש בו, ובמקומו
+                      נשאר מרווח שמחזיק את פריסת ההידר */}
+                  {storeUiOff ? (
+                    <div className="w-full" />
+                  ) : (
                   <div className="flex flex-col w-full max-w-[700px] mx-auto px-1.5 sm:px-2">
                     <form onSubmit={handleSubmit}
                       className={`flex relative w-full h-[32px] sm:h-[40px] lg:min-w-[250px] items-center px-2 sm:px-3.5 rounded-[10px] transition-[border-radius] duration-500 ease-in-out bg-gray-100 focus-within:rounded-[1px] before:content-[''] before:absolute before:bg-mainColor before:transform before:scale-x-0 before:origin-center before:w-full before:h-[2px] before:left-0 before:bottom-0 before:rounded-[1px] before:transition-transform before:duration-300 before:ease-in-out focus-within:before:scale-100`}>
@@ -206,6 +228,7 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
                       />}
                     </form>
                   </div>
+                  )}
 
                   {/* תפריט נוסף */}
                   <div className="me-2 ms-1 sm:me-7 sm:ms-5">
@@ -233,28 +256,32 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
                           ),
                           onClick: () => { }, // אין צורך בפעולה כי זה לינק
                         },
-                        {
-                          label: (
-                            <Link href="/blogs" className="group hover:underline">
-                              <div className="flex items-center justify-center gap-1.5 font-semibold">
-                                <IoNewspaperOutline size={20} />
-                                <span>{t("common:blogsTitle")}</span>
+                        // הבלוג ואזורי המשלוח שייכים לחנות הפעילה — כשהיא סגורה
+                        // הבלוג חסום ואין משלוחים, ולכן שני הפריטים יורדים
+                        ...(storeUiOff ? [] : [
+                          {
+                            label: (
+                              <Link href="/blogs" className="group hover:underline">
+                                <div className="flex items-center justify-center gap-1.5 font-semibold">
+                                  <IoNewspaperOutline size={20} />
+                                  <span>{t("common:blogsTitle")}</span>
+                                </div>
+                              </Link>
+                            ),
+                            onClick: () => { }, // אין צורך בפעולה כי זה לינק
+                          },
+                          {
+                            label: (
+                              <div className="group hover:underline">
+                                <div className="flex items-center justify-center gap-1.5 font-semibold">
+                                  <TbTruckDelivery size={24} />
+                                  <span>{t("common:deliveryAreas")}</span>
+                                </div>
                               </div>
-                            </Link>
-                          ),
-                          onClick: () => { }, // אין צורך בפעולה כי זה לינק
-                        },
-                        {
-                          label: (
-                            <div className="group hover:underline">
-                              <div className="flex items-center justify-center gap-1.5 font-semibold">
-                                <TbTruckDelivery size={24} />
-                                <span>{t("common:deliveryAreas")}</span>
-                              </div>
-                            </div>
-                          ),
-                          onClick: () => setDeliveriesPopup(true),
-                        },
+                            ),
+                            onClick: () => setDeliveriesPopup(true),
+                          },
+                        ]),
                         {
                           label: (
                             <Link href="/תקנון-אתר" className="group hover:underline">
@@ -272,18 +299,21 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
 
                   {/* כפתור סל הקניות */}
                   <div className="px-3 sm:px-10 hidden md:hidden md:items-center lg:flex gap-5 absolute inset-y-0 right-0 sm:static sm:inset-auto sm:pr-0">
-                    <button
-                      aria-label="Total"
-                      onClick={toggleCartDrawer}
-                      className="relative text-2xl font-bold"
-                    >
-                      {totalItems === 0 ? null :
-                        <span className="absolute z-10 top-0 right-0 inline-flex items-center justify-center p-1 h-5 text-xs font-medium leading-none text-red-100 transform -translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full" style={{ minWidth: '20px', aspectRatio: '1/1' }}>
-                          {totalItems}
-                        </span>
-                      }
-                      <FiShoppingCart className="w-6 h-6 drop-shadow-xl" />
-                    </button>
+                    {/* אין עגלה כשהחנות סגורה — אי אפשר להזמין */}
+                    {!storeUiOff && (
+                      <button
+                        aria-label="Total"
+                        onClick={toggleCartDrawer}
+                        className="relative text-2xl font-bold"
+                      >
+                        {totalItems === 0 ? null :
+                          <span className="absolute z-10 top-0 right-0 inline-flex items-center justify-center p-1 h-5 text-xs font-medium leading-none text-red-100 transform -translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full" style={{ minWidth: '20px', aspectRatio: '1/1' }}>
+                            {totalItems}
+                          </span>
+                        }
+                        <FiShoppingCart className="w-6 h-6 drop-shadow-xl" />
+                      </button>
+                    )}
 
                     {/* כפתור פרופיל */}
                     {userInfo?.name ?
@@ -304,17 +334,24 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
                             <FiUserCheck className="w-6 h-6 drop-shadow-xl" />
                           </span>}
                       </Link> :
-                      <button className="flex items-center justify-center bg-white hover:bg-mainColor hover:text-white text-2xl font-bold w-9 h-9 rounded-full leading-none outline outline-2 outline-mainColor outline-offset-2 hover:scale-110 hover:outline-none transition-all overflow-hidden"
-                        aria-label="Login"
-                        onClick={() => setModalOpen(!modalOpen)}>
-                        <FiUser className="w-6 h-6 drop-shadow-xl" />
-                      </button>
+                      // כשהחנות סגורה ההתחברות היא עמוד מלא ולא מודאל
+                      storeUiOff ?
+                        <Link className="flex items-center justify-center bg-white hover:bg-mainColor hover:text-white text-2xl font-bold w-9 h-9 rounded-full leading-none outline outline-2 outline-mainColor outline-offset-2 hover:scale-110 hover:outline-none transition-all overflow-hidden"
+                          aria-label="Login"
+                          href={LOGIN_PATH}>
+                          <FiUser className="w-6 h-6 drop-shadow-xl" />
+                        </Link> :
+                        <button className="flex items-center justify-center bg-white hover:bg-mainColor hover:text-white text-2xl font-bold w-9 h-9 rounded-full leading-none outline outline-2 outline-mainColor outline-offset-2 hover:scale-110 hover:outline-none transition-all overflow-hidden"
+                          aria-label="Login"
+                          onClick={() => setModalOpen(!modalOpen)}>
+                          <FiUser className="w-6 h-6 drop-shadow-xl" />
+                        </button>
                     }
 
                     {/* כפתור עמוד קופה - רק לקופאים */}
                     {userInfo?.isCashier && (
                       <Link
-                        href={cashierPage ? "/" : "/cashier-desk"}
+                        href={cashierPage ? (STORE_CLOSED ? CLOSED_HOME : "/") : "/cashier-desk"}
                         className="flex items-center justify-center text-white bg-mainColor text-2xl font-bold w-9 h-9 rounded-full leading-none outline outline-2 outline-mainColor outline-offset-2 hover:scale-110 hover:outline-none transition-all overflow-hidden"
                         aria-label={cashierPage ? t("common:backToHomePgae") : t("common:cashierDesk")}
                         title={cashierPage ? t("common:backToHomePgae") : t("common:cashierDesk")}
@@ -332,8 +369,9 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
           </div>
         </div>
 
-        {/* פס קטגוריות מתחת ל-navbar - בכל הרזולוציות (תמיד מתחת לחיפוש, לא עולה למעלה) */}
-        {!cashierPage && (
+        {/* פס קטגוריות מתחת ל-navbar - בכל הרזולוציות (תמיד מתחת לחיפוש, לא עולה למעלה).
+            כשהחנות סגורה אין גלישה בקטגוריות ולכן הפס יורד לגמרי */}
+        {!cashierPage && !STORE_CLOSED && (
           <div className="block w-full">
             <NavbarPromo logoHeight={logoHeight} />
           </div>

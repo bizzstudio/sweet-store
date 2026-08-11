@@ -1,7 +1,9 @@
 // src/lib/seo.js
+import { BASE_PATH, asset } from "@utils/basePath";
+
 export function buildSeo({ defaults = {}, page = {} }) {
   const baseUrl = (defaults.meta_url || "").replace(/\/$/, "");
-  const siteName = defaults.meta_title || "תמרים בתומר";
+  const siteName = defaults.meta_title || "המתוקים של בני";
   const title = page.title || defaults.meta_title || siteName;
   const description = page.description || defaults.meta_description || "";
   const image = absUrl(baseUrl, page.image || defaults.meta_img || "/logo/logo-color.png");
@@ -23,7 +25,7 @@ export function buildSeo({ defaults = {}, page = {} }) {
     twitter: { cardType: "summary_large_image" },
     additionalLinkTags: [
       ...(defaults.favicon ? [{ rel: "icon", href: absUrl(baseUrl, defaults.favicon) }] : []),
-      { rel: "manifest", href: "/api/manifest" },
+      { rel: "manifest", href: asset("/api/manifest") },
     ],
   };
 }
@@ -31,13 +33,17 @@ export function buildSeo({ defaults = {}, page = {} }) {
 export function withOrigin(defaults, req) {
   const proto = (req.headers["x-forwarded-proto"] || "https").toString().split(",")[0];
   const host = (req.headers["x-forwarded-host"] || req.headers["host"]).toString().split(",")[0];
-  const origin = `${proto}://${host}`;
+  // ה-Host שמגיע מה-proxy הוא שורש הדומיין בלבד. כשהחנות יושבת בתת-נתיב
+  // (‎/sweet-store) חייבים לצרף אותו, אחרת ה-canonical וה-og:url מצביעים
+  // לשורש srv2 — כתובת שאינה החנות.
+  const origin = `${proto}://${host}${BASE_PATH}`;
   return { ...defaults, meta_url: defaults?.meta_url || origin };
 }
 
+// base כבר כולל את תת-הנתיב (ראה withOrigin), ולכן asset() חל רק כשאין base.
 function absUrl(base, pth) {
   if (!pth) return "";
   if (/^https?:\/\//i.test(pth)) return pth;
-  if (!base) return pth.startsWith("/") ? pth : `/${pth}`;
+  if (!base) return asset(pth.startsWith("/") ? pth : `/${pth}`);
   return `${base}/${pth.replace(/^\//, "")}`;
 }

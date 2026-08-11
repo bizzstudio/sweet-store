@@ -1,7 +1,7 @@
 // src/pages/blogs/index.jsx
 import React, { useContext, useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import Layout from "@layout/Layout";
 import BlogCard from "@component/blog/BlogCard";
 import BlogServices from "@services/BlogServices";

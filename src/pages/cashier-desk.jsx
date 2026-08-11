@@ -3,7 +3,7 @@ import React, { useContext, useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
 import { IoBagHandle, IoWalletSharp } from "react-icons/io5";
 import useTranslation from "next-translate/useTranslation";
-import Image from "next/image";
+import Image from "@component/common/Img";
 
 // Internal import
 import Layout from "@layout/Layout";

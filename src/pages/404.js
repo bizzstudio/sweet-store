@@ -1,6 +1,6 @@
 // src/pages/404.js
 import React from "react";
-import Image from "next/image";
+import Image from "@component/common/Img";
 import useTranslation from "next-translate/useTranslation";
 import Link from "next/link";
 import MainBT from "@component/button/MainBT";
