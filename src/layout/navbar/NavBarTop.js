@@ -11,6 +11,7 @@ import LoginModal from "@component/modal/LoginModal";
 import { UserContext } from "@context/UserContext";
 import useGetSetting from "@hooks/useGetSetting";
 import useUtilsFunction from "@hooks/useUtilsFunction";
+import { asset } from "@utils/basePath";
 
 const NavBarTop = () => {
   const {
@@ -36,7 +37,7 @@ const NavBarTop = () => {
     dispatch({ type: "USER_LOGOUT" });
     Cookies.remove("userInfo");
     Cookies.remove("couponInfo");
-    window.location = "/";
+    window.location = asset("/");
   };
 
   console.log(' storeCustomizationSetting?.navbar',  storeCustomizationSetting?.navbar)

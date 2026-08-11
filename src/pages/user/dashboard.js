@@ -26,6 +26,7 @@ import { SidebarContext } from "@context/SidebarContext";
 import Loading from "@component/preloader/Loading";
 import useGetSetting from "@hooks/useGetSetting";
 import useUtilsFunction from "@hooks/useUtilsFunction";
+import { asset } from "@utils/basePath";
 import { STORE_CLOSED, LOGIN_PATH } from "@utils/storeMode";
 import MyOrders from "./my-orders";
 
@@ -69,7 +70,9 @@ const Dashboard = ({ title, description, children }) => {
     dispatch({ type: "USER_LOGOUT" });
     Cookies.remove("userInfo");
     Cookies.remove("couponInfo");
-    window.location = exitPath;
+    // ניווט גולמי ולא router.push: כאן חייבים asset() כי רק הראוטר של Next
+    // מוסיף את תת-הנתיב לבדו. בלעדיו ההתנתקות יצאה אל שורש הדומיין
+    window.location = asset(exitPath);
   };
 
   useEffect(() => {

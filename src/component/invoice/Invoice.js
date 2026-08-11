@@ -172,7 +172,8 @@ const Invoice = ({ data, printRef, globalSetting, currency }) => {
               {t("common:paymentMethod")}
             </span>
             <span className="text-sm text-gray-500 font-semibold font-serif block">
-              {t(`common:${data?.paymentMethod}`)}
+              {/* default: שיטת תשלום ללא תרגום תוצג בשמה ולא כמפתח תרגום */}
+              {t(`common:${data?.paymentMethod}`, {}, { default: data?.paymentMethod })}
             </span>
           </div>
           <div className="mb-3 md:mb-0 lg:mb-0  flex flex-col sm:flex-wrap">

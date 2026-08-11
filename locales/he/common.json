@@ -576,6 +576,8 @@
 
     "Cash": "מזומן",
     "Card": "כ.א",
+    "manual": "ידני",
+    "creditCard": "כרטיס אשראי",
     "Credit": "אשראי",
 
     "orderStatus": "סטטוס",

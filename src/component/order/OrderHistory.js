@@ -76,7 +76,11 @@ const OrderHistory = ({ order, currency }) => {
       </td>
 
       <td className="px-1 md:px-5 py-3 leading-6 text-center whitespace-nowrap md:block hidden">
-        <span className="text-sm">{t(`common:${order.paymentMethod}`)}</span>
+        {/* default: שיטת תשלום שאין לה תרגום תציג את שמה הגולמי ולא את
+            מפתח התרגום ("common:manual") */}
+        <span className="text-sm">
+          {t(`common:${order.paymentMethod}`, {}, { default: order.paymentMethod })}
+        </span>
       </td>
       <td className="px-1 md:px-5 py-3 leading-6 text-center md:whitespace-nowrap font-medium text-sm max-md:w-min">
         {status}

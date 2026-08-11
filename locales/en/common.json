@@ -574,6 +574,8 @@
 
   "Cash": "Cash",
   "Card": "Card",
+  "manual": "Manual",
+  "creditCard": "Credit Card",
   "Credit": "Credit",
 
   "OrderStatus": "Status",

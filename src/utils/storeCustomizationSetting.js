@@ -617,82 +617,106 @@ const storeCustomization = {
     },
     dashboard: {
       invoice_message_first: {
+        he: "תודה רבה",
         en: "Thank You",
         de: "Danke",
       },
       invoice_message_last: {
+        he: "ההזמנה שלך התקבלה!",
         en: "Your order have been received !",
         de: "Ihre Bestellung ist eingegangen!",
       },
       print_button: {
+        he: "הדפסת חשבונית",
         en: "Print Invoice",
         de: "Rechnung Drucken",
       },
       download_button: {
+        he: "הורדת חשבונית",
         en: "Download Invoice",
         de: "Download Rechnung",
       },
       dashboard_title: {
+        he: "האזור האישי",
         en: "Dashboard",
         de: "Armaturenbrett",
       },
       total_order: {
+        he: "סה״כ הזמנות",
         en: "Total Orders",
         de: "Gesamtbestellungen",
       },
       pending_order: {
+        he: "ממתינות",
         en: "Pending Orders",
         de: "Ausstehende Bestellungen",
       },
-      Processing_order: {
+      processing_order: {
+        he: "בטיפול",
         en: "Processing Order",
         de: "Bearbeitungsauftrag",
       },
       complete_order: {
+        he: "הושלמו",
         en: "Complete Orders",
         de: "Bestellungen abschließen",
       },
       recent_order: {
+        he: "הזמנות אחרונות",
         en: "Recent Orders",
         de: "letzte Bestellungen",
       },
       my_order: {
+        he: "ההזמנות שלי",
         en: "My Orders",
         de: "Meine Bestellungen",
       },
       update_profile: {
+        he: "עדכון פרטים",
         en: "Update Profile",
         de: "Profil aktualisieren",
       },
       full_name: {
+        he: "שם פרטי",
         en: "Full Name",
         de: "Vollständiger Name",
       },
+      last_name: {
+        he: "שם משפחה",
+        en: "Last Name",
+      },
       address: {
+        he: "כתובת",
         en: "Address",
         de: "Adresse",
       },
       user_phone: {
+        he: "טלפון",
         en: "Phone/Mobile",
         de: "Mobiltelefon",
       },
       user_email: {
+        he: "כתובת אימייל",
         en: "Email Address",
         de: "E-Mail-Adresse",
       },
       update_button: {
+        he: "שמירת השינויים",
         en: "Update Profile",
         de: "Profil aktualisieren",
       },
       current_password: {
+        he: "סיסמה נוכחית",
         en: "Current Password",
         de: "Aktuelles Passwort",
       },
       new_password: {
+        he: "סיסמה חדשה",
         en: "New Password",
         de: "Neues Kennwort",
       },
       change_password: {
+        he: "שינוי סיסמה",
         en: "Change Password",
         de: "Kennwort ändern",
       },
