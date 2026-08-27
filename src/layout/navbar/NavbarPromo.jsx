@@ -249,7 +249,7 @@ const NavbarPromo = ({ logoHeight }) => {
                           )
                         ) : (
                           <Image
-                            src="https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png"
+                            src="/category-icons/general.svg"
                             width={400}
                             height={400}
                             alt="category"

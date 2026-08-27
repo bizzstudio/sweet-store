@@ -10,7 +10,17 @@ const ProductServices = {
     return requests.get("/products/cart-products");
   },
 
-  getShowingStoreProducts: async ({ category = "", title = "", slug = "", sku = "" }) => {
+  getShowingStoreProducts: async ({
+    category = "",
+    title = "",
+    slug = "",
+    sku = "",
+    // עימוד ומיון בצד השרת. שניהם opt-in: בלי page/limit ה-endpoint מתנהג
+    // בדיוק כמו קודם (100 מוצרים, מיון אלפביתי), ולכן דף הבית לא מושפע.
+    page = null,
+    limit = null,
+    sort = null,
+  }) => {
     // resolve the issue with URLs that include non-English letters.
     const rawSlug = String(slug ?? "").trim();
     let newSlug = rawSlug
@@ -26,8 +36,13 @@ const ProductServices = {
 
     // console.log({ encodedSlug })
 
+    const pagination =
+      page || limit || sort
+        ? `&page=${page || 1}&limit=${limit || 48}&sort=${encodeURIComponent(sort || "Popular")}`
+        : "";
+
     return requests.get(
-      `/products/store?category=${encodedCategory}&title=${encodedTitle}&slug=${encodedSlug}&sku=${sku}`
+      `/products/store?category=${encodedCategory}&title=${encodedTitle}&slug=${encodedSlug}&sku=${sku}${pagination}`
     );
   },
 

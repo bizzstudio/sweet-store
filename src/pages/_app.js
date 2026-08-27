@@ -61,12 +61,12 @@ function MyApp({ Component, pageProps }) {
     }
   }, [loading, error, router.events]);
 
-  // Redirects
-  useEffect(() => {
-    if (router.pathname === "/product-category/מבצעים") {
-      router.push("/offers");
-    }
-  }, [router.pathname]);
+  // הוסרה הפניה מ-‎/product-category/מבצעים ל-‎/offers.
+  //
+  // היא מעולם לא רצה: router.pathname במסלול דינמי הוא התבנית
+  // ‎"/product-category/[categoryName]" ולא הנתיב בפועל, ולכן ההשוואה תמיד
+  // נכשלה. גם לו הייתה רצה היא הייתה מזיקה — ‎pages/offers.js מחזיר
+  // ‎notFound: true במכוון, כך שההפניה הייתה מובילה ל-404 במקום לקטגוריה.
 
   // Hotjar + GTM הוסרו מכאן והועברו לסניפטים הסטנדרטיים ב-_document.js (ב-<head>/<body>).
   const isProductPage = router.pathname.startsWith("/product/");

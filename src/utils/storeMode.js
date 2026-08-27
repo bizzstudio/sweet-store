@@ -6,7 +6,10 @@
 //
 // להחזרת החנות לפעילות מלאה: להחליף ל-false ולבנות מחדש (npm run build).
 // הקובץ מיובא גם ב-middleware (Edge runtime) וגם בקומפוננטות — לכן ללא תלויות.
-export const STORE_CLOSED = true;
+//
+// 27/08/2026: החנות נפתחה מחדש. הקטלוג, החיפוש והקטגוריות פתוחים לכולם;
+// העגלה והצ'קאאוט ממשיכים לדרוש התחברות דרך PROTECTED_PREFIXES.
+export const STORE_CLOSED = false;
 
 // יעד ברירת המחדל של לקוח מחובר כשהחנות סגורה
 export const CLOSED_HOME = "/user/dashboard";
@@ -41,14 +44,33 @@ const PUBLIC_PREFIXES = [
   "/user/forget-password",
 ];
 
-// מסלולים שנשארים פתוחים אך דורשים התחברות. הבדיקה היא לפי תחילית, כך
-// שגם תתי-העמודים (‎/user/my-orders,‎ /order/123) נכללים.
+// מסלולים שנשארים פתוחים אך דורשים התחברות **כשהחנות סגורה**. הבדיקה היא לפי
+// תחילית, כך שגם תתי-העמודים (‎/user/my-orders,‎ /order/123) נכללים.
+//
+// הרשימה רחבה בכוונה: במצב "חנות סגורה" ממילא אין גלישה אנונימית, ולכן גם
+// מסלולי הרכישה נכללים בה.
 const PROTECTED_PREFIXES = [
   "/user", // האזור האישי על כל עמודיו
   "/order", // צפייה בהזמנה קיימת
   "/success", // סיום תשלום
   "/failed", // כישלון תשלום
   "/cashier-desk", // עמדת הקופה (מוגנת בנפרד בבדיקת isCashier)
+];
+
+// מסלולים שדורשים התחברות **גם כשהחנות פתוחה**.
+//
+// זו תת-קבוצה מצומצמת של PROTECTED_PREFIXES, ולא היא עצמה, מסיבה מהותית:
+// החנות תומכת ברכישה כאורח (ראו שדות guestName/guestPhone ב-pages/checkout.jsx
+// ובשמירת checkoutGuestData ל-localStorage). אכיפת התחברות על ‎/checkout,
+// ‎/success,‎ /failed ו-‎/order הייתה חוסמת את מסלול האורח כולו — כלומר שוברת
+// מכירות במקום להגן על משהו.
+//
+// מה שכן נכלל הוא מה שאין לו שום משמעות בלי משתמש מזוהה: האזור האישי ועמדת
+// הקופה. עד כה הם היו מוגנים בהפניה בצד הלקוח בלבד (useEffect שמנתב כשאין
+// userInfo), כלומר העמוד נשלח לדפדפן לפני שההפניה רצה.
+const AUTH_REQUIRED_PREFIXES = [
+  "/user", // האזור האישי — הזמנות, כתובות, פרטי לקוח
+  "/cashier-desk", // עמדת הקופה (הרשאת isCashier נבדקת בנוסף בעמוד עצמו)
 ];
 
 // נתיבים מגיעים מה-URL ולכן עלולים להיות מקודדים (עברית = ‎%D7%A2...).
@@ -71,10 +93,17 @@ export const isPublicPath = (pathname) => {
   return PUBLIC_PREFIXES.some((prefix) => matchesPrefix(path, prefix));
 };
 
-// עמוד שנשאר זמין אך מחייב לקוח מחובר
+// עמוד שנשאר זמין אך מחייב לקוח מחובר (רלוונטי כשהחנות סגורה)
 export const isProtectedPath = (pathname) => {
   const path = decodePath(pathname);
   return PROTECTED_PREFIXES.some((prefix) => matchesPrefix(path, prefix));
+};
+
+// עמוד שמחייב לקוח מחובר גם בחנות פתוחה. חייב להיבדק *אחרי* isPublicPath,
+// כי אימות אימייל ואיפוס סיסמה יושבים תחת ‎/user ומגיעים דווקא ממי שאינו מחובר.
+export const isAuthRequiredPath = (pathname) => {
+  const path = decodePath(pathname);
+  return AUTH_REQUIRED_PREFIXES.some((prefix) => matchesPrefix(path, prefix));
 };
 
 // סניטציה של פרמטר redirect. מותר רק נתיב פנימי: "//host", "https://host"

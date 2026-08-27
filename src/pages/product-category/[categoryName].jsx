@@ -1,15 +1,13 @@
 // src/pages/product-category/[categoryName].jsx
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useCallback, useRef } from "react";
 import Image from "@component/common/Img";
 import useTranslation from "next-translate/useTranslation";
 
 // Internal import
 import Layout from "@layout/Layout";
-import useFilter from "@hooks/useFilter";
 import ProductServices from "@services/ProductServices";
 import ProductCard from "@component/product/ProductCard";
 import { SidebarContext } from "@context/SidebarContext";
-import Loading from "@component/preloader/Loading";
 import { useRouter } from "next/router";
 import AttributeServices from "@services/AttributeServices";
 import MinimalTitle from "@component/common/MinimalTitle";
@@ -17,11 +15,15 @@ import MainBT from "@component/button/MainBT";
 import SortDropdown from "@component/common/SortDropdown";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 
-const CategoryPage = ({ products, attributes }) => {
-    // console.log('products :>> ', products);
+// כמה מוצרים נטענים בכל פעם. הקטגוריה הגדולה בחנות מונה ~3,600 מוצרים, ולכן
+// אי אפשר לשלוח את כולם ב-props של העמוד (המערך המלא נשלח פעמיים — פעם ב-HTML
+// ופעם ב-JSON של ההידרציה, ~3MB לקטגוריה). הדפדוף הוא בצד השרת, ו"טען עוד"
+// מושך את העמוד הבא בלבד.
+const PAGE_SIZE = 48;
+
+const CategoryPage = ({ products, totalProducts, attributes }) => {
     const { t } = useTranslation();
-    const { isLoading, setIsLoading, offers, categories } = useContext(SidebarContext);
-    const [visibleProduct, setVisibleProduct] = useState(24);
+    const { offers, categories, setIsLoading } = useContext(SidebarContext);
     const router = useRouter();
     const { categoryName } = router.query; // זה יכול להיות slug או שם
     const { showingTranslateValue, findMainCategory } = useUtilsFunction();
@@ -30,20 +32,93 @@ const CategoryPage = ({ products, attributes }) => {
     const currentCategory = findMainCategory(categories, categoryName);
 
     // שם הקטגוריה להצגה
-    const displayCategoryName = currentCategory 
+    const displayCategoryName = currentCategory
         ? showingTranslateValue(currentCategory.name)
         : categoryName;
 
+    // המיון עבר לצד השרת: מיון בדפדפן היה ממיין רק את המוצרים שכבר נטענו,
+    // כלומר "מהזול ליקר" היה מחזיר את הזול מבין 48 ולא מבין 3,600.
+    const [sortedField, setSortedField] = useState("Popular");
+    const [items, setItems] = useState(products || []);
+    const [total, setTotal] = useState(totalProducts || 0);
+    const [page, setPage] = useState(1);
+    const [isFetching, setIsFetching] = useState(false);
+    // העמוד האחרון הגיע חלקי — סימן שאין יותר מה למשוך, גם אם total גדול יותר
+    // (הקטלוג יכול להשתנות בין בקשה לבקשה)
+    const [reachedEnd, setReachedEnd] = useState(false);
+
+    // מונה בקשות: תשובה של בקשה שכבר הוחלפה (החלפת מיון, מעבר קטגוריה, לחיצה
+    // כפולה) חייבת להיזרק. בלעדיו שתי בקשות שחוזרות בסדר הפוך משאירות על המסך
+    // את התוצאה של הבקשה הישנה יותר.
+    const requestIdRef = useRef(0);
+
+    // CategoryCarousel מדליק את isLoading הגלובלי לפני הניווט לכאן ומסתמך על
+    // עמוד היעד לכבות אותו — בדיוק כמו בדף הבית ובחיפוש.
     useEffect(() => {
         setIsLoading(false);
-    }, [products]);
+    }, [products, setIsLoading]);
 
-    const { setSortedField, productData, sortedField } = useFilter(products);
+    // מעבר בין קטגוריות משתמש באותה קומפוננטה, ולכן ה-state חייב להתאפס
+    // כשמגיעים props חדשים — אחרת נשארים המוצרים של הקטגוריה הקודמת.
+    useEffect(() => {
+        requestIdRef.current += 1; // פוסל בקשות שעדיין באוויר מהקטגוריה הקודמת
+        setItems(products || []);
+        setTotal(totalProducts || 0);
+        setPage(1);
+        setSortedField("Popular");
+        setReachedEnd(false);
+        setIsFetching(false);
+    }, [products, totalProducts]);
+
+    const fetchPage = useCallback(
+        async (nextPage, sort, { append }) => {
+            const requestId = ++requestIdRef.current;
+            setIsFetching(true);
+            try {
+                const data = await ProductServices.getShowingStoreProducts({
+                    category: categoryName,
+                    page: nextPage,
+                    limit: PAGE_SIZE,
+                    sort,
+                });
+                if (requestId !== requestIdRef.current) return; // בקשה מיושנת
+                const fetched = Array.isArray(data?.products) ? data.products : [];
+
+                setItems((prev) => {
+                    if (!append) return fetched;
+                    // הגנה מפני מפתחות כפולים ב-React: אם הקטלוג השתנה בין
+                    // בקשה לבקשה, אותו מוצר יכול לחזור בשני עמודים עוקבים.
+                    const seen = new Set(prev.map((p) => p._id));
+                    return [...prev, ...fetched.filter((p) => !seen.has(p._id))];
+                });
+
+                if (typeof data?.totalProducts === "number") setTotal(data.totalProducts);
+                if (fetched.length < PAGE_SIZE) setReachedEnd(true);
+                setPage(nextPage);
+            } catch (err) {
+                if (requestId !== requestIdRef.current) return;
+                console.error("category fetch failed:", err?.message || err);
+            } finally {
+                if (requestId === requestIdRef.current) setIsFetching(false);
+            }
+        },
+        [categoryName]
+    );
+
+    // שינוי מיון מתחיל את הרשימה מחדש מהעמוד הראשון
+    const handleSortChange = (value) => {
+        if (value === sortedField) return;
+        setSortedField(value);
+        setReachedEnd(false);
+        fetchPage(1, value, { append: false });
+    };
+
+    const hasMore = !reachedEnd && items.length < total;
 
     return (
         <Layout title={displayCategoryName}
-         description={`גלו את מגוון המוצרים בקטגוריית ${displayCategoryName}. איכות מובטחת, מחירים מעולים ומשלוח מהיר.`}
-         >
+            description={`גלו את מגוון המוצרים בקטגוריית ${displayCategoryName}. איכות מובטחת, מחירים מעולים ומשלוח מהיר.`}
+        >
             <div className="mx-auto max-w-screen-2xl px-3 sm:px-10">
                 <div className="flex py-5">
                     <div className="flex w-full">
@@ -54,16 +129,16 @@ const CategoryPage = ({ products, attributes }) => {
                                     <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                                         <h6 className="text-sm font-serif text-right">
                                             {t("common:totalI")}{" "}
-                                            <span className="font-bold">{productData?.length}</span>{" "}
+                                            <span className="font-bold">{total}</span>{" "}
                                             {t("common:itemsFound")}
                                         </h6>
 
                                         {/* הוספת רכיב המיון */}
-                                        {productData?.length > 0 && (
+                                        {total > 0 && (
                                             <div className="flex justify-center sm:justify-end">
                                                 <SortDropdown
                                                     sortedField={sortedField}
-                                                    setSortedField={setSortedField}
+                                                    setSortedField={handleSortChange}
                                                 />
                                             </div>
                                         )}
@@ -71,7 +146,7 @@ const CategoryPage = ({ products, attributes }) => {
                                 </div>
                             </div>
 
-                            {productData?.length === 0 && (
+                            {items.length === 0 && !isFetching && (
                                 <div className="flex flex-col items-center text-center align-middle mx-auto p-5 my-5">
                                     <Image
                                         className="my-4"
@@ -86,43 +161,31 @@ const CategoryPage = ({ products, attributes }) => {
                                 </div>
                             )}
 
-                            {isLoading ? (
-                                <Loading loading={isLoading} />
-                            ) : (
-                                <>
-                                    <div
-                                        className={`grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-6 gap-2 md:gap-3 lg:gap-3 ${productData?.length < 6 ? 'justify-center' : ''}`}
-                                        style={{
-                                            gridTemplateColumns: window.innerWidth < 350 ?
-                                                `repeat(1, minmax(150px, 1fr))`
-                                                : window.innerWidth < 640
-                                                    ? `repeat(2, minmax(150px, 1fr))`
-                                                    : productData?.length < 6
-                                                        ? `repeat(${Math.min(productData?.length, 6)}, minmax(150px, 235px))`
-                                                        : '',
-                                        }}
-                                    >
-                                        {productData?.slice(0, visibleProduct).map((product, i) => (
-                                            <ProductCard
-                                                key={i + 1}
-                                                product={product}
-                                                attributes={attributes}
-                                                offers={offers}
-                                            />
-                                        ))}
-                                    </div>
+                            {/* הפריסה נקבעת במחלקות Tailwind בלבד. הגרסה הקודמת חישבה
+                                gridTemplateColumns מ-window.innerWidth בתוך ה-render —
+                                ערך שנקרא פעם אחת ולא מתעדכן בסיבוב מסך או בשינוי גודל
+                                חלון, ומונע כל אפשרות לרנדר את העמוד בשרת. */}
+                            <div className="grid grid-cols-1 xss:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3 lg:gap-3">
+                                {items.map((product) => (
+                                    <ProductCard
+                                        key={product._id}
+                                        product={product}
+                                        attributes={attributes}
+                                        offers={offers}
+                                    />
+                                ))}
+                            </div>
 
-                                    {productData?.length > visibleProduct && (
-                                        <div className="w-full flex justify-center mt-5">
-                                            <MainBT
-                                                onClick={() => setVisibleProduct((pre) => pre + 36)}
-                                                className="!w-auto px-6"
-                                            >
-                                                {t("common:loadMoreBtn")}
-                                            </MainBT>
-                                        </div>
-                                    )}
-                                </>
+                            {hasMore && (
+                                <div className="w-full flex justify-center mt-5">
+                                    <MainBT
+                                        disabled={isFetching}
+                                        onClick={() => fetchPage(page + 1, sortedField, { append: true })}
+                                        className="!w-auto px-6"
+                                    >
+                                        {isFetching ? t("common:loadingMore") : t("common:loadMoreBtn")}
+                                    </MainBT>
+                                </div>
                             )}
                         </div>
                     </div>
@@ -137,17 +200,28 @@ export default CategoryPage;
 export const getServerSideProps = async (context) => {
     const { categoryName } = context.query;
 
-    const [data, attributes] = await Promise.all([
-        ProductServices.getShowingStoreProducts({
-            category: categoryName,
-        }),
-        AttributeServices.getShowingAttributes({}),
-    ]);
+    try {
+        const [data, attributes] = await Promise.all([
+            ProductServices.getShowingStoreProducts({
+                category: categoryName,
+                page: 1,
+                limit: PAGE_SIZE,
+                sort: "Popular",
+            }),
+            AttributeServices.getShowingAttributes({}),
+        ]);
 
-    return {
-        props: {
-            products: data?.products,
-            attributes,
-        },
-    };
+        return {
+            props: {
+                products: data?.products ?? [],
+                totalProducts: data?.totalProducts ?? 0,
+                attributes: attributes ?? [],
+            },
+        };
+    } catch (err) {
+        // נפילה של ה-API לא צריכה להחזיר 500 על עמוד קטגוריה — עדיף עמוד ריק
+        // עם הודעת "לא נמצאו מוצרים" מאשר מסך שגיאה של Next.
+        console.error("getServerSideProps (product-category):", err?.message || err);
+        return { props: { products: [], totalProducts: 0, attributes: [] } };
+    }
 };

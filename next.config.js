@@ -54,7 +54,21 @@ const baseConfig = {
     // אין להגדיר כאן loader מותאם: כל ערך שאינו "default" מכבה את endpoint
     // המיטוב המובנה ‎/_next/image, וכל התמונות באתר מחזירות 404.
     // תיקון ה-basePath ל-src נעשה ב-@component/common/Img במקום.
-    remotePatterns: [{ protocol: "https", hostname: "**" }],
+    // רשימת דומיינים סגורה במקום התבנית הפתוחה "**" שהייתה כאן.
+    //
+    // "**" הפך את ‎/_next/image לפרוקסי תמונות פתוח: כל אחד יכול היה לבקש
+    // מהשרת של החנות להוריד כתובת https שרירותית ולהגיש אותה מהדומיין שלנו
+    // (צריכת רוחב-פס וזיכרון על חשבוננו, והסתרת המקור האמיתי מאחורי הדומיין).
+    // הרשימה נגזרה מסריקה של כל כתובות התמונות ב-DB (settings/categories/
+    // products/blogs/popups) ובקוד — בפועל נמצאו שני דומיינים בלבד.
+    // תמונות המוצרים והלוגו הן מקומיות ואינן זקוקות להיתר.
+    remotePatterns: [
+      { protocol: "https", hostname: "res.cloudinary.com" },
+      { protocol: "https", hostname: "i.postimg.cc" },
+    ],
+    // dangerouslyAllowSVG נשאר כבוי בכוונה: SVG עוקף את המנוע דרך unoptimized
+    // ב-@component/common/Img, ולכן אין צורך לפתוח כאן הגשת SVG מרוחק ואין
+    // צורך לשנות contentDispositionType עבור כל שאר התמונות באתר.
     // הגשת פורמטים מודרניים (קטנים ב-25%-50% מ-JPEG/PNG) — משפר LCP ומשקל תמונות.
     formats: ["image/avif", "image/webp"],
     // התמונות המעובדות ניתנות למטמון ל-31 יום במקום 60 שניות (ברירת המחדל).

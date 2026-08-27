@@ -1,6 +1,8 @@
 import React from "react";
 import Cookies from "js-cookie";
 
+import { assetFromSetting } from "@utils/basePath";
+
 const CartItemPreview = ({ item }) => {
 
   let currentLang = Cookies.get('_lang');
@@ -23,7 +25,15 @@ const CartItemPreview = ({ item }) => {
       >
         <img
           key={item?.id}
-          src={item?.image || "https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png"}
+          // ‎<img> רגיל ולא next/image, ולכן ה-basePath לא נוסף לבד.
+          // הרכיב מקבל שני סוגי item: פריט עגלה (image = מחרוזת) ומוצר גולמי
+          // מ-MissingProductsModal/PriceUpdatedModal (image = מערך). מערך ריק
+          // הוא truthy, ולכן הגרסה הקודמת ייצרה ‎<img src=""> — בקשה חוזרת
+          // לעמוד עצמו. בקטלוג הזה לאף מוצר אין תמונה, כך שזה המצב הרגיל.
+          src={assetFromSetting(
+            Array.isArray(item?.image) ? item.image[0] : item?.image,
+            "/product-placeholder.svg"
+          )}
           width={60}
           height={60}
           alt={item?.title|| 'מוצר מחוק'}

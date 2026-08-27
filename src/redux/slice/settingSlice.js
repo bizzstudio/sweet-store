@@ -6,26 +6,25 @@ const settingSlice = createSlice({
     settingItem: [],
   },
   reducers: {
+    // החלפה של הגדרה קיימת, או הוספה אם אינה קיימת.
+    //
+    // כאן היה באג: שני הענפים של ה-map החזירו את הפריט הישן (x) ולא את
+    // action.payload, כך שעדכון הגדרה קיימת לא עשה דבר. מכיוון שהמצב נשמר
+    // ל-sessionStorage, לקוח שכבר טען את ההגדרות פעם אחת נשאר נעול עליהן
+    // לכל אורך הגלישה - וכל שינוי בפאנל הניהול לא הגיע אליו.
     addSetting: (state, action) => {
-      const existsItem = state.settingItem.find(
+      const exists = state.settingItem.some(
         (x) => x.name === action.payload.name
       );
-      if (existsItem) {
-        return {
-          ...state,
-          settingItem: state.settingItem.map((x) => {
-            if (x.name === existsItem.name) {
-              return x;
-            }
-            return x;
-          }),
-        };
-      } else {
-        return {
-          ...state,
-          settingItem: [...state.settingItem, action.payload],
-        };
-      }
+
+      return {
+        ...state,
+        settingItem: exists
+          ? state.settingItem.map((x) =>
+              x.name === action.payload.name ? action.payload : x
+            )
+          : [...state.settingItem, action.payload],
+      };
     },
     removeSetting: (state, action) => {
       return {

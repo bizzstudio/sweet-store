@@ -1,10 +1,14 @@
 // src/middleware.js
 //
-// שער הכניסה לאתר כשהחנות סגורה (ראו src/utils/storeMode.js).
-// רץ לפני כל בקשת עמוד ומנתב:
+// שער הכניסה לאתר. רץ לפני כל בקשת עמוד (ראו src/utils/storeMode.js).
+//
+// חנות סגורה (STORE_CLOSED=true):
 //   מבקר לא מחובר  ->  /login  (למעט עמודי מידע ותקנון)
 //   לקוח מחובר      ->  /user/dashboard לכל ניסיון גלישה בחנות
-// כשהדגל STORE_CLOSED כבוי הקובץ לא עושה דבר והאתר מתנהג כרגיל.
+//
+// חנות פתוחה (STORE_CLOSED=false):
+//   הקטלוג, החיפוש, העגלה והצ'קאאוט — כולל רכישה כאורח — חופשיים לכולם.
+//   ‎/user ו-‎/cashier-desk מחייבים עוגיית התחברות (AUTH_REQUIRED_PREFIXES).
 import { NextResponse } from "next/server";
 
 import {
@@ -13,12 +17,11 @@ import {
   LOGIN_PATH,
   isPublicPath,
   isProtectedPath,
+  isAuthRequiredPath,
   safeInternalPath,
 } from "@utils/storeMode";
 
 export function middleware(request) {
-  if (!STORE_CLOSED) return NextResponse.next();
-
   const { pathname, search } = request.nextUrl;
 
   // עוגיית ההתחברות נכתבת ב-useLoginSubmit ונמחקת בהתנתקות. די בקיומה כדי
@@ -52,6 +55,21 @@ export function middleware(request) {
 
   const toDashboard = () => redirectTo(CLOSED_HOME);
 
+  // ── חנות פתוחה ─────────────────────────────────────────────────────────
+  // הקטלוג, החיפוש, העגלה והצ'קאאוט (כולל רכישה כאורח) חופשיים לכולם, אבל
+  // האזור האישי ועמדת הקופה עדיין מחייבים עוגיית התחברות. עד כה הם היו
+  // מוגנים רק בהפניה בצד הלקוח, כלומר ה-HTML נשלח לדפדפן לפני שההפניה רצה.
+  if (!STORE_CLOSED) {
+    // עמודי תוכן, התחברות, אימות אימייל ואיפוס סיסמה — פתוחים תמיד.
+    // הבדיקה חייבת לקדום, כי שני האחרונים יושבים תחת ‎/user.
+    if (isPublicPath(pathname)) return NextResponse.next();
+    if (isAuthRequiredPath(pathname)) {
+      return isLoggedIn ? NextResponse.next() : toLogin();
+    }
+    return NextResponse.next();
+  }
+
+  // ── חנות סגורה ─────────────────────────────────────────────────────────
   // עמוד ההתחברות: לקוח שכבר מחובר לא צריך אותו
   if (pathname === LOGIN_PATH) {
     if (!isLoggedIn) return NextResponse.next();

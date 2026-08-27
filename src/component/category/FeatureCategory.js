@@ -21,10 +21,13 @@ const FeatureCategory = () => {
   const { showingTranslateValue, getCategorySlug } = useUtilsFunction();
 
   // פונקציה להחזיר אייקונים לפי קטגוריה
+  // הגיבוי היה תמונה מרוחקת ב-Cloudinary של פרויקט הדמו המקורי; הוחלף בנכס
+  // מקומי כדי שהאייקון לא ייפול על דומיין חיצוני כשלקטגוריה אין icon ב-DB.
   const getCategoryIcon = (category) => {
+    const fallback = "/category-icons/general.svg";
     return {
-      bw: category.icon || "https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png",
-      color: category.coloredIcon || category.icon || "https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png"
+      bw: category.icon || fallback,
+      color: category.coloredIcon || category.icon || fallback,
     };
   };
 

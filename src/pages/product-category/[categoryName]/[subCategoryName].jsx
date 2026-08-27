@@ -95,18 +95,11 @@ const SubCategoryPage = ({ products, attributes }) => {
                                 <Loading loading={isLoading} />
                             ) : (
                                 <>
+                                    {/* ראה ההערה ב-[categoryName].jsx: החישוב מ-window.innerWidth
+                                        בתוך ה-render נקרא פעם אחת בלבד ואינו מתעדכן בשינוי
+                                        גודל חלון. */}
                                     <div
-                                        className={`grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-6 gap-2 md:gap-3 lg:gap-3 ${productData?.length < 6 ? 'justify-center' : ''}`}
-                                        style={{
-                                            gridTemplateColumns:
-                                                window.innerWidth < 350 ?
-                                                    `repeat(1, minmax(150px, 1fr))`
-                                                    : window.innerWidth < 640
-                                                        ? `repeat(2, minmax(150px, 1fr))`
-                                                        : productData?.length < 6
-                                                            ? `repeat(${Math.min(productData?.length, 6)}, minmax(150px, 235px))`
-                                                            : '',
-                                        }}
+                                        className="grid grid-cols-1 xss:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3 lg:gap-3"
                                     >
                                         {productData?.slice(0, visibleProduct).map((product, i) => (
                                             <ProductCard

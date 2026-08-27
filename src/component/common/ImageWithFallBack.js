@@ -3,8 +3,12 @@ import { useState, useRef } from "react";
 import Image from "@component/common/Img";
 import useTranslation from "next-translate/useTranslation";
 
+// ברירת המחדל הייתה תמונה מרוחקת ב-Cloudinary של פרויקט הדמו המקורי. בקטלוג
+// הזה אין תמונות לאף מוצר, כך שכל 4,320 הכרטיסים נשענים על התמונה הזו — כלומר
+// אלפי בקשות לדומיין חיצוני שאינו בשליטתנו. הקובץ המקומי מוגש מאותו origin,
+// נשמר במטמון עם שאר הנכסים, ואינו נשבר אם Cloudinary לא זמין.
 const ImageWithFallback = ({
-  fallback = "https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png",
+  fallback = "/product-placeholder.svg",
   alt,
   src,
   outOfStock,

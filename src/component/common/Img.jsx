@@ -28,6 +28,28 @@ import { assetFromSetting } from "@utils/basePath";
 const normalize = (src) =>
   typeof src === "string" && src ? assetFromSetting(src) : src;
 
-const Img = ({ src, ...rest }) => <NextImage src={normalize(src)} {...rest} />;
+// SVG עוקף את מנוע המיטוב.
+//
+// ‎/_next/image מחזיר 400 על כל SVG אלא אם מדליקים dangerouslyAllowSVG — דגל
+// שפותח את המנוע להגשת SVG שרירותי מכל דומיין מרוחק, ומחייב בתמורה CSP
+// ו-contentDispositionType גלובליים שמשנים את ההתנהגות של *כל* התמונות באתר.
+// המחיר הזה מיותר: SVG הוא וקטורי, ולכן אין מה למטב בו — resize ו-webp אינם
+// רלוונטיים, והקובץ ממילא קטן מהתוצר. unoptimized מגיש אותו ישירות, חוסך
+// round-trip למנוע, ומאפשר להשאיר את הדגל המסוכן כבוי.
+//
+// הבדיקה מתעלמת מ-query string ומ-hash כדי לתפוס גם כתובות חתומות של CDN.
+const isSvg = (src) =>
+  typeof src === "string" && /\.svg(?:[?#]|$)/i.test(src);
+
+const Img = ({ src, unoptimized, ...rest }) => {
+  const normalized = normalize(src);
+  return (
+    <NextImage
+      src={normalized}
+      unoptimized={unoptimized ?? isSvg(normalized)}
+      {...rest}
+    />
+  );
+};
 
 export default Img;

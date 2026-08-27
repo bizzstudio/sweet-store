@@ -373,7 +373,11 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
   // ---- SEO / Microdata for Meta ----
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
   const productUrl = `${siteUrl}/product/${product.slug}`;
-  const productImage = product?.image?.[0] || "https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png";
+  // JSON-LD מחייב כתובת מוחלטת. הגיבוי היה תמונת דמו ב-Cloudinary של הפרויקט
+  // המקורי — ומכיוון שלאף מוצר בקטלוג אין תמונה, כל המוצרים היו מפרסמים
+  // בנתוני המבנה תמונה מדומיין זר שאינו בשליטתנו.
+  const productImage =
+    product?.image?.[0] || `${siteUrl}/product-placeholder.svg`;
   const basePrice = price || product?.prices?.price || 0;
   const availability =
     stock > 0

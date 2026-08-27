@@ -13,10 +13,11 @@ import { SidebarContext } from "@context/SidebarContext";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 
 // פונקציה להחזיר אייקונים לפי קטגוריה (זמנית - צריך להגיע מהשרת)
+const CATEGORY_ICON_FALLBACK = "/category-icons/general.svg";
 const getCategoryIconByCode = (category) => {
   return {
-    bw: category.icon || "https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png",
-    color: category.coloredIcon || category.icon || "https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png"
+    bw: category.icon || CATEGORY_ICON_FALLBACK,
+    color: category.coloredIcon || category.icon || CATEGORY_ICON_FALLBACK
   };
 };
 

@@ -8,6 +8,12 @@ import SettingServices from "@services/SettingServices";
 import { addSetting } from "@redux/slice/settingSlice";
 import { storeCustomization } from "@utils/storeCustomizationSetting";
 
+// ההגדרות נשמרות ל-sessionStorage, ולכן בלי רענון יזום לקוח שהטאב שלו פתוח
+// ממשיך לראות את הגרסה שנטענה בכניסה הראשונה - שינוי בפאנל הניהול לא מגיע
+// אליו כלל. הדגל ברמת המודול מבטיח רענון אחד בדיוק לכל טעינת עמוד, במקום
+// בקשה נפרדת מכל אחד מעשרות הרכיבים שקוראים להוק הזה.
+let settingsRefreshed = false;
+
 const useGetSetting = () => {
   const lang = Cookies.get("_lang");
   const dispatch = useDispatch();
@@ -37,10 +43,13 @@ const useGetSetting = () => {
   // }, []);
 
   useEffect(() => {
-    // Function to fetch and add the setting
-    const fetchAndAddSetting = async () => {
+    // Function to fetch and add the setting.
+    // showSkeleton מבדיל בין טעינה ראשונה (אין מה להציג - מגיע סקלטון) לבין
+    // רענון ברקע של עותק שכבר מוצג. בלי ההבחנה הזו כל טעינת עמוד הייתה
+    // מהבהבת בסקלטון למרות שהתוכן כבר על המסך
+    const fetchAndAddSetting = async (showSkeleton = true) => {
       try {
-        setLoading(true);
+        if (showSkeleton) setLoading(true);
         // console.log("storeCustomizationSetting setting not available");
         const res = await SettingServices.getStoreCustomizationSetting();
         // console.log("res", res);
@@ -93,13 +102,17 @@ const useGetSetting = () => {
       }
     };
 
-    // Check if the setting is not in the store and fetch it
-    if (!storeCustomizationSetting) {
-      fetchAndAddSetting();
-    }
-
-    if (!globalSetting) {
+    // רענון אחד לכל טעינת עמוד: העותק השמור מוצג מיד, והנתונים הטריים
+    // מחליפים אותו כשהם מגיעים. אם משום מה הרענון כבר בוצע והמידע עדיין
+    // חסר, הבקשה שכבר בדרך תמלא אותו
+    if (!settingsRefreshed) {
+      settingsRefreshed = true;
+      // סקלטון רק כשאין עדיין מה להציג
+      fetchAndAddSetting(!storeCustomizationSetting);
       fetchGlobalSetting();
+    } else {
+      if (!storeCustomizationSetting) fetchAndAddSetting();
+      if (!globalSetting) fetchGlobalSetting();
     }
 
     // Check if the "lang" value is not set and set a default value

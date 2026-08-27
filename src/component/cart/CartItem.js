@@ -11,6 +11,7 @@ import useAddToCart from "@hooks/useAddToCart";
 import { SidebarContext } from "@context/SidebarContext";
 import useCart from "@hooks/useCart";
 import useUtilsFunction from "@hooks/useUtilsFunction";
+import { assetFromSetting } from "@utils/basePath";
 
 const CartItem = ({ item, currency, updateTotalPrice }) => {
   const { updateItemQuantity, removeItem, updateItem, items } = useCart();
@@ -111,10 +112,12 @@ const CartItem = ({ item, currency, updateTotalPrice }) => {
 
   // console.log('item :>> ', item);
 
-  const placeholderImage = "https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png";
-  const imageSrc = Array.isArray(item?.image)
-    ? (item.image.length > 0 ? item.image[0] : placeholderImage)
-    : (item?.image || placeholderImage);
+  // ‎<img> רגיל ולא next/image, ולכן ה-basePath לא נוסף לבד — ראה src/utils/basePath.js.
+  // הפרמטר השני של assetFromSetting מטפל גם במקרה שהערך קיים אך ריק (מוצר
+  // שנשמר עם image: [""]), שאחרת היה מייצר <img src=""> ובקשה חוזרת לעמוד עצמו.
+  const PLACEHOLDER = "/product-placeholder.svg";
+  const rawImage = Array.isArray(item?.image) ? item.image[0] : item?.image;
+  const imageSrc = assetFromSetting(rawImage, PLACEHOLDER);
 
   return (
     <div className={`group w-full h-auto flex gap-4 justify-start items-center py-3 px-6 border-b hover:bg-mainColor-superLight transition-all border-gray-100 relative last:border-b-0 ${isFreeGift ? 'bg-gradient-to-l from-mainColor/60 to-white' : 'bg-white'}`}>

@@ -114,7 +114,7 @@ const CategoryCarousel = () => {
                       />
                     ) : (
                       <Image
-                        src="https://res.cloudinary.com/ahossain/image/upload/v1655097002/placeholder_kvepfp.png"
+                        src="/category-icons/general.svg"
                         alt="category"
                         width="35"
                         height="35"

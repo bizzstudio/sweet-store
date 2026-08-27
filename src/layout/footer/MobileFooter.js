@@ -16,7 +16,7 @@ import { SidebarContext } from "@context/SidebarContext";
 import CategoryDrawer from "@component/drawer/CategoryDrawer";
 import useCart from "@hooks/useCart";
 import { BsFire } from "react-icons/bs";
-import { FiRefreshCcw } from "react-icons/fi";
+import { FiRefreshCcw, FiSearch } from "react-icons/fi";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 
 const MobileFooter = () => {
@@ -38,12 +38,18 @@ const MobileFooter = () => {
   const lblLogin = t("common:login");
   const lblRestore = t("common:restoreOrderBTN");
   const lblHome = t("common:homeBTN");
+  const lblSearch = t("common:search");
 
-  // מציאת קטגוריית המבצעים
-  const offersCategory = categories?.[0]?.children 
+  // מציאת קטגוריית המבצעים.
+  //
+  // כשאין קטגוריה כזו (המצב בחנות הזו) ה-fallback הקודם היה הסלאג הקבוע
+  // "מבצעים" — כלומר כפתור קבוע בתפריט התחתון שמוביל לקטגוריה לא קיימת ולעמוד
+  // ריק. במקומו מוצג כאן כפתור חיפוש, שהוא שימושי ממילא בקטלוג של 4,000 פריטים
+  // ושומר על חמש המשבצות של הגריד (העגלה חייבת להישאר במשבצת האמצעית).
+  const offersCategory = categories?.[0]?.children
     ? findCategoryByIdentifier(categories[0].children, "מבצעים")
     : null;
-  const offersCategorySlug = offersCategory ? getCategorySlug(offersCategory) : "מבצעים";
+  const offersCategorySlug = offersCategory ? getCategorySlug(offersCategory) : null;
 
   return (
     <>
@@ -75,17 +81,30 @@ const MobileFooter = () => {
               <span className="text-[10px] leading-tight">{lblAllProducts}</span>
             </button>
 
-            {/* 2. מבצעים – לינק */}
-            <Link
-              href={`/product-category/${offersCategorySlug}`}
-              aria-label={lblDeals}
-              className="grid grid-cols-1 gap-0.5 items-center justify-center h-full text-red-600"
-            >
-              <div className="w-[6vw] h-[6vw] min-w-[24px] min-h-[24px] max-w-[32px] max-h-[32px] flex items-center justify-center mx-auto">
-                <BsFire className="w-full h-full drop-shadow" />
-              </div>
-              <span className="text-[10px] leading-tight">{lblDeals}</span>
-            </Link>
+            {/* 2. מבצעים – רק אם קטגוריית המבצעים קיימת; אחרת חיפוש */}
+            {offersCategorySlug ? (
+              <Link
+                href={`/product-category/${offersCategorySlug}`}
+                aria-label={lblDeals}
+                className="grid grid-cols-1 gap-0.5 items-center justify-center h-full text-red-600"
+              >
+                <div className="w-[6vw] h-[6vw] min-w-[24px] min-h-[24px] max-w-[32px] max-h-[32px] flex items-center justify-center mx-auto">
+                  <BsFire className="w-full h-full drop-shadow" />
+                </div>
+                <span className="text-[10px] leading-tight">{lblDeals}</span>
+              </Link>
+            ) : (
+              <Link
+                href="/search"
+                aria-label={lblSearch}
+                className="grid grid-cols-1 gap-0.5 items-center justify-center h-full"
+              >
+                <div className="w-[6vw] h-[6vw] min-w-[24px] min-h-[24px] max-w-[32px] max-h-[32px] flex items-center justify-center mx-auto">
+                  <FiSearch className="w-full h-full drop-shadow" />
+                </div>
+                <span className="text-[10px] leading-tight">{lblSearch}</span>
+              </Link>
+            )}
 
             {/* 3. עגלה – מעוצב כמו בתמונה */}
             <button
