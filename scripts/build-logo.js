@@ -135,6 +135,38 @@ const toPng = (svg, w, h, out) =>
     const { size } = fs.statSync(path.join(LOGO_DIR, f));
     console.log(`  ${f.padEnd(24)} ${(size / 1024).toFixed(0)}KB`);
   }
+  // ── סנכרון לפאנל הניהול ──────────────────────────────────────────────────
+  // sweet-admin מחזיק עותקים משלו ולא יכול להצביע לכאן: הוא אפליקציית Vite
+  // נפרדת, ו-SidebarContent/InvoiceForDownload מייבאים את הקובץ כמודול
+  // (‎@/assets/img/logo/…) כדי שייכנס ל-bundle. בלי הסנכרון הזה החשבוניות
+  // שהפאנל מפיק ללקוחות ימשיכו לשאת את הלוגו הישן.
+  // שני השימושים אומתו כבטוחים ליחס: הסיידבר ב-h-auto, החשבונית ב-width בלבד.
+  if (process.argv.includes("--admin")) {
+    const A = path.join(__dirname, "..", "..", "sweet-admin");
+    if (!fs.existsSync(A)) throw new Error("לא נמצאה תיקיית sweet-admin לצד sweet-store");
+    const copy = (from, to) => {
+      const dest = path.join(A, to);
+      if (!fs.existsSync(path.dirname(dest))) return console.warn(`  ! דילוג, אין תיקייה: ${to}`);
+      fs.copyFileSync(path.join(LOGO_DIR, from), dest);
+      console.log(`  → sweet-admin/${to}`);
+    };
+    console.log("\nסנכרון לפאנל הניהול:");
+    // logo-color = הגרסה הירוקה, logo-dark = הגרסה הלבנה למצב כהה (שמות היסטוריים)
+    for (const [from, to] of [
+      ["logo-color.png", "src/assets/img/logo/logo-color.png"],
+      ["logo-color.svg", "src/assets/img/logo/logo-color.svg"],
+      ["logo-mark-light.png", "src/assets/img/logo/logo-dark.png"],
+      ["logo-mark-light.svg", "src/assets/img/logo/logo-dark.svg"],
+      ["logo-square-180.png", "public/favicon.png"],
+      ["logo-square-192.png", "public/logo192.png"],
+      ["logo-square.png", "public/logo512.png"],
+    ]) copy(from, to);
+    for (const f of fs.readdirSync(path.join(A, "public", "logo")))
+      if (fs.existsSync(path.join(LOGO_DIR, f))) copy(f, path.join("public", "logo", f));
+  } else {
+    console.log("\n(להעברת הלוגו גם לפאנל הניהול: node scripts/build-logo.js --admin)");
+  }
+
   console.log(
     "\nשימו לב: public/service-worker.js מצמיד כל /logo/* ל-md5 שלו.\n" +
     "חובה להריץ npm run build אחרי השינוי, אחרת מבקרים חוזרים יקבלו את הלוגו הישן מהמטמון."

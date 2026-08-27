@@ -85,6 +85,12 @@ const ProductCard = ({ product, attributes, offers = [] }) => {
   //   return null; // במקרה שאין אף offer עם שם
   // };
 
+  // ‎image הוא מערך בסכימה, אבל ‎[""] אפשרי (יבוא שהשאיר מחרוזת ריקה) ולכן
+  // לא די בבדיקת אורך. משמש להתאמת אזור התמונה: תמונה אמיתית מול placeholder.
+  const hasImage = Boolean(
+    Array.isArray(product?.image) ? product.image[0] : product?.image
+  );
+
   // הסתרת מוצרים שניתנים במתנה במבצע — אי אפשר לקנותם כמוצר רגיל
   if (isFreeGiftProduct(product?._id, allOffers)) {
     return null;
@@ -122,11 +128,23 @@ const ProductCard = ({ product, attributes, offers = [] }) => {
           // אזור התמונה הוקטן מ-h-32/h-44: בקטלוג הזה לאף מוצר אין תמונה, ולכן
           // הבלוק הזה היה חצי כרטיס של placeholder זהה, כפול אלפי כרטיסים.
           // הרקע המרומז מגיע מכאן ולא מתוך ה-SVG, כדי שימלא את כל הרוחב.
-          className="relative flex justify-center cursor-pointer w-full h-24 sm:h-32 bg-mainColor-superLight"
+          //
+          // שימו לב לחישוב: styles/custom.css מגדיר html{font-size:1.2rem},
+          // ולכן 1rem שווה 19.2px ולא 16px. h-20/h-24 כאן הם 96px ו-115px
+          // בפועל — לא 80 ו-96. כל מחלקת מרווח של Tailwind בפרויקט הזה גדולה
+          // ב-20% מערכה הנקוב.
+          //
+          // הגוון והריפוד חלים רק כשאין תמונה. מוצר עם תמונה אמיתית (רקע לבן)
+          // היה מקבל מסגרת ירקרקת מסביב, ולכן במקרה הזה הרקע לבן והתמונה
+          // ממלאת את המסגרת.
+          className={`relative flex justify-center cursor-pointer w-full h-20 sm:h-24 ${hasImage ? "bg-white" : "bg-mainColor-superLight"
+            }`}
         >
-          <div className="relative w-full h-full p-3 sm:p-4">
+          <div className={`relative w-full h-full ${hasImage ? "p-1" : "p-3 sm:p-4"}`}>
             <ImageWithFallback
-              src={product.image[0]}
+              // ‎product.image[0] הישיר קורס אם השדה חסר לגמרי; הסכימה אמנם
+              // מבטיחה מערך, אבל מסמך שנוצר מחוץ למודל אינו מחויב לה
+              src={Array.isArray(product?.image) ? product.image[0] : product?.image}
               outOfStock={product.stock <= 0}
               alt="product"
               card={true}
@@ -143,7 +161,10 @@ const ProductCard = ({ product, attributes, offers = [] }) => {
                 {product.unit}
               </span>
             )}
-            <h2 className="text-heading mb-0 block text-sm sm:text-[15px] font-semibold text-gray-800 leading-snug min-h-[2.5rem] sm:min-h-[2.75rem]">
+            {/* min-h שומר על שתי שורות גם לשם קצר, כדי ששורת המחיר תתחיל
+                באותו גובה בכל הכרטיסים. בערכי rem (‎1rem=19.2px כאן) 2rem הם
+                כ-38px — בדיוק שתי שורות של leading-snug בגודל הזה. */}
+            <h2 className="text-heading mb-0 block text-sm sm:text-[15px] font-semibold text-gray-800 leading-snug min-h-[2rem] sm:min-h-[2.25rem]">
               <span className="line-clamp-2">
                 {showingTranslateValue(product?.title)}
               </span>

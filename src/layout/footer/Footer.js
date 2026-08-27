@@ -306,7 +306,10 @@ const Footer = () => {
                     "/logo/logo-color.svg"
                   }
                   alt="logo"
-                  className="sm:w-2/3 w-1/2 aspect-square object-contain"
+                  // ‎aspect-square הוסר: הלוגו הוא נעילה אופקית ביחס 5.47:1,
+                  // ובתוך תיבה ריבועית עם object-contain הוא צויר בכ-18% מגובהה
+                  // ונראה זעיר בתוך שטח ריק. עכשיו הגובה נגזר מהרוחב לפי היחס.
+                  className="sm:w-2/3 w-1/2 h-auto object-contain"
                 />
               </Link>
               <p className="leading-7 font-sans text-sm text-gray-600 mt-3">

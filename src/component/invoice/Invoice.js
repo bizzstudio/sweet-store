@@ -78,7 +78,9 @@ const Invoice = ({ data, printRef, globalSetting, currency }) => {
                   // src="/logo/logo-color.svg"
                   src={storeCustomizationSetting?.navbar?.logo}
                   alt="logo"
-                  className="-mx-1.5"
+                  // ‎h-auto: המידות 190x40 הן יחס 4.75:1 בעוד הלוגו הוא 5.47:1,
+                  // ובלי זה הדפדפן מותח אותו אנכית ב-15% על גבי חשבונית ללקוח
+                  className="-mx-1.5 h-auto object-contain"
                 />
               </Link>
             </h2>

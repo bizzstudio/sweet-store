@@ -90,18 +90,28 @@ const Home = ({ popularProducts, discountProducts, attributes, blogs, totalBlogs
             <div className="min-h-screen w-full max-w-full overflow-hidden">
               <div className="bg-white">
                 <div className="mx-auto sm:py-5 max-w-screen-2x1 px-3 sm:px-10">
+                  {/* פאנל המבצעים מוצג רק כשיש מה להציג בו. OfferCard מרנדר את
+                      הכותרת "מבצעים אחרונים" גם ברשימה ריקה, וכשאין בקטלוג אף
+                      מוצר בהנחה התוצאה הייתה קופסה ריקה לצד הקרוסלה. במצב הזה
+                      הקרוסלה מקבלת את מלוא הרוחב במקום שישית ריקה. */}
                   <div className="flex flex-col lg:flex-row gap-6 mx-auto py-5 max-w-screen-2xl px-3 sm:px-10">
-                    <div ref={carouselRef} className="flex-shrink-0 lg:block w-full lg:w-3/5 h-fit">
+                    <div
+                      ref={carouselRef}
+                      className={`flex-shrink-0 lg:block h-fit w-full ${discountProducts?.length > 0 ? "lg:w-3/5" : "lg:w-full"
+                        }`}
+                    >
                       <MainCarousel />
                     </div>
-                    <div className="w-full hidden lg:flex">
-                      <OfferCard
-                        discountProducts={discountProducts}
-                        // קבלת הגובה של הבאנר המתחלף (קרוסלה)
-                        height={carouselHeight}
-                        attributes={attributes}
-                      />
-                    </div>
+                    {discountProducts?.length > 0 && (
+                      <div className="w-full hidden lg:flex">
+                        <OfferCard
+                          discountProducts={discountProducts}
+                          // קבלת הגובה של הבאנר המתחלף (קרוסלה)
+                          height={carouselHeight}
+                          attributes={attributes}
+                        />
+                      </div>
+                    )}
                   </div>
                   {storeCustomizationSetting?.home?.promotion_banner_status && (
                     <div className="bg-gray-100 px-10 py-6 mt-6">
