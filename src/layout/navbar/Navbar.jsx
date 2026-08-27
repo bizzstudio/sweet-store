@@ -106,11 +106,16 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
     }
   }, []);
 
-  // מדידת גובה הNavbar והגדרת גובה הלוגו
+  // מדידת גובה הNavbar והגדרת גובה הלוגו.
+  //
+  // קודם הלוגו נמתח ל-135% מגובה הסרגל וחרג ממנו כלפי מטה. עם הלוגו החדש
+  // (יחס 5.47:1 במקום 4.2:1) זה הפך אותו לרצועה שבולעת את ההידר ודוחקת את
+  // שורת החיפוש. עכשיו הוא ממורכז אנכית ותופס כמחצית מגובה הסרגל — יחס
+  // שמשאיר לחיפוש את הרוחב שלו ונשאר קריא גם בנייד.
   const updateLogoDimensions = useCallback(() => {
     if (navbarRef.current) {
       const navbarHeight = navbarRef.current.offsetHeight;
-      setLogoHeight(navbarHeight * 1.35);
+      setLogoHeight(Math.max(30, Math.round(navbarHeight * 0.5)));
     }
     if (logoRef.current) {
       const width = logoRef.current.offsetWidth;
@@ -153,7 +158,7 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
           ref={navbarRef}
           className={`${disableSticky ? "relative" : "sticky top-0"} z-20 bg-white flex xl:flex-row w-full drop-shadow-lg ${cashierPage ? "border-b" : ""}`}
         >
-          {/* logo - בצד ימין, בגובה 1.3 כפול מה-navbar כך שהחלק התחתון חורג */}
+          {/* logo - בצד ימין, ממורכז אנכית בתוך ה-navbar */}
           <Link
             ref={logoRef}
             href={
@@ -163,20 +168,23 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
                   ? CLOSED_HOME
                   : "/"
             }
-            className="absolute right-0 top-0 flex items-start overflow-visible pointer-events-auto z-10"
-            // תקרת רוחב: לוגו הטקסט רחב פי ~4 מגובהו, ובלעדיה הוא בלע במסך
+            className="absolute right-0 top-0 h-full flex items-center px-3 sm:px-5 pointer-events-auto z-10"
+            // תקרת רוחב: הלוגו רחב פי ~5.5 מגובהו, ובלעדיה הוא בלע במסך
             // צר כמעט את כל ההידר והשאיר לשורת החיפוש כמה עשרות פיקסלים
-            style={{ height: logoHeight ? `${logoHeight}px` : '130%', maxWidth: '45%' }}
+            style={{ maxWidth: "40%" }}
           >
             <Image
-              width={160}
-              height={160}
+              width={328}
+              height={60}
               src={storeCustomizationSetting?.navbar?.logo}
               alt="logo"
               priority
-              sizes="160px"
-              className="h-full w-auto max-w-full object-contain"
-              style={{ objectPosition: 'center top' }}
+              sizes="(max-width: 640px) 40vw, 328px"
+              // maxHeight ולא height: כשתקרת הרוחב (40%) נכנסת לפעולה במסך צר,
+              // גובה קשיח היה משאיר רצועות ריקות מעל ומתחת ללוגו במקום להקטין
+              // אותו. שתי התקרות יחד שומרות על היחס בכל רוחב מסך.
+              className="w-auto max-w-full h-auto object-contain"
+              style={{ maxHeight: logoHeight ? `${logoHeight}px` : undefined }}
               // מדידה מחדש ברגע שהתמונה נטענה: עד אז רוחב הלוגו הוא 0 ושורת
               // החיפוש מקבלת רוחב שגוי. הטיימרים לבדם לא מכסים טעינה איטית
               onLoad={updateLogoDimensions}
@@ -373,7 +381,7 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
             כשהחנות סגורה אין גלישה בקטגוריות ולכן הפס יורד לגמרי */}
         {!cashierPage && !STORE_CLOSED && (
           <div className="block w-full">
-            <NavbarPromo logoHeight={logoHeight} />
+            <NavbarPromo />
           </div>
         )}
       </>

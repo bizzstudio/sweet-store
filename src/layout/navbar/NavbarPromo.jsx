@@ -15,7 +15,14 @@ import useUtilsFunction from "@hooks/useUtilsFunction";
 import Image from "@component/common/Img";
 import LoginModal from "@component/modal/LoginModal";
 
-const NavbarPromo = ({ logoHeight }) => {
+// גודל אייקון הקטגוריה. היה משוכפל שלוש פעמים במחרוזת אחת ארוכה (ולכן גם
+// התיישן בשלושה מקומות שונים), והיה גדול מדי — 67px בדסקטופ, כך שסרגל של חמש
+// קטגוריות תפס גובה של באנר. ‎object-contain ולא object-cover: אלה אייקונים,
+// ו-cover חותך אותם כשהיחס אינו ריבועי בדיוק.
+const CATEGORY_ICON_CLASS =
+  "object-contain shrink-0 2xl:w-[46px] 2xl:h-[46px] xl:w-[42px] xl:h-[42px] lg:w-[38px] lg:h-[38px] md:w-[34px] md:h-[34px] sm:w-[32px] sm:h-[32px] w-[30px] h-[30px]";
+
+const NavbarPromo = () => {
   const [LoginModalOpen, setLoginModalOpen] = useState(false);
   const [activePopover, setActivePopover] = useState(null);
   const { storeCustomizationSetting } = useGetSetting();
@@ -159,8 +166,11 @@ const NavbarPromo = ({ logoHeight }) => {
       )}
 
       <div className={`${asPath === "/" ? "bg-mainColor-superLight" : "bg-white"} w-full relative`}>
-        <div className="relative w-full sm:ps-20 md:pe-3 md:pt-2 md:pb-1 flex justify-center lg:justify-between items-center"
-        style={{ paddingRight: logoHeight > 0 ? `${logoHeight}px` : '180px' }}>
+        {/* אין יותר paddingRight לפי גובה הלוגו: הלוגו היה נמתח ל-135% מגובה
+            ה-navbar וגלש אל תוך הפס הזה, ולכן הפס נאלץ לפנות לו מקום. מאז
+            שהלוגו ממורכז בתוך ה-navbar אין גלישה, והריפוד רק דחף את הקטגוריות
+            הצידה ומנע מהן להתמרכז. */}
+        <div className="relative w-full px-3 sm:px-6 md:pt-2 md:pb-1 flex justify-center lg:justify-between items-center">
           {/* קונטיינר גלילה אמיתי */}
           <div className="w-full relative md:pt-2 pt-3 pb-1">
             {/* חץ שמאלה (צד שמאל של המסך) – גולל שמאלה */}
@@ -236,7 +246,7 @@ const NavbarPromo = ({ logoHeight }) => {
                               width={130}
                               height={130}
                               alt="Category"
-                              className="object-cover shrink-0 2xl:w-[67px] 2xl:h-[67px] xl:w-[60px] xl:h-[60px] lg:w-[54px] lg:h-[54px] md:w-[46px] md:h-[46px] sm:w-[40px] sm:h-[40px] w-[38px] h-[38px]"
+                              className={CATEGORY_ICON_CLASS}
                             />
                           ) : (
                             <Image
@@ -244,7 +254,7 @@ const NavbarPromo = ({ logoHeight }) => {
                               width={130}
                               height={130}
                               alt="Category"
-                              className="object-cover shrink-0 2xl:w-[67px] 2xl:h-[67px] xl:w-[60px] xl:h-[60px] lg:w-[54px] lg:h-[54px] md:w-[46px] md:h-[46px] sm:w-[40px] sm:h-[40px] w-[38px] h-[38px] opacity-90"
+                              className={`${CATEGORY_ICON_CLASS} opacity-90`}
                             />
                           )
                         ) : (
@@ -253,12 +263,12 @@ const NavbarPromo = ({ logoHeight }) => {
                             width={400}
                             height={400}
                             alt="category"
-                            className="object-cover shrink-0 2xl:w-[67px] 2xl:h-[67px] xl:w-[60px] xl:h-[60px] lg:w-[54px] lg:h-[54px] md:w-[46px] md:h-[46px] sm:w-[40px] sm:h-[40px] w-[38px] h-[38px]"
+                            className={CATEGORY_ICON_CLASS}
                           />
                         )}
 
                         <div
-                          className={`inline-flex items-center justify-center text-center 2xl:text-[20px] xl:text-[18px] lg:text-[18px] md:text-[16px] sm:text-[16px] text-[15px] font-light w-full whitespace-nowrap ${selectedCategory == index ? "text-mainColor-dark" : ""
+                          className={`inline-flex items-center justify-center text-center 2xl:text-[15px] xl:text-[14px] lg:text-[14px] md:text-[13px] sm:text-[13px] text-[12px] font-medium w-full whitespace-nowrap ${selectedCategory == index ? "text-mainColor-dark" : ""
                             }`}
                         >
                           {title}

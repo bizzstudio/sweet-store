@@ -1,10 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <title>אין תמונה למוצר</title>
-  <rect width="512" height="512" fill="#f2fbf7" />
-  <g fill="none" stroke="#a5e5cb" stroke-width="20" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M256 128 400 196v120L256 384 112 316V196Z" />
-    <path d="M112 196l144 68 144-68" />
-    <path d="M256 264v120" />
-    <path d="M184 162l144 68" />
+  <!-- ללא רקע: אזור התמונה בכרטיס נותן את הגוון בעצמו, כך שהאייקון ממלא
+       את כל הרוחב ולא נראה כריבוע צף בתוך מלבן -->
+  <g fill="none" stroke="#bfe6d4" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M256 140 392 204v104L256 372 120 308V204Z" />
+    <path d="M120 204l136 64 136-64" />
+    <path d="M256 268v104" />
+    <path d="M188 172l136 64" />
   </g>
 </svg>

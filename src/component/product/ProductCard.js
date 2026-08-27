@@ -103,7 +103,9 @@ const ProductCard = ({ product, attributes, offers = [] }) => {
         />
       )}
 
-      <div className="group box-border overflow-hidden flex justify-between rounded-md shadow-md pe-0 flex-col items-center bg-white relative">
+      {/* כרטיס: מסגרת דקה + צל רך במקום צל כבד, והרמה קלה בריחוף.
+          בקטלוג שכולו כרטיסים זהים הצל הכבד יצר "רעש" על פני כל המסך. */}
+      <div className="group box-border overflow-hidden flex justify-between rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 pe-0 flex-col items-center bg-white relative">
         <div className="w-full flex justify-between">
           {/* אם אין מלאי למוצר מופיע אזל מהמלאי */}
           {/* {product.stock <= 0 && <Stock product={product} stock={product.stock} card right={"2"} top={"2"} />} */}
@@ -117,9 +119,12 @@ const ProductCard = ({ product, attributes, offers = [] }) => {
               `opened ${showingTranslateValue(product?.title)} product modal`
             );
           }}
-          className="relative flex justify-center cursor-pointer pt-1 sm:pt-2 w-full h-32 sm:h-44"
+          // אזור התמונה הוקטן מ-h-32/h-44: בקטלוג הזה לאף מוצר אין תמונה, ולכן
+          // הבלוק הזה היה חצי כרטיס של placeholder זהה, כפול אלפי כרטיסים.
+          // הרקע המרומז מגיע מכאן ולא מתוך ה-SVG, כדי שימלא את כל הרוחב.
+          className="relative flex justify-center cursor-pointer w-full h-24 sm:h-32 bg-mainColor-superLight"
         >
-          <div className="relative w-full h-full p-1 sm:p-2">
+          <div className="relative w-full h-full p-3 sm:p-4">
             <ImageWithFallback
               src={product.image[0]}
               outOfStock={product.stock <= 0}
@@ -128,19 +133,24 @@ const ProductCard = ({ product, attributes, offers = [] }) => {
             />
           </div>
         </div>
-        <div className="w-full px-2 sm:px-3 lg:px-4 pb-2 sm:pb-4 overflow-hidden">
-          <div className="relative mb-1.5 sm:mb-1">
-            <span className="text-gray-400 font-medium text-[10px] sm:text-xs d-block mb-0.5 sm:mb-1">
-              {product.unit}
-            </span>
-            <h2 className="text-heading mb-0 block text-sm sm:text-base font-medium text-gray-600">
+        <div className="w-full px-2.5 sm:px-3.5 pt-2.5 pb-2.5 sm:pb-3.5 overflow-hidden flex flex-col flex-grow">
+          {/* השם הוא המידע היחיד שיש למוצרי הקטלוג הזה (אין תמונות), ולכן הוא
+              מקבל את הבכורה: כהה וכבד יותר מקודם. ה-min-h שומר על גובה אחיד
+              בין כרטיס עם שם בשורה אחת לכרטיס עם שתיים, כדי שהגריד לא ישתנשן. */}
+          <div className="relative mb-2">
+            {product.unit && (
+              <span className="text-gray-400 font-medium text-[10px] sm:text-xs block mb-0.5">
+                {product.unit}
+              </span>
+            )}
+            <h2 className="text-heading mb-0 block text-sm sm:text-[15px] font-semibold text-gray-800 leading-snug min-h-[2.5rem] sm:min-h-[2.75rem]">
               <span className="line-clamp-2">
                 {showingTranslateValue(product?.title)}
               </span>
             </h2>
           </div>
 
-          <div className="flex flex-row justify-between items-center gap-2 text-heading text-xs sm:text-base space-s-2 md:text-base lg:text-xl">
+          <div className="mt-auto flex flex-row justify-between items-center gap-2 text-heading text-xs sm:text-base space-s-2 md:text-base lg:text-xl">
             <Price
               card
               product={product}
