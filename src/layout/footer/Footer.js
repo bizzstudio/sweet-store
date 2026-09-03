@@ -31,7 +31,10 @@ const Footer = () => {
   // console.log("storeCustomizationSetting?.footer: ", storeCustomizationSetting?.footer)
 
   return (
-    <div className="pb-16 lg:pb-0 xl:pb-0 bg-white">
+    // ‎<footer> ולא ‎<div>: זהו אזור ה-contentinfo של העמוד — פרטי החנות,
+    // קישורי המדיניות והרשתות החברתיות. עד עכשיו לא היה באתר אף אזור כזה,
+    // ולכן קורא מסך לא יכול היה לקפוץ לתחתית העמוד ישירות.
+    <footer className="pb-16 lg:pb-0 xl:pb-0 bg-white">
       <div className="mx-auto max-w-screen-2xl px-4 sm:px-10">
         <div className="grid grid-cols-2 md:grid-cols-7 xl:grid-cols-12 gap-5 sm:gap-9 lg:gap-11 xl:gap-7 py-10 lg:py-16 justify-between">
           {storeCustomizationSetting?.footer?.block1_status && (
@@ -49,7 +52,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <Link
                     href={`${storeCustomizationSetting?.footer?.block1_sub_link1}`}
-                    className="text-gray-600 inline-block w-full hover:text-mainColor"
+                    className="text-gray-600 inline-block w-full hover:text-mainColor-dark"
                   >
                     <CMSkeleton
                       count={1}
@@ -65,7 +68,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <Link
                     href={`${storeCustomizationSetting?.footer?.block1_sub_link2}`}
-                    className="text-gray-600 inline-block w-full hover:text-mainColor"
+                    className="text-gray-600 inline-block w-full hover:text-mainColor-dark"
                   >
                     <CMSkeleton
                       count={1}
@@ -81,7 +84,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <Link
                     href={`${storeCustomizationSetting?.footer?.block1_sub_link3}`}
-                    className="text-gray-600 inline-block w-full hover:text-mainColor"
+                    className="text-gray-600 inline-block w-full hover:text-mainColor-dark"
                   >
                     {showingTranslateValue(
                       storeCustomizationSetting?.footer_block_one_link_three_title
@@ -100,7 +103,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <Link
                     href={`${storeCustomizationSetting?.footer?.block1_sub_link4}`}
-                    className="text-gray-600 inline-block w-full hover:text-mainColor"
+                    className="text-gray-600 inline-block w-full hover:text-mainColor-dark"
                   >
                     <CMSkeleton
                       count={1}
@@ -131,7 +134,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <Link
                     href={`${storeCustomizationSetting?.footer?.block2_sub_link1}`}
-                    className="text-gray-600 inline-block w-full hover:text-mainColor"
+                    className="text-gray-600 inline-block w-full hover:text-mainColor-dark"
                   >
                     <CMSkeleton
                       count={1}
@@ -148,7 +151,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <Link
                     href={`${storeCustomizationSetting?.footer?.block2_sub_link2}`}
-                    className="text-gray-600 inline-block w-full hover:text-mainColor"
+                    className="text-gray-600 inline-block w-full hover:text-mainColor-dark"
                   >
                     <CMSkeleton
                       count={1}
@@ -164,7 +167,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <Link
                     href={`${storeCustomizationSetting?.footer?.block2_sub_link3}`}
-                    className="text-gray-600 inline-block w-full hover:text-mainColor"
+                    className="text-gray-600 inline-block w-full hover:text-mainColor-dark"
                   >
                     <CMSkeleton
                       count={1}
@@ -180,7 +183,7 @@ const Footer = () => {
                 <li className="flex items-baseline">
                   <Link
                     href={`${storeCustomizationSetting?.footer?.block2_sub_link4}`}
-                    className="text-gray-600 inline-block w-full hover:text-mainColor"
+                    className="text-gray-600 inline-block w-full hover:text-mainColor-dark"
                   >
                     <CMSkeleton
                       count={1}
@@ -215,7 +218,7 @@ const Footer = () => {
                       storeCustomizationSetting?.footer?.block3_sub_link1
                       // : "#"
                       }`}
-                    className="text-gray-600 inline-block w-full hover:text-mainColor"
+                    className="text-gray-600 inline-block w-full hover:text-mainColor-dark"
                   >
                     <CMSkeleton
                       count={1}
@@ -235,7 +238,7 @@ const Footer = () => {
                       storeCustomizationSetting?.footer?.block3_sub_link2
                       // : "#"
                       }`}
-                    className="text-gray-600 inline-block w-full hover:text-mainColor"
+                    className="text-gray-600 inline-block w-full hover:text-mainColor-dark"
                   >
                     <CMSkeleton
                       count={1}
@@ -255,7 +258,7 @@ const Footer = () => {
                       storeCustomizationSetting?.footer?.block3_sub_link3
                       // : "#"
                       }`}
-                    className="text-gray-600 inline-block w-full hover:text-mainColor"
+                    className="text-gray-600 inline-block w-full hover:text-mainColor-dark"
                   >
                     <CMSkeleton
                       count={1}
@@ -275,7 +278,7 @@ const Footer = () => {
                       storeCustomizationSetting?.footer?.block3_sub_link4
                       // : "#"
                       }`}
-                    className="text-gray-600 inline-block w-full hover:text-mainColor"
+                    className="text-gray-600 inline-block w-full hover:text-mainColor-dark"
                   >
                     <CMSkeleton
                       count={1}
@@ -299,8 +302,12 @@ const Footer = () => {
                 rel="noreferrer"
               >
                 <Image
+                  // המידות המוצהרות קובעות את התיבה שהדפדפן שומר לפני שהתמונה
+                  // נטענת (הלוגו כאן lazy, מתחת לקפל). 300x300 שמרו ריבוע
+                  // ואז התמונה כיווצה אותו לרצועה — קפיצת פריסה של ~150px.
+                  // 300x55 הוא היחס האמיתי של הנעילה (5.47:1).
                   width={300}
-                  height={300}
+                  height={55}
                   src={
                     storeCustomizationSetting?.footer?.block4_logo ||
                     "/logo/logo-color.svg"
@@ -356,7 +363,7 @@ const Footer = () => {
                       <li className="flex items-center transition ease-in-out duration-500">
                         <Link
                           href={`${storeCustomizationSetting?.footer?.social_facebook}`}
-                          aria-label="Social Link"
+                          aria-label={`פייסבוק – ${t("common:opensInNewWindow")}`}
                           rel="noreferrer"
                           target="_blank"
                           className="block text-center mx-auto text-gray-500 hover:text-white p-1"
@@ -369,7 +376,7 @@ const Footer = () => {
                       <li className="flex items-center transition ease-in-out duration-500">
                         <Link
                           href={`${storeCustomizationSetting?.footer?.social_twitter}`}
-                          aria-label="Social Link"
+                          aria-label={`X (טוויטר) – ${t("common:opensInNewWindow")}`}
                           rel="noreferrer"
                           target="_blank"
                           className="block text-center mx-auto text-gray-500 hover:text-white p-1"
@@ -382,7 +389,7 @@ const Footer = () => {
                       <li className="flex items-center transition ease-in-out duration-500">
                         <Link
                           href={`${storeCustomizationSetting?.footer?.social_pinterest}`}
-                          aria-label="Social Link"
+                          aria-label={`פינטרסט – ${t("common:opensInNewWindow")}`}
                           rel="noreferrer"
                           target="_blank"
                           className="block text-center mx-auto text-gray-500 hover:text-white p-1"
@@ -395,7 +402,7 @@ const Footer = () => {
                       <li className="flex items-center transition ease-in-out duration-500">
                         <Link
                           href={`${storeCustomizationSetting?.footer?.social_linkedin}`}
-                          aria-label="Social Link"
+                          aria-label={`לינקדאין – ${t("common:opensInNewWindow")}`}
                           rel="noreferrer"
                           target="_blank"
                           className="block text-center mx-auto text-gray-500 hover:text-white p-1"
@@ -408,7 +415,7 @@ const Footer = () => {
                       <li className="flex items-center transition ease-in-out duration-500">
                         <Link
                           href={`${storeCustomizationSetting?.footer?.social_whatsapp}`}
-                          aria-label="Social Link"
+                          aria-label={`וואטסאפ – ${t("common:opensInNewWindow")}`}
                           rel="noreferrer"
                           target="_blank"
                           className="block text-center mx-auto text-gray-500 hover:text-white p-1"
@@ -488,7 +495,7 @@ const Footer = () => {
         </div>
       </div>
 
-    </div>
+    </footer>
   );
 };
 

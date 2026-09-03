@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { FiPlus, FiMinus, FiTrash2 } from "react-icons/fi";
 import Cookies from "js-cookie";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const VoiceSearchItem = ({ item, currency, onQuantityChange, onRemove }) => {
     const router = useRouter();
@@ -64,11 +65,14 @@ const VoiceSearchItem = ({ item, currency, onQuantityChange, onRemove }) => {
                 </div>
 
                 <div className="flex items-center justify-between gap-1">
+                    {/* חנות ללא מחירים — ראה src/utils/priceVisibility.js */}
                     <div className="font-bold text-sm md:text-base text-heading leading-5">
-                        <span>
-                            {currency}
-                            {totalPrice.toFixed(2)}
-                        </span>
+                        {!HIDE_PRICES && (
+                            <span>
+                                {currency}
+                                {totalPrice.toFixed(2)}
+                            </span>
+                        )}
                     </div>
 
                     <div className="flex gap-2 flex-row-reverse mt-auto">
@@ -98,7 +102,7 @@ const VoiceSearchItem = ({ item, currency, onQuantityChange, onRemove }) => {
                         <button
                             type="button"
                             onClick={handleRemove}
-                            className="hover:text-red-600 text-red-400 text-lg cursor-pointer"
+                            className="hover:text-red-600 text-red-600 text-lg cursor-pointer"
                         >
                             <FiTrash2 />
                         </button>

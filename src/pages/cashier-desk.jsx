@@ -18,6 +18,7 @@ import CashierVoicePanel from "@component/voice-search/CashierVoicePanel";
 import CustomerNameVoiceInput from "@component/voice-search/CustomerNameVoiceInput";
 import MissingProductsModal from "@component/modal/MissingProductsModal";
 import PriceUpdatedModal from "@component/modal/PriceUpdatedModal";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 import MainModal from "@component/modal/MainModal";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 import useGetSetting from "@hooks/useGetSetting";
@@ -195,7 +196,7 @@ const CashierDesk = () => {
 
                                     <div className="lg:col-span-5 mt-6 lg:mt-0 md:hidden block">
                                         <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-[150px]">
-                                            <h2 className="text-xl font-semibold text-blackmb-4 flex items-center">
+                                            <h2 className="text-xl font-semibold text-black mb-4 flex items-center">
                                                 <IoBagHandle className="ml-2" />
                                                 {t("common:orderSummary")}
                                             </h2>
@@ -204,7 +205,7 @@ const CashierDesk = () => {
                                             <div className="space-y-3 max-h-80 overflow-y-auto">
                                                 {isEmpty ? (
                                                     <div className="text-center py-8 text-gray-500">
-                                                        <IoBagHandle className="mx-auto w-12 h-12 mb-3 text-gray-300" />
+                                                        <IoBagHandle className="mx-auto w-12 h-12 mb-3 text-gray-400" />
                                                         <p>{t("common:noProductsInCart")}</p>
                                                         <p className="text-sm mt-1">{t("common:useVoiceToAddProducts")}</p>
                                                     </div>
@@ -217,7 +218,9 @@ const CashierDesk = () => {
 
                                             {!isEmpty && (
                                                 <>
-                                                    {/* חישוב מחירים */}
+                                                    {/* חישוב מחירים — יורד כולו בחנות ללא מחירים.
+                                                        ראה src/utils/priceVisibility.js */}
+                                                    {!HIDE_PRICES && (
                                                     <div className="border-t border-gray-200 mt-4 pt-4 space-y-2">
                                                         <div className="flex justify-between text-sm">
                                                             <span>{t("common:productsTotal")}:</span>
@@ -236,6 +239,7 @@ const CashierDesk = () => {
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    )}
 
                                                     {/* כפתור יצירת הזמנה */}
                                                     <button
@@ -272,7 +276,7 @@ const CashierDesk = () => {
 
                                     {/* פרטי הלקוח */}
                                     <div className="bg-white p-6 border border-gray-200 rounded-lg">
-                                        <h2 className="text-xl font-semibold text-blackmb-4">
+                                        <h2 className="text-xl font-semibold text-black mb-4">
                                             {t("common:customerDetails")}
                                         </h2>
 
@@ -305,7 +309,7 @@ const CashierDesk = () => {
 
                                     {/* קופון הנחה */}
                                     {/* <div className="bg-white p-6 border border-gray-200 rounded-lg">
-                                        <h2 className="text-xl font-semibold text-blackmb-4">
+                                        <h2 className="text-xl font-semibold text-black mb-4">
                                             {t("common:discountCoupon")}
                                         </h2>
                                         {couponInfo.couponCode ? (
@@ -348,7 +352,7 @@ const CashierDesk = () => {
                             {/* עמודת ימין - סיכום ההזמנה */}
                             <div className="lg:col-span-5 mt-6 lg:mt-0 md:block hidden">
                                 <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-[150px]">
-                                    <h2 className="text-xl font-semibold text-blackmb-4 flex items-center">
+                                    <h2 className="text-xl font-semibold text-black mb-4 flex items-center">
                                         <IoBagHandle className="ml-2" />
                                         {t("common:orderSummary")}
                                     </h2>
@@ -357,7 +361,7 @@ const CashierDesk = () => {
                                     <div className="space-y-3 max-h-80 overflow-y-auto">
                                         {isEmpty ? (
                                             <div className="text-center py-8 text-gray-500">
-                                                <IoBagHandle className="mx-auto w-12 h-12 mb-3 text-gray-300" />
+                                                <IoBagHandle className="mx-auto w-12 h-12 mb-3 text-gray-400" />
                                                 <p>{t("common:noProductsInCart")}</p>
                                                 <p className="text-sm mt-1">{t("common:useVoiceToAddProducts")}</p>
                                             </div>
@@ -370,7 +374,9 @@ const CashierDesk = () => {
 
                                     {!isEmpty && (
                                         <>
-                                            {/* חישוב מחירים */}
+                                            {/* חישוב מחירים — יורד כולו בחנות ללא מחירים.
+                                                ראה src/utils/priceVisibility.js */}
+                                            {!HIDE_PRICES && (
                                             <div className="border-t border-gray-200 mt-4 pt-4 space-y-2">
                                                 <div className="flex justify-between text-sm">
                                                     <span>{t("common:productsTotal")}:</span>
@@ -389,6 +395,7 @@ const CashierDesk = () => {
                                                     </div>
                                                 </div>
                                             </div>
+                                            )}
 
                                             {/* כפתור יצירת הזמנה */}
                                             <button

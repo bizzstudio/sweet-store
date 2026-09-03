@@ -24,7 +24,7 @@ const CheckoutCard = ({ item }) => {
             <span className="text-sm font-medium text-gray-700 text-heading line-clamp-1">
               {item?.title?.substring(0, 5)}
             </span>
-            <span className="text-xs text-gray-400 mb-2">
+            <span className="text-xs text-gray-500 mb-2">
               Item Price{currency}
               {item.price}
             </span>

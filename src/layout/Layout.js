@@ -4,6 +4,7 @@ import Head from "next/head";
 import { ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
+import useTranslation from "next-translate/useTranslation";
 
 // Internal import
 import Navbar from "@layout/navbar/Navbar";
@@ -36,6 +37,7 @@ import WelcomeGiftManager from "@component/welcome-gift/WelcomeGiftManager";
 import { STORE_CLOSED } from "@utils/storeMode";
 
 const Layout = ({ title, description, children, cashierPage = false }) => {
+  const { t } = useTranslation();
 
   const { state: { userInfo }, dispatch } = useContext(UserContext);
 
@@ -259,6 +261,14 @@ const Layout = ({ title, description, children, cashierPage = false }) => {
       )}
 
       <div className="font-sans">
+        {/* דילוג על הניווט — הרכיב הראשון בסדר ה-Tab בכל עמוד. בלעדיו משתמש
+            מקלדת חייב לעבור את פס המשלוח, הלוגו, החיפוש, התפריט וכל פס
+            הקטגוריות (עשרות עצירות) לפני שהוא מגיע לתוכן העמוד. */}
+        {!cashierPage && (
+          <a href="#main-content" className="skip-to-content">
+            {t("common:skipToContent")}
+          </a>
+        )}
         <Head>
           <title>
             {title
@@ -280,10 +290,18 @@ const Layout = ({ title, description, children, cashierPage = false }) => {
             <Navbar cashierPage={cashierPage} disableSticky />
           </div>
         )}
-        <div className="bg-mainColor-superLight min-h-[calc(100vh-127px)]">
+        {/* ‎<main> ולא ‎<div>: אזור ציון (landmark) שקוראי מסך מנווטים אליו
+            ישירות, וגם יעד הקישור "דלג לתוכן". ‎tabIndex={-1} מאפשר לקבל
+            פוקוס תכנותית אחרי הדילוג בלי להוסיף עצירת Tab משלו. */}
+        <main
+          id="main-content"
+          tabIndex={-1}
+          data-skip-target
+          className="bg-mainColor-superLight min-h-[calc(100vh-127px)]"
+        >
           {!storeUiOff && <StickyCart />}
           {children}
-        </div>
+        </main>
         {!storeUiOff && !cashierPage && <MobileFooter />}
         {!cashierPage &&
           <div className="w-full max-w-full overflow-hidden">

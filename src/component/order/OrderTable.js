@@ -1,6 +1,7 @@
 import useUtilsFunction from "@hooks/useUtilsFunction";
 import Cookies from "js-cookie";
 import React from "react";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const OrderTable = ({ data, currency }) => {
   const { getNumberTwo } = useUtilsFunction();
@@ -32,15 +33,21 @@ const OrderTable = ({ data, currency }) => {
           <td className="px-6 py-1 whitespace-nowrap font-bold text-center">
             {item.quantity}{" "}
           </td>
-          <td className="px-6 py-1 whitespace-nowrap font-bold text-center font-DejaVu">
-            {currency}
-            {getNumberTwo(item.discountedPrice ? item.discountedPrice / item.quantity : item.itemTotal / item.quantity)}
-          </td>
+          {/* חנות ללא מחירים — שתי עמודות המחיר יורדות יחד עם הכותרות
+              שלהן ב-Invoice.js. ראה src/utils/priceVisibility.js */}
+          {!HIDE_PRICES && (
+            <>
+              <td className="px-6 py-1 whitespace-nowrap font-bold text-center font-DejaVu">
+                {currency}
+                {getNumberTwo(item.discountedPrice ? item.discountedPrice / item.quantity : item.itemTotal / item.quantity)}
+              </td>
 
-          <td className="px-6 py-1 whitespace-nowrap text-right font-bold font-DejaVu k-grid text-red-500">
-            {currency}
-            {getNumberTwo(item.discountedPrice ? item.discountedPrice : item.itemTotal)}         
-          </td>
+              <td className="px-6 py-1 whitespace-nowrap text-right font-bold font-DejaVu k-grid text-red-500">
+                {currency}
+                {getNumberTwo(item.discountedPrice ? item.discountedPrice : item.itemTotal)}
+              </td>
+            </>
+          )}
         </tr>
       ))}
     </tbody>

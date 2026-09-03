@@ -38,7 +38,7 @@ function ActiveLotteryContent({ lottery, onClose }) {
       <p className="text-base text-gray-700 leading-relaxed">
         כל הזמנה שתבצעו בתקופה זו מהווה כרטיס הגרלה.
         <br />
-        <span className="font-bold text-mainColor">
+        <span className="font-bold text-mainColor-dark">
           הזוכה יקבל החזר מלא על סכום ההזמנה שלו!
         </span>
       </p>
@@ -66,14 +66,14 @@ function WinnerLotteryContent({ lottery, onClose }) {
           <p className="text-sm text-gray-500 mb-0.5">הזוכה הוא</p>
           <p className="text-2xl font-bold text-mainColor">{lottery.winnerName}</p>
           {lottery.winnerInvoice && (
-            <p className="text-sm text-gray-400 mt-0.5">הזמנה #{lottery.winnerInvoice}</p>
+            <p className="text-sm text-gray-500 mt-0.5">הזמנה #{lottery.winnerInvoice}</p>
           )}
         </div>
       )}
       <p className="text-base text-gray-700 leading-relaxed">
         מזל טוב לזוכה! 🎉
         <br />
-        <span className="font-bold text-mainColor">
+        <span className="font-bold text-mainColor-dark">
           סכום ההזמנה יוחזר במלואו.
         </span>
       </p>

@@ -8,6 +8,7 @@ import useAsync from "@hooks/useAsync";
 import SettingServices from "@services/SettingServices";
 import useCart from "@hooks/useCart";
 import useGetSetting from "@hooks/useGetSetting";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 /**
  * פס משלוח חינם — מוצג לאורך כל האתר (מעל ה-Navbar).
@@ -29,6 +30,10 @@ const FreeShippingBar = () => {
 
     // הפס מוצג רק אם משלוח חינם מוגדר ופעיל
     if (!freeShippingStatus || !(threshold > 0)) return null;
+
+    // חנות ללא מחירים — כל תוכן הפס הוא סכומים ("עוד ₪X למשלוח חינם"),
+    // ולכן הוא יורד כולו. ראה src/utils/priceVisibility.js
+    if (HIDE_PRICES) return null;
 
     // חישוב סכום זכאות — עקבי עם checkout.jsx ו-useCheckoutSubmit:
     // סכום מוצרים − הנחת סף − הנחת קופון (קבוע/אחוז על הסכום שאחרי הסף).

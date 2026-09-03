@@ -102,10 +102,23 @@ export default function ResultWindow({ products = [], attributes, clearInput, cl
 
             <div
                 ref={resultRef}
+                id="search-results"
+                // ‎role="region" ולא ‎listbox: ‎listbox רשאי להכיל רק ‎option,
+                // וכאן יש כותרת, מכלים ו-*כפתורים* בתוך כל שורה — מבנה
+                // ש-ARIA אוסר בתוך ‎option. בנוסף ‎role="option" על ‎<a> מוחק
+                // את סמנטיקת הקישור ומחייב מודל מקלדת (חצים +
+                // ‎aria-activedescendant) שאינו ממומש כאן.
+                // אזור מסומן בשם + מונה חי נותן את אותה תועלת בלי לשבור דבר.
+                role="region"
+                aria-label={t("common:searchResultsRegion")}
                 className='fixed sm:absolute sm:top-10 top-16 left-1/2 sm:left-0 -translate-x-1/2 sm:translate-x-0 bg-white w-[90vw] sm:w-full lg:min-w-[585px] max-w-full shadow-xl overflow-hidden rounded-bl-lg rounded-br-lg z-10'
             >
                 <div className="p-1">
-                    <h2 className="text-right text-xl p-4">{visibleProducts.length} {t("common:itemsFound")}</h2>
+                    {/* ‎aria-live: מספר התוצאות משתנה תוך כדי הקלדה, וקורא מסך
+                        צריך לשמוע את העדכון בלי לעזוב את שדה החיפוש. */}
+                    <h2 className="text-right text-xl p-4" aria-live="polite" aria-atomic="true">
+                        {visibleProducts.length} {t("common:itemsFound")}
+                    </h2>
                     <div className="overflow-y-auto sm:max-h-[570px] max-h-[450px]">
                         {visibleProducts.slice(0, 10).map((product) => (
                             <Link
@@ -149,13 +162,14 @@ export default function ResultWindow({ products = [], attributes, clearInput, cl
                                                         >
                                                             <button
                                                                 type='button'
-                                                                className="sm:pl-1"
+                                                                aria-label={`${t("common:decreaseQuantity")} – ${showingTranslateValue(product?.title)}`}
+                                                                className="focus-ring-light px-2 py-1 flex items-center"
                                                                 onClick={() =>
                                                                     updateItemQuantity(item.id, item.quantity - 1)
                                                                 }
                                                             >
                                                                 <span className="text-dark text-base">
-                                                                    <IoRemove />
+                                                                    <IoRemove aria-hidden="true" />
                                                                 </span>
                                                             </button>
                                                             <p className="text-sm text-dark px-1 font-serif font-semibold">
@@ -163,7 +177,8 @@ export default function ResultWindow({ products = [], attributes, clearInput, cl
                                                             </p>
                                                             <button
                                                                 type='button'
-                                                                className="sm:pr-1"
+                                                                aria-label={`${t("common:increaseQuantity")} – ${showingTranslateValue(product?.title)}`}
+                                                                className="focus-ring-light px-2 py-1 flex items-center"
                                                                 onClick={() =>
                                                                     item?.variants?.length > 0
                                                                         ? handleModalOpen(product)
@@ -171,7 +186,7 @@ export default function ResultWindow({ products = [], attributes, clearInput, cl
                                                                 }
                                                             >
                                                                 <span className="text-dark text-base">
-                                                                    <IoAdd />
+                                                                    <IoAdd aria-hidden="true" />
                                                                 </span>
                                                             </button>
                                                         </div>
@@ -183,8 +198,9 @@ export default function ResultWindow({ products = [], attributes, clearInput, cl
                                                 <button
                                                     type='button'
                                                     onClick={() => handleModalOpen(product)}
-                                                    aria-label="options"
-                                                    className={product?.stock <= 0 ? "h-9 px-2 flex items-center justify-center border border-gray-200 rounded text-gray-400" : "h-9 px-2 flex items-center justify-center border border-gray-200 rounded text-mainColor-dark hover:bg-mainColor-dark hover:text-white transition-all"}
+                                                    aria-haspopup="dialog"
+                                                    aria-label={t("common:chooseOptionsFor", { name: showingTranslateValue(product?.title) })}
+                                                    className={product?.stock <= 0 ? "h-9 px-2 flex items-center justify-center border border-gray-200 rounded text-gray-500" : "h-9 px-2 flex items-center justify-center border border-gray-200 rounded text-mainColor-dark hover:bg-mainColor-dark hover:text-white transition-all"}
                                                 >
                                                     <span className="text-[10px]">
                                                         {t("common:options")}
@@ -194,11 +210,11 @@ export default function ResultWindow({ products = [], attributes, clearInput, cl
                                                 <button
                                                     type='button'
                                                     onClick={() => handleAddToCart(product)}
-                                                    aria-label="cart"
-                                                    className={product?.stock <= 0 ? "h-9 px-2 flex items-center justify-center border border-gray-200 rounded text-gray-400" : "h-9 px-2 flex items-center justify-center border border-gray-200 rounded text-mainColor-dark hover:bg-mainColor-dark hover:text-white transition-all"}
+                                                    aria-label={t("common:addProductToCart", { name: showingTranslateValue(product?.title) })}
+                                                    className={product?.stock <= 0 ? "h-9 px-2 flex items-center justify-center border border-gray-200 rounded text-gray-500" : "h-9 px-2 flex items-center justify-center border border-gray-200 rounded text-mainColor-dark hover:bg-mainColor-dark hover:text-white transition-all"}
                                                 >
                                                     <span className="text-2xl">
-                                                        <LiaCartPlusSolid />
+                                                        <LiaCartPlusSolid aria-hidden="true" />
                                                     </span>
                                                 </button>
                                             )
@@ -212,7 +228,7 @@ export default function ResultWindow({ products = [], attributes, clearInput, cl
                     {visibleProducts.length > 10 && (
                         <div className="text-center">
                             <button
-                                className="text-blackhover:underline"
+                                className="text-gray-900 font-semibold underline underline-offset-2 py-3 px-4 hover:text-mainColor-superDark"
                                 type='submit'
                             >
                                 {t("common:showAll")} ({visibleProducts.length})

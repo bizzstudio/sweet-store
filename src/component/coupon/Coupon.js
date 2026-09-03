@@ -9,6 +9,7 @@ import CouponServices from "@services/CouponServices";
 import OfferTimer from "@component/coupon/OfferTimer";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 import useTranslation from "next-translate/useTranslation";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const Coupon = ({ couponInHome }) => {
   const [copiedCode, setCopiedCode] = useState("");
@@ -51,16 +52,20 @@ const Coupon = ({ couponInHome }) => {
               </figure>
               <div className="ml-3">
                 <div className="flex items-center font-serif gap-0.5">
-                  <h6 className="pl-1 text-base font-medium text-gray-600">
-                    <span className="text-lg md:text-xl lg:text-xl text-red-500 font-bold">
-                      {coupon?.discountType?.type === "fixed" ? (
-                        <span>${coupon?.discountType?.value}</span>
-                      ) : (
-                        <span>{coupon?.discountType?.value}%</span>
-                      )}
-                    </span>{" "}
-                    {t("common:off")}
-                  </h6>
+                  {/* קופון בסכום קבוע מציג סכום כסף — יורד בחנות ללא מחירים.
+                      קופון באחוזים אינו מחיר ונשאר. ראה src/utils/priceVisibility.js */}
+                  {!(HIDE_PRICES && coupon?.discountType?.type === "fixed") && (
+                    <h6 className="pl-1 text-base font-medium text-gray-600">
+                      <span className="text-lg md:text-xl lg:text-xl text-red-500 font-bold">
+                        {coupon?.discountType?.type === "fixed" ? (
+                          <span>${coupon?.discountType?.value}</span>
+                        ) : (
+                          <span>{coupon?.discountType?.value}%</span>
+                        )}
+                      </span>{" "}
+                      {t("common:off")}
+                    </h6>
+                  )}
                   <div className="ml-2">
                     {dayjs().isAfter(dayjs(coupon.endTime)) ? (
                       <span className="text-red-600 inline-block px-4 py-1 rounded-full font-medium text-xs bg-red-100">
@@ -131,13 +136,15 @@ const Coupon = ({ couponInHome }) => {
                       </CopyToClipboard>
                     </div>
                   </div>
-                  <p className="text-xs leading-4 text-gray-500 mt-2 text-center">
-                    {t("common:OfferCard-description")}{" "}
-                    <span className="font-bold">
-                      {currency}
-                      {coupon.minimumAmount}
-                    </span>{" "}
-                  </p>
+                  {!HIDE_PRICES && (
+                    <p className="text-xs leading-4 text-gray-500 mt-2 text-center">
+                      {t("common:OfferCard-description")}{" "}
+                      <span className="font-bold">
+                        {currency}
+                        {coupon.minimumAmount}
+                      </span>{" "}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -191,16 +198,18 @@ const Coupon = ({ couponInHome }) => {
                 <h2 className="font-serif text-lg leading-6 font-medium mb-3">
                   {showingTranslateValue(coupon?.title)}
                 </h2>
-                <h2 className="pl-1 text-base font-medium text-gray-600">
-                  <span className="text-lg md:text-xl lg:text-xl text-red-500 font-bold">
-                    {coupon?.discountType?.type === "fixed" ? (
-                      <span>${coupon?.discountType?.value}</span>
-                    ) : (
-                      <span>{coupon?.discountType?.value}%</span>
-                    )}
-                  </span>{" "}
-                  {t("common:off")}
-                </h2>
+                {!(HIDE_PRICES && coupon?.discountType?.type === "fixed") && (
+                  <h2 className="pl-1 text-base font-medium text-gray-600">
+                    <span className="text-lg md:text-xl lg:text-xl text-red-500 font-bold">
+                      {coupon?.discountType?.type === "fixed" ? (
+                        <span>${coupon?.discountType?.value}</span>
+                      ) : (
+                        <span>{coupon?.discountType?.value}%</span>
+                      )}
+                    </span>{" "}
+                    {t("common:off")}
+                  </h2>
+                )}
               </div>
             </div>
             <div className="md:border-l-2 lg:border-l-2 border-dashed lg:w-1/3 md:w-1/3 relative px-6">
@@ -241,13 +250,15 @@ const Coupon = ({ couponInHome }) => {
                       </CopyToClipboard>
                     </div>
                   </div>
-                  <p className="text-xs leading-5 text-gray-500 mt-2 text-center">
-                    {t("common:OfferCard-description")}{" "}
-                    <span className="font-bold text-gray-700">
-                      {currency}
-                      {coupon.minimumAmount}
-                    </span>{" "}
-                  </p>
+                  {!HIDE_PRICES && (
+                    <p className="text-xs leading-5 text-gray-500 mt-2 text-center">
+                      {t("common:OfferCard-description")}{" "}
+                      <span className="font-bold text-gray-700">
+                        {currency}
+                        {coupon.minimumAmount}
+                      </span>{" "}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

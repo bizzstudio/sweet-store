@@ -157,7 +157,7 @@ const VoiceSearchModal = ({ modalOpen, setModalOpen, titleMessage }) => {
                         alt="Voice Search"
                         className="w-20 h-20 mb-4"
                     />
-                    <h2 className="text-2xl font-bold text-blacktext-center whitespace-pre-wrap">
+                    <h2 className="text-2xl font-bold text-black text-center whitespace-pre-wrap">
                         {titleMessage}
                     </h2>
                 </div>

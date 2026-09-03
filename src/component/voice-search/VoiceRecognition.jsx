@@ -229,7 +229,7 @@ const VoiceRecognition = ({
                 )}
 
                 {/* אינדיקטור האזנה / עיבוד */}
-                <div className="w-full flex justify-between items-stretch gap-3 p-2 pb-1 text-gray-400">
+                <div className="w-full flex justify-between items-stretch gap-3 p-2 pb-1 text-gray-500">
                     <div className={`flex items-center gap-[3px] ${isInitializing
                         ? 'animate-pulse'
                         : (isListening ? 'animate-pulse' : 'cursor-pointer')

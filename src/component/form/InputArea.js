@@ -56,8 +56,15 @@ const InputArea = ({
           id={name}
           dir={currentLang ? 'rtl' : 'ltr'}
           {...register(`${name}`, {
-            required: isRequired ? `${label} is required!` : false,
+            // ההודעה הייתה קבועה באנגלית ("... is required!") גם באתר עברי.
+            // ‎Error מתרגם רק שגיאות מסוג "required", ולכן כל הודעה אחרת
+            // הגיעה למסך כמות שהיא.
+            required: isRequired
+              ? (currentLang ? `נא למלא: ${label}` : `${label} is required!`)
+              : false,
           })}
+          // ‎aria-required מוכרז בכניסה לשדה, לפני שהמשתמש מנסה לשלוח
+          aria-required={isRequired || undefined}
           type={type}
           pattern={type === 'tel' ? '[0-9]*' : undefined} // אפשור של מספרים בלבד
           name={name}
@@ -70,8 +77,8 @@ const InputArea = ({
           }}
           className={
             Icon
-              ? "py-2 px-4 pl-10 w-full appearance-none border text-sm opacity-75 text-input rounded-md placeholder-body min-h-12 transition duration-200 focus:ring-0 ease-in-out bg-white border-gray-300 focus:outline-none focus:border-mainColor h-11 md:h-12 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              : "py-2 px-4 md:px-5 w-full appearance-none border text-sm opacity-75 text-input rounded-md placeholder-body min-h-12 transition duration-200 focus:ring-0 ease-in-out bg-white border-gray-300 focus:outline-none focus:border-mainColor h-11 md:h-12 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              ? "py-2 px-4 pl-10 w-full appearance-none border text-sm text-input rounded-md placeholder-body min-h-12 transition duration-200 focus:ring-0 ease-in-out bg-white border-gray-300 focus:outline-none focus:border-mainColor h-11 md:h-12 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              : "py-2 px-4 md:px-5 w-full appearance-none border text-sm text-input rounded-md placeholder-body min-h-12 transition duration-200 focus:ring-0 ease-in-out bg-white border-gray-300 focus:outline-none focus:border-mainColor h-11 md:h-12 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           }
         />
       </div>

@@ -13,6 +13,7 @@ import Cookies from "js-cookie";
 // ה-Image של react-pdf מוריד את הקובץ בעצמו מה-URL, ולכן — בניגוד ל-next/image —
 // הוא אינו מקבל את ה-basePath אוטומטית וחייב את asset().
 import { asset } from "@utils/basePath";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 Font.register({
   family: "Assistant",
@@ -95,6 +96,13 @@ const styles = StyleSheet.create({
     // borderTopWidth: 0.5,
     // borderBottomWidth: 0.5,
     // borderColor: '#d1d5db',
+  },
+  // בחנות ללא מחירים נותרות שלוש עמודות (מספר, שם, כמות) במקום חמש, ו-25%
+  // קבועים היו משאירים רבע עמוד ריק מימין לטבלה.
+  // ראה src/utils/priceVisibility.js
+  tableColNoPrices: {
+    width: "33.33%",
+    textAlign: "left",
   },
   tableCell: {
     margin: "auto",
@@ -268,6 +276,9 @@ const styles = StyleSheet.create({
   },
 });
 
+// רוחב עמודה יחיד לכל התאים שנשארים גלויים בשני המצבים, כדי ששורות הגוף
+// והכותרת יתיישרו זו לזו. ראה src/utils/priceVisibility.js
+const COL = HIDE_PRICES ? styles.tableColNoPrices : styles.tableCol;
 
 const InvoiceForDownload = ({
   data,
@@ -350,66 +361,76 @@ const InvoiceForDownload = ({
           </View>
           <View style={styles.table}>
             <View style={styles.tableRow}>
-              <View style={styles.tableCol}>
+              <View style={COL}>
                 <Text style={styles.tableCell}>
                   <Text style={styles.header}>Sr.</Text>
                 </Text>
               </View>
-              <View style={styles.tableCol}>
+              <View style={COL}>
                 <Text style={styles.tableCell}>
                   <Text style={styles.header}>Product Name</Text>
                 </Text>
               </View>
-              <View style={styles.tableCol}>
+              <View style={COL}>
                 <Text style={styles.tableCell}>
                   <Text style={styles.header}>Quantity</Text>
                 </Text>
               </View>
-              <View style={styles.tableCol}>
-                <Text style={styles.tableCell}>
-                  <Text style={styles.header}>Item Price</Text>
-                </Text>
-              </View>
+              {/* חנות ללא מחירים — שתי עמודות המחיר יורדות מה-PDF יחד עם
+                  התאים שלהן למטה. ראה src/utils/priceVisibility.js */}
+              {!HIDE_PRICES && (
+                <>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCell}>
+                      <Text style={styles.header}>Item Price</Text>
+                    </Text>
+                  </View>
 
-              <View style={styles.tableCol}>
-                <Text style={styles.tableCell}>
-                  {" "}
-                  <Text style={styles.header}>Amount</Text>
-                </Text>
-              </View>
+                  <View style={styles.tableCol}>
+                    <Text style={styles.tableCell}>
+                      {" "}
+                      <Text style={styles.header}>Amount</Text>
+                    </Text>
+                  </View>
+                </>
+              )}
             </View>
             {data?.cart?.map((item, i) => (
               <View key={i} style={styles.tableRow}>
-                <View style={styles.tableCol}>
+                <View style={COL}>
                   <Text style={styles.tableCell}>{i + 1} </Text>
                 </View>
-                <View style={styles.tableCol}>
+                <View style={COL}>
                   <Text style={styles.tableCell}>{currentLang ? item.title?.he : item.title?.en}</Text>
                 </View>
-                <View style={styles.tableCol}>
+                <View style={COL}>
                   <Text style={styles.tableCell}>
                     {" "}
                     <Text style={styles.quantity}>{item.quantity}</Text>{" "}
                   </Text>
                 </View>
-                <View style={styles.tableCol}>
-                  <Text style={styles.tableCell}>
-                    {" "}
-                    <Text style={styles.quantity}>
-                      {currency}
-                      {getNumberTwo(item.price)}
-                    </Text>{" "}
-                  </Text>
-                </View>
+                {!HIDE_PRICES && (
+                  <>
+                    <View style={styles.tableCol}>
+                      <Text style={styles.tableCell}>
+                        {" "}
+                        <Text style={styles.quantity}>
+                          {currency}
+                          {getNumberTwo(item.price)}
+                        </Text>{" "}
+                      </Text>
+                    </View>
 
-                <View style={styles.tableCol}>
-                  <Text style={styles.tableCell}>
-                    <Text style={styles.amount}>
-                      {currency}
-                      {getNumberTwo(item.itemTotal)}
-                    </Text>{" "}
-                  </Text>
-                </View>
+                    <View style={styles.tableCol}>
+                      <Text style={styles.tableCell}>
+                        <Text style={styles.amount}>
+                          {currency}
+                          {getNumberTwo(item.itemTotal)}
+                        </Text>{" "}
+                      </Text>
+                    </View>
+                  </>
+                )}
               </View>
             ))}
           </View>
@@ -419,29 +440,33 @@ const InvoiceForDownload = ({
               <Text style={styles.title}> Payment Method</Text>
               <Text style={styles.info}> {data.paymentMethod} </Text>
             </View>
-            <View>
-              <Text style={styles.title}>Shipping Cost</Text>
-              <Text style={styles.info}>
-                {currency}
-                {getNumberTwo(data.shippingCost)}
-              </Text>
-            </View>
-            <View>
-              <Text style={styles.title}>Discount</Text>
-              <Text style={styles.info}>
-                {" "}
-                {currency}
-                {getNumberTwo(data.discount)}
-              </Text>
-            </View>
+            {!HIDE_PRICES && (
+              <>
+                <View>
+                  <Text style={styles.title}>Shipping Cost</Text>
+                  <Text style={styles.info}>
+                    {currency}
+                    {getNumberTwo(data.shippingCost)}
+                  </Text>
+                </View>
+                <View>
+                  <Text style={styles.title}>Discount</Text>
+                  <Text style={styles.info}>
+                    {" "}
+                    {currency}
+                    {getNumberTwo(data.discount)}
+                  </Text>
+                </View>
 
-            <View>
-              <Text style={styles.title}>Total Amount</Text>
-              <Text style={styles.amount}>
-                {currency}
-                {getNumberTwo(data.total)}
-              </Text>
-            </View>
+                <View>
+                  <Text style={styles.title}>Total Amount</Text>
+                  <Text style={styles.amount}>
+                    {currency}
+                    {getNumberTwo(data.total)}
+                  </Text>
+                </View>
+              </>
+            )}
           </View>
 
           <View

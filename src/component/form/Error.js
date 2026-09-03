@@ -41,7 +41,11 @@ const Error = ({ errorName, notifyMsg = '' }) => {
   return (
     <>
       {errorName && (
-        <span className="text-red-400 text-sm mt-2">{
+        // ‎role="alert" — ההודעה מופיעה אחרי שליחת הטופס, כשהפוקוס נמצא על
+        // כפתור השליחה. בלי ההכרזה משתמש קורא-מסך לוחץ "שלח", שום דבר לא
+        // קורה מבחינתו, והוא אינו יודע שיש שדה שגוי בטופס.
+        // ‎block + mt-1: קודם זה היה ‎<span> inline עם ‎mt-2 שלא השפיע כלל.
+        <span role="alert" className="block text-red-700 text-sm font-medium mt-1">{
           translateError(
           errorName.message
           )

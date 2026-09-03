@@ -20,7 +20,7 @@ const Card = () => {
   return (
     <ul className="my-0">
       <li className="flex items-center py-3">
-        <span className="text-xl text-gray-400 items-start mr-4">
+        <span className="text-xl text-gray-500 items-start mr-4">
           <FiTruck />
         </span>
         <p className="font-sans leading-5 text-sm text-gray-500">
@@ -30,7 +30,7 @@ const Card = () => {
         </p>
       </li>
       <li className="flex items-center py-3">
-        <span className="text-xl text-gray-400 items-start mr-4">
+        <span className="text-xl text-gray-500 items-start mr-4">
           <FiHome />
         </span>
         <p className="font-sans leading-5 text-sm text-gray-500">
@@ -40,7 +40,7 @@ const Card = () => {
         </p>
       </li>
       <li className="flex items-center py-3">
-        <span className="text-xl text-gray-400 items-start mr-4">
+        <span className="text-xl text-gray-500 items-start mr-4">
           <FiDollarSign />
         </span>
         <p className="font-sans leading-5 text-sm text-gray-500">
@@ -50,7 +50,7 @@ const Card = () => {
         </p>
       </li>
       <li className="flex items-center py-3">
-        <span className="text-xl text-gray-400 items-start mr-4">
+        <span className="text-xl text-gray-500 items-start mr-4">
           <FiRepeat />
         </span>
         <p className="font-sans leading-5 text-sm text-gray-500">
@@ -61,7 +61,7 @@ const Card = () => {
       </li>
 
       <li className="flex items-center py-3">
-        <span className="text-xl text-gray-400 items-start mr-4">
+        <span className="text-xl text-gray-500 items-start mr-4">
           <FiShieldOff />
         </span>
         <p className="font-sans leading-5 text-sm text-gray-500">
@@ -71,7 +71,7 @@ const Card = () => {
         </p>
       </li>
       <li className="flex items-center py-3">
-        <span className="text-xl text-gray-400 items-start mr-4">
+        <span className="text-xl text-gray-500 items-start mr-4">
           <FiSun />
         </span>
         <p className="font-sans leading-5 text-sm text-gray-500">
@@ -82,7 +82,7 @@ const Card = () => {
       </li>
 
       <li className="flex items-center py-3">
-        <span className="text-xl text-gray-400 items-start mr-4">
+        <span className="text-xl text-gray-500 items-start mr-4">
           <FiMapPin />
         </span>
         <p className="font-sans leading-5 text-sm text-gray-500">

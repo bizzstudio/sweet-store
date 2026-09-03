@@ -10,7 +10,7 @@ const RecognizedProducts = ({ products, isProcessing, onQuantityChange, onRemove
 
   if (!products || products.length === 0) {
     return (
-      <div className="h-full border p-2 border-gray-200 rounded-lg text-center py-4 flex flex-col items-center justify-center gap-1.5 text-lg font-semibold text-gray-400">
+      <div className="h-full border p-2 border-gray-200 rounded-lg text-center py-4 flex flex-col items-center justify-center gap-1.5 text-lg font-semibold text-gray-500">
         <Image src={productsImg} alt="products" width={110} height={110} className='sm:block hidden object-contain' />
         {t('common:theProductsWillBeDisplayedHere')}...
       </div>
@@ -19,7 +19,7 @@ const RecognizedProducts = ({ products, isProcessing, onQuantityChange, onRemove
 
   return (
     <div className="space-y-2 flex flex-col h-full">
-      <h3 className="text-lg font-semibold text-blacktext-center">
+      <h3 className="text-lg font-semibold text-black text-center">
         {products.length} {t('common:voiceSearchRecognizedProducts')}
       </h3>
       
@@ -36,7 +36,7 @@ const RecognizedProducts = ({ products, isProcessing, onQuantityChange, onRemove
       </div>
 
       {isProcessing && (
-        <div className="text-center py-2 text-mainColor">
+        <div className="text-center py-2 text-mainColor-dark">
           <span className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-mainColor me-2"></span>
           {t('common:processing')}...
         </div>

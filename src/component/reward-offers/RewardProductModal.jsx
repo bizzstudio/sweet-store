@@ -9,6 +9,7 @@ import { notifySuccess } from "@utils/toast";
 
 import MainBT from "@component/button/MainBT";
 import MainModal from "@component/modal/MainModal";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const RewardProductModal = ({
     isOpen,
@@ -88,7 +89,10 @@ const RewardProductModal = ({
             return t("common:buyXGetYDescription", { triggerName, rewardName: productTitle });
         }
         if (offerType === 'THRESHOLD_GET_ITEM' && offer?.thresholdAmount) {
-            return t("common:thresholdGetItemDescription", { threshold: offer.thresholdAmount, rewardName: productTitle });
+            // בחנות ללא מחירים הנוסח לא נוקב בסף — ראה src/utils/priceVisibility.js
+            return HIDE_PRICES
+                ? t("common:thresholdGetItemDescriptionNoPrices", { rewardName: productTitle })
+                : t("common:thresholdGetItemDescription", { threshold: offer.thresholdAmount, rewardName: productTitle });
         }
         return showingTranslateValue(offer?.description) || '';
     };

@@ -1,5 +1,6 @@
 // src/pages/accessibility-statement.jsx
 import React from "react";
+import Link from "next/link";
 import Image from "@component/common/Img";
 import { useForm } from "react-hook-form";
 import useTranslation from "next-translate/useTranslation";
@@ -17,7 +18,60 @@ const AccessibilityStatement = () => {
   const { t } = useTranslation();
 
   const { storeCustomizationSetting, loading, error } = useGetSetting();
-  // console.log('storeCustomizationSetting :>> ', storeCustomizationSetting);
+  const { showingTranslateValue } = useUtilsFunction();
+
+  /*
+   * פרטי רכז הנגישות.
+   *
+   * עד כאן היו כאן פרטים קשיחים של סוכנות אחרת ("חלב ודבש"), שהגיעו יחד עם
+   * הקוד שממנו הועתקה החנות: לקוח שפנה בנושא נגישות הגיע לגורם שאין לו קשר
+   * לעסק. תקנות שוויון זכויות מחייבות שהפנייה תגיע למי שאחראי בפועל.
+   *
+   * הערכים נקראים עכשיו מהגדרות החנות, עם נפילה לפרטי הקשר של העסק עצמו.
+   * שדה שאין לו ערך פשוט לא מוצג — עדיף להשמיט שורה מאשר להציג פרט שגוי.
+   *
+   * ⚠ להשלמה בפאנל: accessibility.coordinator_name — שם רכז הנגישות בפועל.
+   */
+  const accessibility = storeCustomizationSetting?.accessibility || {};
+  const contactUs = storeCustomizationSetting?.contact_us || {};
+
+  // הבדיקה על null מפורשת: showingTranslateValue מריץ Object.keys(data) על כל
+  // ערך שאינו undefined, ולכן ערך null בהגדרות היה מפיל את רינדור העמוד —
+  // וכיוון שזהו עמוד סטטי (getStaticProps), גם את ה-build.
+  const asText = (value) => {
+    if (value === null || value === undefined) return "";
+    const text = typeof value === "object" ? showingTranslateValue(value) : value;
+    return typeof text === "string" ? text.trim() : "";
+  };
+
+  /*
+   * ערכי ברירת המחדל של תבנית החנות מכילים ממלאי-מקום שאינם פרטי קשר אמיתיים
+   * (למשל "info@<שם בעברית>.com" ו-"029-00124667"). ערך כזה על הצהרת נגישות
+   * גרוע מהיעדר ערך, ולכן מוצג רק מה שנראה כמו פרט קשר תקין.
+   */
+  const asEmail = (value) => {
+    const text = asText(value);
+    return /^[^\s@\u0590-\u05FF]+@[^\s@\u0590-\u05FF]+\.[A-Za-z]{2,}$/.test(text)
+      ? text
+      : "";
+  };
+
+  // נייד או קו נייח ישראלי — לפחות 9 ספרות אחרי ניקוי מפרידים
+  const asPhone = (value) => {
+    const text = asText(value);
+    const digits = text.replace(/\D/g, "");
+    return digits.length >= 9 && digits.length <= 15 ? text : "";
+  };
+
+  const coordinatorName = asText(accessibility.coordinator_name);
+  const coordinatorPhone =
+    asPhone(accessibility.coordinator_phone) || asPhone(contactUs.call_box_phone);
+  const coordinatorEmail =
+    asEmail(accessibility.coordinator_email) || asEmail(contactUs.email_box_email);
+
+  const hasCoordinatorDetails = Boolean(
+    coordinatorName || coordinatorPhone || coordinatorEmail
+  );
 
   return (
     <Layout title={t("common:accessibilityStatementTitle")} description={t("common:accessibilityStatementDescription")}>
@@ -65,13 +119,32 @@ const AccessibilityStatement = () => {
                 <h2 className="text-2xl font-bold mt-6 mb-4">כיצד לגלוש באתר באמצעות קורא-מסך</h2>
                 <p>מידע זה מיועד לגולשים עיוורים או כבדי-ראייה המשתמשים בתוכנת קורא-מסך. באתר מצוינים אזורי תוכן עיקריים וכן נעשה שימוש ב-ARIA לעזרה ביישומים מורכבים כגון קרוסלת מידע בדפים ראשיים, תפריט נפתח, מודאל להצגת תמונות, טפסים וטאבים. כל התפריטים בנויים באמצעות רשימות כדי לאפשר התמצאות נוחה.</p>
                 <h2 className="text-2xl font-bold mt-6 mb-4">פניות בנושא הנגשת האתר</h2>
-                <p>ליווי ופיקוח הנגשת אתר האינטרנט של המתוקים של בני בוצע על ידי חברת חלב ודבש בניית אתרי אינטרנט מתקדמים.<br />
-                  במידה והמשתמש נתקל בבעיה, הוא מוזמן ליצור קשר עם רכז הנגישות של האתר.</p>
-                <p>פרטי רכז הנגישות מטעם המתוקים של בני:</p>
-                <p><strong>שם:</strong> מוטי בוטבול</p>
-                <p><strong>טלפון:</strong> <a title="0542542428" href="tel:0542542428" target="_blank" rel="noopener" role="link">0542542428</a></p>
-                <p><strong>דואר אלקטרוני:</strong> <a title="Motty@halavudvash.co.il" href="mailto:motty@halavudvash.co.il" target="_blank" rel="noopener" role="link">motty@halavudvash.co.il</a></p>
-                <p>ההצהרה עודכנה לאחרונה בתאריך: 30.07.2025</p>
+                <p>במידה והמשתמש נתקל בבעיה בנגישות האתר, הוא מוזמן ליצור קשר עם רכז הנגישות של האתר.</p>
+                {hasCoordinatorDetails ? (
+                  <p>פרטי רכז הנגישות מטעם המתוקים של בני:</p>
+                ) : (
+                  /* בלי פרטים מאומתים עדיף להפנות לעמוד "צרו קשר" מאשר להציג
+                     כותרת ריקה או פרט שגוי */
+                  <p>
+                    ניתן לפנות אלינו בכל נושא נגישות דרך{" "}
+                    <Link href="/צרו-קשר" className="underline">עמוד יצירת הקשר</Link>.
+                  </p>
+                )}
+                {coordinatorName && (
+                  <p><strong>שם:</strong> {coordinatorName}</p>
+                )}
+                {coordinatorPhone && (
+                  <p><strong>טלפון:</strong>{" "}
+                    <a href={`tel:${coordinatorPhone.replace(/[^\d+]/g, "")}`}>{coordinatorPhone}</a>
+                  </p>
+                )}
+                {coordinatorEmail && (
+                  <p><strong>דואר אלקטרוני:</strong>{" "}
+                    <a href={`mailto:${coordinatorEmail}`}>{coordinatorEmail}</a>
+                  </p>
+                )}
+                {/* התאריך היה 30.07.2025 — ירושה מהאתר שממנו הועתקה החנות */}
+                <p>ההצהרה עודכנה לאחרונה בתאריך: 30.08.2026</p>
               </div>
             </div>
           </div>

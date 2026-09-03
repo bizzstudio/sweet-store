@@ -110,7 +110,7 @@ const useLoginSubmit = (setModalOpen, newsletterOptIn = false) => {
               notifyError(t("common:waiting_for_verification"));
               return;
             } else {
-              notifyError(err ? err.response.data.message : err.message);
+              notifyError(err?.response?.data?.message || err?.message);
               setLoading(false);
             }
           });
@@ -191,7 +191,7 @@ const useLoginSubmit = (setModalOpen, newsletterOptIn = false) => {
         })
         .catch((err) => {
           setLoading(false);
-          notifyError(err ? err.response.data.message : err.message);
+          notifyError(err?.response?.data?.message || err?.message);
         });
     }
   };

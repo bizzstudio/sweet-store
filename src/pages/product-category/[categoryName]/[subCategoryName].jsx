@@ -12,9 +12,8 @@ import { SidebarContext } from "@context/SidebarContext";
 import Loading from "@component/preloader/Loading";
 import { useRouter } from "next/router";
 import AttributeServices from "@services/AttributeServices";
-import MinimalTitle from "@component/common/MinimalTitle";
 import MainBT from "@component/button/MainBT";
-import SortDropdown from "@component/common/SortDropdown";
+import CatalogHeader from "@component/category/CatalogHeader";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 
 const SubCategoryPage = ({ products, attributes }) => {
@@ -23,7 +22,7 @@ const SubCategoryPage = ({ products, attributes }) => {
     const [visibleProduct, setVisibleProduct] = useState(24);
     const router = useRouter();
     const { categoryName, subCategoryName } = router.query; // אלו יכולים להיות slugs או שמות
-    const { showingTranslateValue, findMainCategory, findSubCategory } = useUtilsFunction();
+    const { showingTranslateValue, findMainCategory, findSubCategory, getCategorySlug } = useUtilsFunction();
 
     // מציאת הקטגוריה הראשית לפי slug או שם
     const currentCategory = findMainCategory(categories, categoryName);
@@ -50,31 +49,31 @@ const SubCategoryPage = ({ products, attributes }) => {
         <Layout title={`${displayCategoryName} - ${displaySubCategoryName}`} 
         description={`גלו את מגוון המוצרים בקטגוריה ${displayCategoryName} - ${displaySubCategoryName}. איכות מובטחת, מחירים מעולים ומשלוח מהיר.`}>
             <div className="mx-auto max-w-screen-2xl px-3 sm:px-10">
-                <div className="flex py-5">
+                <div className="flex pb-5">
                     <div className="flex w-full">
                         <div className="w-full">
-                            <div className="my-3 bg-mainColor-light border border-gray-100 rounded-md p-3">
-                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                                    <MinimalTitle title={displayCategoryName} subtitle={displaySubCategoryName} />
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-                                        <h6 className="text-sm font-serif text-right">
-                                            {t("common:totalI")}{" "}
-                                            <span className="font-bold">{productData?.length}</span>{" "}
-                                            {t("common:itemsFound")}
-                                        </h6>
-
-                                        {/* הוספת רכיב המיון */}
-                                        {productData?.length > 0 && (
-                                            <div className="flex justify-center sm:justify-end">
-                                                <SortDropdown
-                                                    sortedField={sortedField}
-                                                    setSortedField={setSortedField}
-                                                />
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
+                            <CatalogHeader
+                                title={displaySubCategoryName}
+                                breadcrumbs={[
+                                    {
+                                        label: displayCategoryName,
+                                        href: currentCategory
+                                            ? `/product-category/${getCategorySlug(currentCategory)}`
+                                            : undefined,
+                                    },
+                                    { label: displaySubCategoryName },
+                                ]}
+                                totalProducts={productData?.length}
+                                parentCategory={currentCategory}
+                                parentCategorySlug={
+                                    currentCategory ? getCategorySlug(currentCategory) : null
+                                }
+                                activeSubCategorySlug={
+                                    currentSubCategory ? getCategorySlug(currentSubCategory) : null
+                                }
+                                sortedField={sortedField}
+                                onSortChange={setSortedField}
+                            />
 
                             {productData?.length === 0 && (
                                 <div className="flex flex-col items-center text-center align-middle mx-auto p-5 my-5">
@@ -98,24 +97,29 @@ const SubCategoryPage = ({ products, attributes }) => {
                                     {/* ראה ההערה ב-[categoryName].jsx: החישוב מ-window.innerWidth
                                         בתוך ה-render נקרא פעם אחת בלבד ואינו מתעדכן בשינוי
                                         גודל חלון. */}
-                                    <div
-                                        className="grid grid-cols-1 xss:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3 lg:gap-3"
-                                    >
-                                        {productData?.slice(0, visibleProduct).map((product, i) => (
-                                            <ProductCard
-                                                key={i + 1}
-                                                product={product}
-                                                attributes={attributes}
-                                                offers={offers}
-                                            />
+                                    {/* ‎<ul> — ראה ההערה ב-[categoryName].jsx.
+                                        ‎key לפי ‎_id ולא לפי אינדקס: עם אינדקס
+                                        React ממחזר כרטיס קיים כשהמיון משתנה
+                                        ומצב ה"בעגלה" נדבק למוצר הלא נכון. */}
+                                    <ul className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 md:gap-3 list-none p-0">
+                                        {productData?.slice(0, visibleProduct).map((product) => (
+                                            <li key={product._id} className="flex">
+                                                <div className="w-full">
+                                                    <ProductCard
+                                                        product={product}
+                                                        attributes={attributes}
+                                                        offers={offers}
+                                                    />
+                                                </div>
+                                            </li>
                                         ))}
-                                    </div>
+                                    </ul>
 
                                     {productData?.length > visibleProduct && (
-                                        <div className="w-full flex justify-center mt-5">
+                                        <div className="w-full flex justify-center mt-6">
                                             <MainBT
                                                 onClick={() => setVisibleProduct((pre) => pre + 36)}
-                                                className="!w-auto px-6"
+                                                className="!w-auto px-8"
                                             >
                                                 {t("common:loadMoreBtn")}
                                             </MainBT>

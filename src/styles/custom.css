@@ -1225,11 +1225,22 @@ p:not(:last-of-type) {
 }
 
 .read-or-hide {
-  color: darkorange;
-  font-size: 13px;
+  /* ‎darkorange (‎#ff8c00) על לבן = 2.3:1 — הרחק מתחת ל-4.5:1 שהתקן דורש,
+     והטקסט הזה הוא הפעולה "קרא עוד" ולא קישוט. ‎#b45309 נותן 5.0:1.
+     ‎13px היה גם קטן מדי לפעולה; הקו התחתון מוסיף סימון שאינו תלוי בצבע. */
+  color: #b45309;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
   cursor: pointer;
   display: block;
   text-align: right;
+  padding: 6px 0;
+}
+
+.read-or-hide:hover {
+  color: #92400e;
 }
 
 .carousel-root .carousel .control-dots .dot .selected {
@@ -2351,3 +2362,163 @@ p:not(:last-of-type) {
     background-image: none;
   }
 }
+
+
+/* ==========================================================================
+   שכבת נגישות גלובלית (ת"י 5568 / WCAG 2.1 AA)
+   --------------------------------------------------------------------------
+   נוספה כבלוק אחד בסוף הקובץ בכוונה: כמה מחלקות קיימות (‎.glow-btn,
+   ‎.payment-glow-btn, ‎.custom-select) מכריזות ‎outline:none ומבטלות לגמרי את
+   סימון הפוקוס. הבלוק הזה בא אחריהן בקסקדה ולכן מחזיר טבעת פוקוס לכולן, בלי
+   לגעת בעיצוב הרגיל שלהן.
+
+   ‎:focus-visible ולא ‎:focus — הטבעת מופיעה רק בניווט מקלדת ולא בלחיצת עכבר,
+   כך שהמראה בשימוש רגיל לא משתנה.
+   ========================================================================== */
+
+:root {
+  /* צבע טבעת הפוקוס. ‎#064e35 (mainColor.superDark) מול לבן נותן יחס ניגודיות
+     של ~9:1 — הרבה מעל ה-3:1 שהתקן דורש מרכיב ממשק. הירוק הבהיר יותר
+     (‎#0d9e6d) עומד על 3.1:1 בלבד ונופל על רקעים בהירים כמו ‎#f2fbf7. */
+  --focus-ring-color: #064e35;
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 2px;
+}
+
+/* טבעת פוקוס אחידה לכל רכיב אינטראקטיבי */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible,
+[role="button"]:focus-visible,
+[role="link"]:focus-visible,
+[role="tab"]:focus-visible,
+[role="menuitem"]:focus-visible,
+[role="option"]:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color) !important;
+  outline-offset: var(--focus-ring-offset) !important;
+  border-radius: 4px;
+}
+
+/* ‎!important נדרש כאן: המחלקות הקיימות מכריזות ‎outline:none על ‎.glow-btn
+   ובחלקן גם ב-state של ‎:focus, וללא זה הטבעת נבלעת. */
+.glow-btn:focus-visible,
+.payment-glow-btn:focus-visible,
+.custom-select:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color) !important;
+  outline-offset: var(--focus-ring-offset) !important;
+}
+
+/* פוקוס על רקע כהה (כפתורים ירוקים מלאים, פס ההידר) — טבעת לבנה נראית שם,
+   ירוקה כהה נבלעת. */
+.focus-ring-light:focus-visible {
+  outline: var(--focus-ring-width) solid #ffffff !important;
+  outline-offset: var(--focus-ring-offset) !important;
+  box-shadow: 0 0 0 calc(var(--focus-ring-width) + var(--focus-ring-offset)) rgba(6, 78, 53, 0.55);
+}
+
+/* קישור "דלג לתוכן" — מוסתר עד שמקבל פוקוס, ואז נפתח מעל ההידר.
+   נדרש בת"י 5568 (מנגנון דילוג על ניווט חוזר). */
+.skip-to-content {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 9999;
+  transform: translateY(-120%);
+  padding: 12px 24px;
+  background: #064e35;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 16px;
+  border-bottom-left-radius: 10px;
+  text-decoration: underline;
+  transition: transform 0.15s ease-in-out;
+}
+
+.skip-to-content:focus {
+  transform: translateY(0);
+}
+
+/* יעד הדילוג לא אמור לצייר טבעת פוקוס — הוא מקבל פוקוס תכנותית בלבד */
+main:focus,
+[data-skip-target]:focus {
+  outline: none;
+}
+
+/* שטח מגע מינימלי 44x44 (WCAG 2.5.5).
+   --------------------------------------------------------------------------
+   הגרסה הראשונה כאן השתמשה ב-‎::after שקוף שנמתח ל-44px מעבר לגבולות הכפתור,
+   כדי להגדיל את אזור הלחיצה בלי לשנות את המראה. זה פגם: הפסאודו-אלמנט הוא
+   ילד של הכפתור, ולכן כל לחיצה בשטח שלו נזקפת לכפתור — גם בחלק שגולש מעל
+   השכן. בשורת הפעולות של הטבלה בפאנל (עריכה / מחיקה, ‎p-2 ≈ 34px וצמודים)
+   הגלישה היא ~5px לכל צד, כלומר לחיצה בקצה "עריכה" הייתה מפעילה "מחיקה".
+
+   ‎min-width/min-height אמיתיים מגדילים את הכפתור עצמו, והפריסה מסתדרת
+   סביבו — אין חפיפה ואין גניבת לחיצות. המחיר: הכפתור באמת גדל, ולכן
+   המחלקה הוסרה משני מקומות שבהם הגדילה הייתה שוברת פריסה (שורת החיפוש
+   בהידר, שגובהה 32px, ופס הכמות בחלון התוצאות).
+
+   ‎display לא נקבע כאן בכוונה: חלק מהכפתורים כבר ‎flex, וקביעת ‎inline-flex
+   הייתה דורסת אותם (הקובץ נטען אחרי ‎@tailwind utilities). */
+.tap-target {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* כיבוד העדפת המערכת "צמצום תנועה". האנימציות באתר (‎left-right-animation,
+   ‎animate-bounce-2s, קרוסלות, hover:scale) גורמות אי-נוחות למשתמשים עם
+   רגישות לתנועה, ובלי הכלל הזה אין דרך לכבות אותן. */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .left-right-animation,
+  .right-left-animation,
+  .animate-bounce-2s {
+    animation: none !important;
+  }
+
+  .glow-btn:hover,
+  .checkout-prompt-bar:hover {
+    transform: none !important;
+  }
+}
+
+/* מצב ניגודיות גבוהה של מערכת ההפעלה — הגבולות הדקים (‎border-gray-100)
+   נעלמים שם לגמרי ומשאירים גריד כרטיסים בלי הפרדה. */
+@media (forced-colors: active) {
+
+  .glow-btn,
+  .payment-glow-btn,
+  .product-card {
+    border: 1px solid ButtonBorder;
+  }
+}
+
+/* ==========================================================================
+   כרטיס מוצר — מבנה משותף לגריד הקטלוג
+   ========================================================================== */
+
+/* קו תחתון בשם המוצר רק בריחוף/פוקוס על כל הכרטיס. שם המוצר הוא הקישור,
+   ולכן הריחוף צריך להיות מורגש גם כשהעכבר על אזור התמונה. */
+.product-card:hover .product-card__title,
+.product-card:focus-within .product-card__title {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* הערה: לא מוגדרת כאן טבעת ברמת הכרטיס.
+   ‎:focus-within נדלק על *כל* צאצא שמקבל פוקוס — לא רק קישור השם אלא גם
+   "הוסף לסל" וכפתורי הכמות. התוצאה הייתה שתי טבעות בו-זמנית: אחת סביב
+   הכפתור ואחת סביב כל הכרטיס, מה שמטשטש דווקא את מה שהפוקוס אמור לסמן.
+   כל רכיב מקבל את הטבעת שלו מהכלל הגלובלי שלמעלה, וזה הדפוס המקובל. */

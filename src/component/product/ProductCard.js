@@ -1,12 +1,12 @@
 // src/component/product/ProductCard.jsx
 import dynamic from "next/dynamic";
-import Image from "@component/common/Img";
-import { useContext, useState } from "react";
-import { IoAdd, IoBagAddSharp, IoRemove } from "react-icons/io5";
+import Link from "next/link";
+import { useContext, useId, useState } from "react";
+import { IoAdd, IoRemove } from "react-icons/io5";
+import { LiaCartPlusSolid } from "react-icons/lia";
 
 // Internal import
 import Price from "@component/common/Price";
-import Stock from "@component/common/Stock";
 import { notifyError } from "@utils/toast";
 import useAddToCart from "@hooks/useAddToCart";
 import useGetSetting from "@hooks/useGetSetting";
@@ -19,21 +19,36 @@ import { SidebarContext } from "@context/SidebarContext";
 import useTranslation from "next-translate/useTranslation";
 import getOfferNames from "@component/offer/getOfferNames";
 import useCart from "@hooks/useCart";
-import { LiaCartPlusSolid } from "react-icons/lia";
 import { isFreeGiftProduct } from "@utils/offerCalculations";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const ProductCard = ({ product, attributes, offers = [] }) => {
   const [modalOpen, setModalOpen] = useState(false);
-  const { toggleCartDrawer, closeCartDrawer, offers: allOffers } = useContext(SidebarContext)
-  const { items, addItem, updateItemQuantity, inCart } = useCart();
+  const { offers: allOffers } = useContext(SidebarContext);
+  const { items, addItem, updateItemQuantity } = useCart();
   const { handleIncreaseQuantity } = useAddToCart();
   const { globalSetting } = useGetSetting();
   const { showingTranslateValue } = useUtilsFunction();
   const { t } = useTranslation();
 
+  // מזהה לקישור בין הכרטיס (‎aria-labelledby) לכותרת שלו. קורא מסך שעובר על
+  // הגריד מכריז את שם המוצר לכל כרטיס במקום "מאמר" חוזר 48 פעמים.
+  //
+  // ‎useId ולא ‎product._id: בדף הבית "פופולריים" ו"מבצעים" מגיעים משתי
+  // רשימות נפרדות של אותה קריאת API, ומוצר פופולרי שגם בהנחה מופיע בשתיהן.
+  // מזהה מבוסס ‎_id היה נוצר פעמיים באותו עמוד, ו-‎aria-labelledby של שני
+  // הכרטיסים היה מצביע על אותה כותרת. ‎useId ייחודי לכל מופע.
+  //
+  // חשוב: הקריאה חייבת להישאר כאן, לצד שאר ה-hooks. בהמשך הקומפוננטה יש
+  // ‎return null עבור מוצר שניתן במתנה, ו-hook שיושב אחריו לא היה נקרא
+  // באותו רנדר — הפרה של Rules of Hooks שמשבשת את סדר ה-hooks.
+  const titleId = useId();
+
   const currency = globalSetting?.default_currency || "₪";
 
-  // console.log('attributes in product cart',attributes)
+  const title = showingTranslateValue(product?.title);
+  const hasVariants = product?.variants?.length > 0;
+  const outOfStock = product?.stock <= 0;
 
   const handleAddItem = (p) => {
     if (p.stock < 1) return notifyError(t("common:productStockOut"));
@@ -54,36 +69,9 @@ const ProductCard = ({ product, attributes, offers = [] }) => {
       slug: p.slug,
     };
     addItem(newItem);
-    // פתיחת העגלה לשתי שניות באופן אוטומטי
-    // toggleCartDrawer()
-    // setTimeout(()=>{
-    //   closeCartDrawer()
-    // },2000)
-  };
-
-  const handleModalOpen = (event, id) => {
-    setModalOpen(event);
   };
 
   const offerName = getOfferNames(offers, product, ", ");
-  // פונקציות מבצעים ישנים
-  // const getOfferName = (product) => {
-  //   if (product.isCombination) {
-  //     return getFirstOfferName(product?.variants);
-  //   } else {
-  //     return product?.prices?.offers[0]?.name;
-  //   }
-  // }
-
-  // const getFirstOfferName = (variants) => {
-  //   for (let variant of variants) {
-  //     let offer = variant.offers?.find(offer => offer.name);
-  //     if (offer) {
-  //       return offer.name;
-  //     }
-  //   }
-  //   return null; // במקרה שאין אף offer עם שם
-  // };
 
   // ‎image הוא מערך בסכימה, אבל ‎[""] אפשרי (יבוא שהשאיר מחרוזת ריקה) ולכן
   // לא די בבדיקת אורך. משמש להתאמת אזור התמונה: תמונה אמיתית מול placeholder.
@@ -95,6 +83,8 @@ const ProductCard = ({ product, attributes, offers = [] }) => {
   if (isFreeGiftProduct(product?._id, allOffers)) {
     return null;
   }
+
+  const cartItem = items.find((item) => item.id === product._id);
 
   return (
     <>
@@ -109,151 +99,187 @@ const ProductCard = ({ product, attributes, offers = [] }) => {
         />
       )}
 
-      {/* כרטיס: מסגרת דקה + צל רך במקום צל כבד, והרמה קלה בריחוף.
-          בקטלוג שכולו כרטיסים זהים הצל הכבד יצר "רעש" על פני כל המסך. */}
-      <div className="group box-border overflow-hidden flex justify-between rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 pe-0 flex-col items-center bg-white relative">
-        <div className="w-full flex justify-between">
-          {/* אם אין מלאי למוצר מופיע אזל מהמלאי */}
-          {/* {product.stock <= 0 && <Stock product={product} stock={product.stock} card right={"2"} top={"2"} />} */}
-          <Discount product={product} title={offerName} card />
-        </div>
-        <div
-          onClick={() => {
-            handleModalOpen(!modalOpen, product._id);
-            handleLogEvent(
-              "product",
-              `opened ${showingTranslateValue(product?.title)} product modal`
-            );
-          }}
-          // אזור התמונה הוקטן מ-h-32/h-44: בקטלוג הזה לאף מוצר אין תמונה, ולכן
-          // הבלוק הזה היה חצי כרטיס של placeholder זהה, כפול אלפי כרטיסים.
-          // הרקע המרומז מגיע מכאן ולא מתוך ה-SVG, כדי שימלא את כל הרוחב.
-          //
-          // שימו לב לחישוב: styles/custom.css מגדיר html{font-size:1.2rem},
-          // ולכן 1rem שווה 19.2px ולא 16px. h-20/h-24 כאן הם 96px ו-115px
-          // בפועל — לא 80 ו-96. כל מחלקת מרווח של Tailwind בפרויקט הזה גדולה
-          // ב-20% מערכה הנקוב.
-          //
-          // הגוון והריפוד חלים רק כשאין תמונה. מוצר עם תמונה אמיתית (רקע לבן)
-          // היה מקבל מסגרת ירקרקת מסביב, ולכן במקרה הזה הרקע לבן והתמונה
-          // ממלאת את המסגרת.
-          className={`relative flex justify-center cursor-pointer w-full h-20 sm:h-24 ${hasImage ? "bg-white" : "bg-mainColor-superLight"
-            }`}
+      {/* ‎<article> ולא ‎<div>: כל כרטיס הוא פריט תוכן עצמאי, וקוראי מסך
+          מאפשרים דילוג בין פריטים כאלה. ‎aria-labelledby נותן לו שם.
+          הכרטיס הוא ‎flex-col עם ‎h-full כדי שכל הכרטיסים בשורה יימתחו לאותו
+          גובה ושורת הכפתור תיישר קו בכולם — בלי זה הגריד נראה משונן. */}
+      <article
+        aria-labelledby={titleId}
+        className="product-card group box-border h-full overflow-hidden flex flex-col rounded-xl border border-gray-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md relative"
+      >
+        <Discount product={product} title={offerName} card />
+
+        {/* אזור התמונה — קישור אמיתי לעמוד המוצר במקום ‎<div onClick>.
+            הגרסה הקודמת פתחה מודל מתוך ‎div ללא ‎role/tabIndex: לא נגיש
+            במקלדת, לא מוכרז כרכיב לחיץ, ולא ניתן לפתיחה בלשונית חדשה. */}
+        <Link
+          href={`/product/${product.slug}`}
+          onClick={() =>
+            handleLogEvent("product", `opened ${title} product page`)
+          }
+          tabIndex={-1}
+          aria-hidden="true"
+          // התמונה והכותרת מובילות לאותו יעד; סימון התמונה כ-‎aria-hidden
+          // ומחוץ לסדר ה-Tab מונע קישור כפול לכל מוצר בקורא מסך.
+          className={`relative flex justify-center w-full h-28 sm:h-36 shrink-0 ${
+            hasImage ? "bg-white" : "bg-mainColor-superLight"
+          }`}
         >
-          <div className={`relative w-full h-full ${hasImage ? "p-1" : "p-3 sm:p-4"}`}>
+          <div className={`relative w-full h-full ${hasImage ? "p-1.5" : "p-4 sm:p-5"}`}>
             <ImageWithFallback
               // ‎product.image[0] הישיר קורס אם השדה חסר לגמרי; הסכימה אמנם
               // מבטיחה מערך, אבל מסמך שנוצר מחוץ למודל אינו מחויב לה
               src={Array.isArray(product?.image) ? product.image[0] : product?.image}
-              outOfStock={product.stock <= 0}
-              alt="product"
+              outOfStock={outOfStock}
+              alt=""
               card={true}
             />
           </div>
-        </div>
-        <div className="w-full px-2.5 sm:px-3.5 pt-2.5 pb-2.5 sm:pb-3.5 overflow-hidden flex flex-col flex-grow">
-          {/* השם הוא המידע היחיד שיש למוצרי הקטלוג הזה (אין תמונות), ולכן הוא
-              מקבל את הבכורה: כהה וכבד יותר מקודם. ה-min-h שומר על גובה אחיד
-              בין כרטיס עם שם בשורה אחת לכרטיס עם שתיים, כדי שהגריד לא ישתנשן. */}
-          <div className="relative mb-2">
-            {product.unit && (
-              <span className="text-gray-400 font-medium text-[10px] sm:text-xs block mb-0.5">
-                {product.unit}
-              </span>
-            )}
-            {/* min-h שומר על שתי שורות גם לשם קצר, כדי ששורת המחיר תתחיל
-                באותו גובה בכל הכרטיסים. בערכי rem (‎1rem=19.2px כאן) 2rem הם
-                כ-38px — בדיוק שתי שורות של leading-snug בגודל הזה. */}
-            <h2 className="text-heading mb-0 block text-sm sm:text-[15px] font-semibold text-gray-800 leading-snug min-h-[2rem] sm:min-h-[2.25rem]">
-              <span className="line-clamp-2">
-                {showingTranslateValue(product?.title)}
-              </span>
-            </h2>
-          </div>
+        </Link>
 
-          <div className="mt-auto flex flex-row justify-between items-center gap-2 text-heading text-xs sm:text-base space-s-2 md:text-base lg:text-xl">
-            <Price
-              card
-              product={product}
-              currency={currency}
-              price={
-                product?.isCombination
-                  ? product?.variants[0]?.price
-                  : product?.prices?.price
-              }
-              originalPrice={
-                product?.isCombination
-                  ? product?.variants[0]?.originalPrice
-                  : product?.prices?.originalPrice
-              }
-            />
+        <div className="w-full px-3 pt-2.5 pb-3 flex flex-col flex-grow">
+          {product.unit && (
+            <span className="text-gray-500 font-medium text-xs mb-0.5 block">
+              {product.unit}
+            </span>
+          )}
 
-            <div className="h-8 sm:h-9 ms-auto">
-              {inCart(product._id) ? (
-                <div>
-                  {items.map(
-                    (item) =>
-                      item.id === product._id && (
-                        <div
-                          key={item.id}
-                          className="h-8 sm:h-9 w-auto flex items-center justify-evenly py-0.5 sm:py-1 px-1.5 sm:px-2 bg-mainColor-dark text-white rounded"
-                        >
-                          <button
-                            className="pl-0.5 sm:pl-1"
-                            onClick={() =>
-                              updateItemQuantity(item.id, item.quantity - 1)
-                            }
-                          >
-                            <span className="text-dark text-sm sm:text-base">
-                              <IoRemove />
-                            </span>
-                          </button>
-                          <p className="text-xs sm:text-sm text-dark px-0.5 sm:px-1 font-serif font-semibold">
-                            {item.quantity}
-                          </p>
-                          <button
-                            className="pr-0.5 sm:pr-1"
-                            onClick={() =>
-                              item?.variants?.length > 0
-                                ? handleAddItem(item)
-                                : handleIncreaseQuantity(item)
-                            }
-                          >
-                            <span className="text-dark text-sm sm:text-base">
-                              <IoAdd />
-                            </span>
-                          </button>
-                        </div>
-                      )
-                  )}{" "}
-                </div>
-              ) : (
-                <button
-                  // disabled={product?.stock <= 0}
-                  onClick={() => handleAddItem(product)}
-                  aria-label="cart"
-                  className={product?.stock <= 0 ? "h-8 sm:h-9 px-1.5 sm:px-2 flex items-center justify-center border border-gray-200 rounded text-gray-400" : "h-8 sm:h-9 px-1.5 sm:px-2 flex items-center justify-center border border-gray-200 rounded text-mainColor-dark hover:bg-mainColor-dark hover:text-white transition-all"}
-                >
-                  {" "}
-                  {product?.variants?.length > 0 ?
-                    <span className="text-[9px] sm:text-[10px]">
-                      {t("common:options")}
-                    </span>
-                    :
-                    <span className="text-xl sm:text-2xl">
-                      <LiaCartPlusSolid />
-                    </span>}
-                </button>
+          {/* הכותרת היא הקישור הנגיש היחיד של הכרטיס. ‎text-gray-900 ולא
+              ‎text-gray-800: על רקע לבן זה 17.9:1 מול 12.6:1 — שניהם עוברים,
+              אבל הכהה קריא יותר בגודל הקטן הזה, והשם הוא המידע המרכזי בכרטיס.
+              ‎min-h שומר על גובה שתי שורות בכל הכרטיסים כדי ששורת המחיר
+              תתחיל באותו גובה ולא "תרקוד" לאורך הגריד. */}
+          <h3 id={titleId} className="mb-2">
+            <Link
+              href={`/product/${product.slug}`}
+              onClick={() =>
+                handleLogEvent("product", `opened ${title} product page`)
+              }
+              className="product-card__title block text-sm sm:text-[15px] font-semibold text-gray-900 leading-snug min-h-[2rem] sm:min-h-[2.25rem]"
+            >
+              <span className="line-clamp-2">{title}</span>
+            </Link>
+          </h3>
+
+          <div className="mt-auto">
+            {/* בחנות ללא מחירים ‎<Price> מחזיר null, והשורה נשארת רצועה ריקה
+                בגובה קבוע. כשגם המשקל חסר — מוותרים עליה לגמרי.
+                ראה src/utils/priceVisibility.js */}
+            <div
+              className={
+                HIDE_PRICES && !product?.weight
+                  ? "hidden"
+                  : "flex items-baseline justify-between gap-2 mb-2.5 min-h-[1.75rem]"
+              }
+            >
+              <Price
+                card
+                product={product}
+                currency={currency}
+                price={
+                  product?.isCombination
+                    ? product?.variants[0]?.price
+                    : product?.prices?.price
+                }
+                originalPrice={
+                  product?.isCombination
+                    ? product?.variants[0]?.originalPrice
+                    : product?.prices?.originalPrice
+                }
+              />
+              {product?.weight && (
+                <span className="text-xs text-gray-500 whitespace-nowrap shrink-0">
+                  {product.weight} ק&quot;ג
+                </span>
               )}
             </div>
+
+            {/* שורת הפעולה — ברוחב מלא ובגובה 44px לפחות (שטח מגע תקני).
+                קודם זו הייתה משבצת אייקון ברוחב ~30px בפינה, בלי תווית טקסט:
+                גם קטנה מדי לאצבע וגם לא ברור מה היא עושה. */}
+            {cartItem ? (
+              <div className="flex items-stretch h-11 rounded-lg bg-mainColor-dark text-white overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateItemQuantity(cartItem.id, cartItem.quantity - 1)
+                  }
+                  aria-label={`${t("common:decreaseQuantity")} – ${title}`}
+                  className="focus-ring-light w-12 shrink-0 flex items-center justify-center text-xl hover:bg-mainColor-superDark transition-colors"
+                >
+                  <IoRemove aria-hidden="true" />
+                </button>
+                {/* ‎aria-live: שינוי הכמות מוכרז לקורא מסך בלי לזוז מהכפתור */}
+                <span
+                  aria-live="polite"
+                  aria-atomic="true"
+                  className="flex-grow flex items-center justify-center font-bold text-base tabular-nums"
+                >
+                  <span className="sr-only">{t("common:quantityInCart")}: </span>
+                  {cartItem.quantity}
+                </span>
+                <button
+                  type="button"
+                  // התנאי נבדק על *פריט העגלה* ולא על המוצר. ‎handleAddItem
+                  // מפשיט את ‎variants בבניית פריט העגלה, ולכן פריט רגיל מגיע
+                  // תמיד ל-‎handleIncreaseQuantity (שבודק מלאי). בדיקה על
+                  // ‎product.variants הייתה שולחת מוצרי-וריאציה ל-handleAddItem,
+                  // שמוסיף שורה חדשה של מוצר הבסיס ועוקף את בדיקת המלאי.
+                  onClick={() =>
+                    cartItem?.variants?.length > 0
+                      ? handleAddItem(cartItem)
+                      : handleIncreaseQuantity(cartItem)
+                  }
+                  aria-label={`${t("common:increaseQuantity")} – ${title}`}
+                  className="focus-ring-light w-12 shrink-0 flex items-center justify-center text-xl hover:bg-mainColor-superDark transition-colors"
+                >
+                  <IoAdd aria-hidden="true" />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                disabled={outOfStock}
+                onClick={() => handleAddItem(product)}
+                // ‎aria-label כולל את שם המוצר: בגריד של 48 כרטיסים, "הוסף
+                // לעגלה" לבדו חוזר 48 פעמים ואינו מזהה על מה לוחצים.
+                //
+                // סדר המילים אינו שרירותי: WCAG 2.5.3 דורש שהשם הנגיש יכיל
+                // את הטקסט הנראה כרצף רציף, כדי שפקודה קולית ("לחץ הוסף
+                // לעגלה") תתאים. לכן התווית היא "הוסף לעגלה – <שם>" ולא
+                // "הוסף <שם> לעגלה".
+                //
+                // וכשהמוצר אזל, הטקסט הנראה הוא "אזל מהמלאי" — תווית שאומרת
+                // "הוסף לעגלה" הייתה סותרת אותו ישירות.
+                aria-label={
+                  outOfStock
+                    ? t("common:outOfStockFor", { name: title })
+                    : hasVariants
+                      ? t("common:chooseOptionsFor", { name: title })
+                      : t("common:addProductToCart", { name: title })
+                }
+                aria-haspopup={hasVariants ? "dialog" : undefined}
+                className={
+                  outOfStock
+                    ? "w-full h-11 flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 text-gray-500 text-sm font-semibold cursor-not-allowed"
+                    : "w-full h-11 flex items-center justify-center gap-1.5 rounded-lg border-2 border-mainColor-dark text-mainColor-dark text-sm font-bold hover:bg-mainColor-dark hover:text-white active:scale-[0.98] transition-all"
+                }
+              >
+                {outOfStock ? (
+                  t("common:stockOut")
+                ) : (
+                  <>
+                    <LiaCartPlusSolid className="text-xl" aria-hidden="true" />
+                    <span>
+                      {hasVariants ? t("common:options") : t("common:addToCart")}
+                    </span>
+                  </>
+                )}
+              </button>
+            )}
           </div>
-          {product?.weight && (
-            <div className="text-[10px] sm:text-xs text-gray-500 mt-0.5">
-              {t("common:weight")}: {product.weight} ק&quot;ג
-            </div>
-          )}
         </div>
-      </div>
+      </article>
     </>
   );
 };

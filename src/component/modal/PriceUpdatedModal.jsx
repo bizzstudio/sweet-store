@@ -5,6 +5,7 @@ import useTranslation from "next-translate/useTranslation";
 import newPriceImage from "public/update product.svg";
 import CartItemPreview from "@component/cart/CartItemPreview";
 import MainBT from "@component/button/MainBT";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const PriceUpdatedModal = ({ priceUpdatedItems = [], closeModal = () => { } }) => {
     const { t } = useTranslation();
@@ -13,9 +14,14 @@ const PriceUpdatedModal = ({ priceUpdatedItems = [], closeModal = () => { } }) =
     return (
         <div className="flex flex-col w-fit justify-center items-center">
             <img src={newPriceImage.src} alt="Price Updated image" className="w-[85px]" />
-            <h1 className="text-[22px] font-bold text-blackmt-4 mb-2 text-center">
-                {/* "למוצרים הבאים עודכן המחיר" עם משתנה count */}
-                {t("common:priceUpdatedForProducts", { count })}
+            <h1 className="text-[22px] font-bold text-black mt-4 mb-2 text-center">
+                {/* "למוצרים הבאים עודכן המחיר" עם משתנה count.
+                    בחנות ללא מחירים המודל עדיין נחוץ — ההזמנה נדחתה והלקוח
+                    חייב לשלוח שוב — אבל הנוסח לא מזכיר מחיר.
+                    ראה src/utils/priceVisibility.js */}
+                {HIDE_PRICES
+                    ? t("common:productsUpdatedNoPrices", { count })
+                    : t("common:priceUpdatedForProducts", { count })}
             </h1>
             <ul className="text-right">
                 {priceUpdatedItems.map((conflictItem, index) => (

@@ -10,6 +10,7 @@ import InputArea from "@component/form/InputArea";
 import useGetSetting from "@hooks/useGetSetting";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 import City from "@component/select/City";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const GuestAddressForm = ({ register, errors, setError, clearErrors, watch, chosenCity, setChosenCity, minimumOrderAmount, isDeliverable }) => {
     const { storeCustomizationSetting } = useGetSetting();
@@ -219,14 +220,15 @@ const GuestAddressForm = ({ register, errors, setError, clearErrors, watch, chos
                         {/* עיר */}
                         <div>
                             <div className="flex items-center gap-2">
-                                <Label label={t("common:city")} />
-                                {minimumOrderAmount != null && isDeliverable === true && (
+                                <Label label={t("common:city")} htmlFor="guestCity" />
+                                {!HIDE_PRICES && minimumOrderAmount != null && isDeliverable === true && (
                                     <span className="text-xs text-mainColor-dark font-semibold whitespace-nowrap">
                                         (מינימום קנייה: {minimumOrderAmount}₪)
                                     </span>
                                 )}
                             </div>
                             <City
+                                inputId="guestCity"
                                 setValue={setChosenCity}
                                 placeholder={chosenCity ? JSON.stringify(chosenCity) : t("common:selectCity")}
                             />

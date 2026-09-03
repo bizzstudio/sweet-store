@@ -11,7 +11,7 @@ const MissingProductsModal = ({ missingProducts = [] }) => {
   return (
     <div className="flex flex-col w-fit justify-center items-center">
       <img src={sadOrange.src} alt="Missing Products image" className="w-20" />
-      <h1 className="text-[22px] font-bold text-blackmt-4 mb-2 text-center">
+      <h1 className="text-[22px] font-bold text-black mt-4 mb-2 text-center">
         {t("common:missingProductsAre", { count })}
       </h1>
       <ul className="text-right">

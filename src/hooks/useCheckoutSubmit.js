@@ -20,6 +20,7 @@ import useAddToCart from "./useAddToCart";
 import { SidebarContext } from "@context/SidebarContext";
 import notifyApiResponse from "@utils/notifyApiResponse";
 import { identifyUser, trackNewsletterSignup } from "@services/flashy";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
   const {
@@ -320,12 +321,6 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
           }
           return; // עצור את הביצוע
         }
-
-        // עדכון הערך של העיר בטופס
-        if (guestChosenCity) {
-          setValue("guestCity", guestChosenCity);
-          setValue("chosenCity", guestChosenCity);
-        }
       }
 
       // וולידציות כלליות (לכל המשתמשים)
@@ -341,7 +336,16 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
         return; // עצור את הביצוע
       }
 
-      if (minimumOrderAmount !== undefined && customCartTotal < minimumOrderAmount) {
+      // מינימום הזמנה: בחנות ללא מחירים הכלל אינו נאכף כלל. הלקוח לא רואה
+      // סכומים, ולכן חסימה על סף שהוא לא יכול למדוד הייתה משאירה אותו תקוע
+      // בלי דרך לדעת כמה חסר. השדה עצמו (‎minimumOrderAmount) עדיין נטען
+      // מהגדרת המשלוח ליעד ומשמש כשהמחירים גלויים.
+      // ראה src/utils/priceVisibility.js
+      if (
+        !HIDE_PRICES &&
+        minimumOrderAmount !== undefined &&
+        customCartTotal < minimumOrderAmount
+      ) {
         const cityName = userInfo?.address?.city?.city_name_he || guestChosenCity?.city_name_he || "";
         notifyError(t("minimumOrderAmount", { amount: minimumOrderAmount, city: cityName }));
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -424,8 +428,17 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
 
           orderService = OrderServices.addOrder(orderInfo);
         } else { // משתמש אורח - הזמנה כאורח
-          // איסוף פרטי האורח מהטופס
-          const guestCity = data.guestCity || data.chosenCity;
+          /*
+           * העיר מגיעה מ-guestChosenCity, לא מהטופס.
+           *
+           * בורר העיר הוא react-select שכותב ל-state בלבד ואינו רשום
+           * ב-react-hook-form, ולכן data.guestCity היה ריק בכל הזמנה ראשונה של
+           * אורח. הערך נשלח undefined, השרת דחה ב-400 ("נא להזין את כל השדות
+           * החובה"), והאורח לא יכול היה להזמין בלחיצה הראשונה.
+           *
+           * בנקודה הזו הערך מובטח: הוולידציה למעלה עוצרת שליחה בלי עיר.
+           */
+          const guestCity = guestChosenCity;
 
           orderInfo = {
             // פרטי היוזר האורח

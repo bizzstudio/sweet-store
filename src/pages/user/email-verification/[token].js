@@ -36,7 +36,7 @@ const EmailVerification = ({ params }) => {
       })
       .catch((err) => {
         setLoading(false);
-        setError(err ? err.response.data.message : err.message);
+        setError(err?.response?.data?.message || err?.message);
       });
   }, []);
 

@@ -28,6 +28,16 @@ const withPWA = require("next-pwa")({
 const baseConfig = {
   reactStrictMode: true,
   basePath,
+
+  // הסתרת המחירים בחנות (ראה src/utils/priceVisibility.js).
+  // ההגדרה כאן ולא רק ב-.env בכוונה: מפתח תחת "env" נצרב כקבוע לתוך *שני*
+  // ה-bundles — של השרת ושל הדפדפן — בזמן ה-build. בלעדיה הערך היה נקרא
+  // בזמן ריצה, ואז הגדרה של המשתנה בסביבת השרת בלבד (PM2 / docker-compose)
+  // בלי build הייתה גורמת ל-SSR לרנדר מחירים ולדפדפן להסתיר אותם — כלומר
+  // hydration mismatch וריצוד. ברירת המחדל היא "true" (בלי מחירים).
+  env: {
+    NEXT_PUBLIC_HIDE_PRICES: process.env.NEXT_PUBLIC_HIDE_PRICES ?? "true",
+  },
   eslint: { ignoreDuringBuilds: true },
   i18n: { locales: ["he"], defaultLocale: "he" },
 

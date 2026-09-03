@@ -9,6 +9,7 @@ import SettingServices from "@services/SettingServices";
 import useTranslation from "next-translate/useTranslation";
 import useCart from "@hooks/useCart";
 import Calculating from "./Calculating";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const StickyCart = () => {
   const { totalItems, customCartTotal } = useCart();
@@ -19,10 +20,10 @@ const StickyCart = () => {
   const currency = globalSetting?.default_currency || "₪";
 
   return (
-    <button aria-label="Cart" onClick={toggleCartDrawer} className="absolute">
+    <button type="button" aria-label={t("common:openCart")} onClick={toggleCartDrawer} className="absolute">
       <div className="left-0 w-35 float-right fixed top-2/4 bottom-2/4 align-middle cursor-pointer z-30 hidden lg:block xl:block max-w-[140px]">
       <div className="shadow-xl rounded-lg">
-        <div className="flex flex-col items-center justify-center bg-white rounded-tr-lg p-2 text-gray-700 border-mainColor-dark border">
+        <div className={`flex flex-col items-center justify-center bg-white rounded-tr-lg p-2 text-gray-700 border-mainColor-dark border ${HIDE_PRICES ? "rounded-br-lg" : ""}`}>
           <span className="text-2xl mb-1 text-mainColor-dark">
             <IoBagHandleOutline />
           </span>
@@ -30,14 +31,17 @@ const StickyCart = () => {
             {totalItems} {t("common:items")}
           </span>
         </div>
-        <div className="flex flex-row items-center justify-center bg-mainColor-dark p-2 text-white text-base font-serif font-medium rounded-br-lg mx-auto">
-        {typeof customCartTotal === 'number' ?
-            <>
-              {customCartTotal.toFixed(2)}
-              <small>{currency}</small>
-            </>
-            : <Calculating showText={false} />}
-        </div>
+        {/* חנות ללא מחירים — רצועת הסכום התחתונה יורדת לגמרי */}
+        {!HIDE_PRICES && (
+          <div className="flex flex-row items-center justify-center bg-mainColor-dark p-2 text-white text-base font-serif font-medium rounded-br-lg mx-auto">
+            {typeof customCartTotal === 'number' ?
+                <>
+                  {customCartTotal.toFixed(2)}
+                  <small>{currency}</small>
+                </>
+                : <Calculating showText={false} />}
+          </div>
+        )}
         </div>
       </div>
     </button>

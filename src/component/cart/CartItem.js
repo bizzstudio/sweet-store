@@ -12,6 +12,7 @@ import { SidebarContext } from "@context/SidebarContext";
 import useCart from "@hooks/useCart";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 import { assetFromSetting } from "@utils/basePath";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const CartItem = ({ item, currency, updateTotalPrice }) => {
   const { updateItemQuantity, removeItem, updateItem, items } = useCart();
@@ -140,25 +141,37 @@ const CartItem = ({ item, currency, updateTotalPrice }) => {
         >
           {showingTranslateValue(item.title)}
         </Link>
-        {/* <span className="text-xs text-gray-400 mb-1">
+        {/* <span className="text-xs text-gray-500 mb-1">
           Item Price ${item.price}
         </span> */}
         <div className="flex items-center justify-between gap-1">
           <div className="font-bold text-sm md:text-base text-heading leading-5">
-            {/* מוצר מתנה (rewardGift) */}
-            {isFreeGift ? (
+            {/* חנות ללא מחירים — משאירים רק את הכמות ואת שם המבצע.
+                ראה src/utils/priceVisibility.js */}
+            {HIDE_PRICES ? (
+              <div className="font-normal">
+                {isFreeGift && item.quantity > 1 && (
+                  <span className="text-xs text-gray-500">{item.quantity}x</span>
+                )}
+                {offerTitle && (
+                  <div className="text-xs text-mainColor-dark mt-0.5">
+                    {offerTitle}
+                  </div>
+                )}
+              </div>
+            ) : isFreeGift ? (
               <div>
                 {item.quantity === 1 ? (
                   // יחידה אחת - הכל חינם
                   <div className="flex items-center gap-2">
-                    <del className="text-xs font-normal text-gray-400">
+                    <del className="text-xs font-normal text-gray-500">
                       {currency}{item.prices?.price.toFixed(2)}
                     </del>
                   </div>
                 ) : (
                   // יותר מיחידה - כל הכמות בחינם
                   <div className="flex items-center gap-2">
-                    <del className="text-xs font-normal text-gray-400">
+                    <del className="text-xs font-normal text-gray-500">
                       {currency}{(item.prices?.price * item.quantity).toFixed(2)}
                     </del>
                     <span className="text-xs text-gray-500">{item.quantity}x</span>
@@ -173,7 +186,7 @@ const CartItem = ({ item, currency, updateTotalPrice }) => {
                 <span>
                   {/* אם יש הנחה מופיע בקטן המחיר המקורי */}
                   {totalPrice < item.prices?.price * item.quantity &&
-                    <del className="text-xs font-normal text-gray-400 mr-1">
+                    <del className="text-xs font-normal text-gray-500 mr-1">
                       {(item.prices?.price * item.quantity).toFixed(2)}
                     </del>}
                   {currency}
@@ -185,7 +198,7 @@ const CartItem = ({ item, currency, updateTotalPrice }) => {
                   <div className="mt-0.5">
                     {/* פירוט מפורט של כל מבצע */}
                     {offerDetails.length > 0 && (
-                      <div className="text-xs text-gray-400 mt-0.5">
+                      <div className="text-xs text-gray-500 mt-0.5">
                         {/* מציגים כל מבצע עם הכמות שלו */}
                         {offerDetails.map((detail, idx) => {
                           if (detail.quantityInOffer > 0) {
@@ -245,7 +258,7 @@ const CartItem = ({ item, currency, updateTotalPrice }) => {
               <button
                 type="button"
                 onClick={() => removeItem(item.id)}
-                className="hover:text-red-600 text-red-400 text-lg cursor-pointer"
+                className="hover:text-red-600 text-red-600 text-lg cursor-pointer"
               >
                 <FiTrash2 />
               </button>

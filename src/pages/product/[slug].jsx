@@ -21,6 +21,7 @@ import {
 
 // Internal import
 import Price from "@component/common/Price";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 import Stock from "@component/common/Stock";
 import Tags from "@component/common/Tags";
 import Layout from "@layout/Layout";
@@ -384,6 +385,12 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
       ? "https://schema.org/InStock"
       : "https://schema.org/OutOfStock";
 
+  // ‎offers מכיל את המחיר, ו-JSON-LD נכתב אל תוך ה-HTML עצמו: השארתו כאן
+  // הייתה מדליפה את המחיר לכל מי שפותח "הצג מקור", ובעיקר מגישה אותו
+  // ל-Google להצגה כ-rich result בתוצאות החיפוש — כלומר מחיר גלוי לגמרי
+  // בחנות שאמורה להיות בלי מחירים. ‎offers הוא שדה מומלץ ולא חובה בסכימת
+  // Product, ולכן השמטתו משאירה מבנה תקין (בניגוד ל-Offer בלי price).
+  // ראה src/utils/priceVisibility.js
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -392,14 +399,18 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
     description: showingTranslateValue(product.description),
     image: [productImage],
     sku: product.sku,
-    offers: {
-      "@type": "Offer",
-      priceCurrency: "ILS",
-      price: basePrice,
-      availability,
-      url: productUrl,
-      itemCondition: "https://schema.org/NewCondition",
-    },
+    ...(HIDE_PRICES
+      ? {}
+      : {
+          offers: {
+            "@type": "Offer",
+            priceCurrency: "ILS",
+            price: basePrice,
+            availability,
+            url: productUrl,
+            itemCondition: "https://schema.org/NewCondition",
+          },
+        }),
   };
 
   // console.log("discount", discount);
@@ -445,34 +456,42 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
         >
           <div className="px-0 py-4 lg:py-10">
             <div className="mx-auto px-3 lg:px-10 max-w-screen-2xl">
-              <div className="flex items-center pb-4">
-                <ol className="flex items-center w-full min-w-0 overflow-hidden font-serif">
+              {/* ‎<nav aria-label> — בלי זה ה-‎<ol> הזה הוא רשימה סתמית, ולא
+                  "מיקומך באתר" שקורא מסך יכול לדלג אליה.
+                  שינוי נוסף: קודם היה כאן ‎<button> בתוך ‎<Link> — HTML לא חוקי
+                  (רכיב אינטראקטיבי בתוך רכיב אינטראקטיבי). התוצאה: שתי עצירות
+                  Tab לכל פירור, והכרזה כפולה של "לחצן, קישור". */}
+              <nav aria-label={t("common:breadcrumb")} className="flex items-center pb-4">
+                <ol className="flex items-center w-full min-w-0 overflow-hidden font-serif text-gray-700">
                   {breadcrumbItems.map((item, index) => (
                     <Fragment key={index}>
                       {index > 0 && (
-                        <li className="text-xs sm:text-sm mt-[1px] flex-shrink-0">
+                        <li aria-hidden="true" className="text-xs sm:text-sm mt-[1px] flex-shrink-0">
                           <FiChevronLeft />
                         </li>
                       )}
-                      <li className={`text-xs sm:text-sm ${index === breadcrumbItems.length - 1 ? 'min-w-0 flex-1 overflow-hidden' : 'flex-shrink-0'} ${index === 0 ? 'pr-1' : index === breadcrumbItems.length - 1 ? 'px-1' : 'pl-1'} transition duration-200 ease-in ${item.isActive ? '' : 'cursor-pointer hover:text-black font-semibold'}`}>
+                      <li className={`text-xs sm:text-sm ${index === breadcrumbItems.length - 1 ? 'min-w-0 flex-1 overflow-hidden' : 'flex-shrink-0'} ${index === 0 ? 'pr-1' : index === breadcrumbItems.length - 1 ? 'px-1' : 'pl-1'} transition duration-200 ease-in`}>
                         {item.href ? (
-                          <Link href={item.href} className={index === breadcrumbItems.length - 1 ? 'block truncate' : 'block'}>
-                            <button
-                              type="button"
-                              onClick={() => setIsLoading(!isLoading)}
-                              className={index === breadcrumbItems.length - 1 ? 'truncate w-full text-left' : ''}
-                            >
-                              {item.name}
-                            </button>
+                          <Link
+                            href={item.href}
+                            onClick={() => setIsLoading(!isLoading)}
+                            className={`py-1 hover:text-black hover:underline underline-offset-2 font-semibold ${index === breadcrumbItems.length - 1 ? 'block truncate' : 'block'}`}
+                          >
+                            {item.name}
                           </Link>
                         ) : (
-                          <span className={index === breadcrumbItems.length - 1 ? 'block truncate' : 'block'}>{item.name}</span>
+                          <span
+                            aria-current="page"
+                            className={`font-bold text-gray-900 ${index === breadcrumbItems.length - 1 ? 'block truncate' : 'block'}`}
+                          >
+                            {item.name}
+                          </span>
                         )}
                       </li>
                     </Fragment>
                   ))}
                 </ol>
-              </div>
+              </nav>
               {/* <div className="rounded-lg p-3 lg:p-12 bg-white"> */}
               <div className="w-full rounded-lg p-3 lg:p-12 bg-white">
                 <div className="w-full flex flex-col items-center justify-center lg:flex-row">
@@ -500,7 +519,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                   <div className="relative lg:w-[500px] lg:h-[500px] lg:max-h-[300px] md:w-[300px] md:h-[300px] w-[250px] h-[250px]">
                     <ImageWithFallback
                       src={img || product.image[0]}
-                      alt="product"
+                      alt={showingTranslateValue(product?.title)}
                       noPadding={true}
                       outOfStock={stockLoaded && stock <= 0}
                       slug
@@ -522,13 +541,13 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                 <div className="flex flex-col md:flex-row md:w-1/2 lg:flex-row lg:w-1/2 xl:flex-row xl:w-1/2">
                   <div className="xl:pr-6 md:pr-6 w-full">
                     <div className="mb-3">
-                      <h1 className="leading-7 text-lg md:text-xl lg:text-2xl mb-1 font-semibold font-serif text-gray-800">
+                      <h1 className="leading-tight text-xl md:text-2xl lg:text-3xl mb-1 font-bold font-serif text-gray-900">
                         {showingTranslateValue(product?.title)}
                       </h1>
 
-                      <p className="uppercase font-serif font-medium text-gray-500 text-sm">
+                      <p className="uppercase font-serif font-medium text-gray-600 text-sm">
                         {t("common:SKU")} :{" "}
-                        <span className="font-bold text-gray-600">
+                        <span className="font-bold text-gray-800">
                           {product.sku}
                         </span>
                       </p>
@@ -578,24 +597,32 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                           <br />
                           {Object?.keys(product?.description)?.includes(lang)
                             ? product?.description[lang]?.length > 230 && (
-                              <span
+                              // ‎<span onClick> אינו נגיש במקלדת ואינו מוכרז
+                              // כרכיב לחיץ. ‎<button> + aria-expanded מתקן זאת.
+                              <button
+                                type="button"
                                 onClick={() => setIsReadMore(!isReadMore)}
+                                aria-expanded={!isReadMore}
                                 className="read-or-hide"
                               >
                                 {isReadMore
                                   ? t("common:moreInfo")
                                   : t("common:showLess")}
-                              </span>
+                              </button>
                             )
                             : product?.description?.en?.length > 230 && (
-                              <span
+                              // ‎<span onClick> אינו נגיש במקלדת ואינו מוכרז
+                              // כרכיב לחיץ. ‎<button> + aria-expanded מתקן זאת.
+                              <button
+                                type="button"
                                 onClick={() => setIsReadMore(!isReadMore)}
+                                aria-expanded={!isReadMore}
                                 className="read-or-hide"
                               >
                                 {isReadMore
                                   ? t("common:moreInfo")
                                   : t("common:showLess")}
-                              </span>
+                              </button>
                             )}
                         </div>}
 
@@ -609,25 +636,40 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                         <div className="flex items-center mt-4">
                           <div className="flex flex-wrap items-start justify-start w-full gap-3">
                             <div className="group flex items-center justify-between rounded-md overflow-hidden flex-shrink-0 border h-11 md:h-12 border-gray-300">
+                              {/* ‎focus:outline-none ללא תחליף הסתיר לגמרי את
+                                  סימון הפוקוס. השכבה הגלובלית ב-custom.css
+                                  מחזירה אותו ב-‎:focus-visible, וכאן הוא
+                                  מוסר כדי לא להתנגש. */}
                               <button
+                                type="button"
                                 onClick={() => setItem(item - 1)}
                                 disabled={item === 1}
-                                className="flex items-center justify-center flex-shrink-0 h-full transition ease-in-out duration-300 focus:outline-none w-8 md:w-12 text-heading border-e border-gray-300 hover:text-gray-500"
+                                aria-label={t("common:decreaseQuantity")}
+                                className="flex items-center justify-center flex-shrink-0 h-full transition ease-in-out duration-300 w-11 md:w-12 text-heading border-e border-gray-300 hover:text-gray-500 disabled:opacity-40"
                               >
                                 <span className="text-dark text-base">
-                                  <FiMinus />
+                                  <FiMinus aria-hidden="true" />
                                 </span>
                               </button>
-                              <p className="font-semibold flex items-center justify-center h-full  transition-colors duration-250 ease-in-out cursor-default flex-shrink-0 text-base text-heading w-8  md:w-20 xl:w-24">
+                              {/* ‎aria-live: הכמות משתנה בלחיצה, והפוקוס נשאר
+                                  על הכפתור — בלי ההכרזה אין שום משוב. */}
+                              <p
+                                aria-live="polite"
+                                aria-atomic="true"
+                                className="font-semibold flex items-center justify-center h-full transition-colors duration-250 ease-in-out cursor-default flex-shrink-0 text-base text-heading w-10 md:w-20 xl:w-24 tabular-nums"
+                              >
+                                <span className="sr-only">{t("common:quantity")}: </span>
                                 {item}
                               </p>
                               <button
+                                type="button"
                                 onClick={() => setItem(item + 1)}
                                 disabled={selectVariant?.quantity <= item}
-                                className="flex items-center justify-center h-full flex-shrink-0 transition ease-in-out duration-300 focus:outline-none w-8 md:w-12 text-heading border-s border-gray-300 hover:text-gray-500"
+                                aria-label={t("common:increaseQuantity")}
+                                className="flex items-center justify-center h-full flex-shrink-0 transition ease-in-out duration-300 w-11 md:w-12 text-heading border-s border-gray-300 hover:text-gray-500 disabled:opacity-40"
                               >
                                 <span className="text-dark text-base">
-                                  <FiPlus />
+                                  <FiPlus aria-hidden="true" />
                                 </span>
                               </button>
                             </div>
@@ -657,16 +699,13 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                           <span className="text-gray-800">
                             {t("common:category")}:
                           </span>{" "}
+                          {/* ‎<button> בתוך ‎<Link> — ראה ההערה בפירורי הלחם */}
                           <Link
                             href={parentCategory ? `/product-category/${getCategorySlug(parentCategory)}/${getCategorySlug(foundCategory)}` : `/product-category/${getCategorySlug(foundCategory)}`}
+                            onClick={() => setIsLoading(!isLoading)}
+                            className="text-gray-700 font-serif font-medium underline underline-offset-2 ml-2 hover:text-mainColor-superDark"
                           >
-                            <button
-                              type="button"
-                              className="text-gray-600 font-serif font-medium underline ml-2 hover:text-mainColor-dark"
-                              onClick={() => setIsLoading(!isLoading)}
-                            >
-                              {showingTranslateValue(product?.category?.name)}{product?.weight ? "," : ""}
-                            </button>
+                            {showingTranslateValue(product?.category?.name)}{product?.weight ? "," : ""}
                           </Link>
                           {product?.weight ? (
                             <>

@@ -56,7 +56,7 @@ const CustomerNameVoiceInput = ({ value, onChange, disabled = false, onVoiceStar
                     disabled={disabled}
                     className={`flex items-center justify-center p-3 rounded-lg transition-colors duration-200 border border-gray-200 ${isVoiceActive
                         ? 'bg-mainColor text-white'
-                        : 'text-blackhover:text-mainColor-dark hover:bg-mainColor-superLight'
+                        : 'text-black hover:text-mainColor-dark hover:bg-mainColor-superLight'
                         } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                     title={t("common:voiceInputCustomerName")}
                 >

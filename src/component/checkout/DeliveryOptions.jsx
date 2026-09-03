@@ -31,8 +31,8 @@ const DeliveryOptions = ({ register, selectedCallOnArrival, isDeliverable }) => 
                             />
                             <div className="flex items-center gap-3 ms-2">
                                 <MdOutlinePhoneEnabled className={`w-5 h-5 transition-colors ${selectedCallOnArrival === "true"
-                                    ? "text-mainColor"
-                                    : "text-gray-500 group-hover:text-mainColor"
+                                    ? "text-mainColor-dark"
+                                    : "text-gray-500 group-hover:text-mainColor-dark"
                                     }`} />
                                 <span className={`text-sm font-medium transition-colors ${selectedCallOnArrival === "true"
                                     ? "text-stone-700"
@@ -55,8 +55,8 @@ const DeliveryOptions = ({ register, selectedCallOnArrival, isDeliverable }) => 
                             />
                             <div className="flex items-center gap-3 ms-2">
                                 <FaDoorOpen className={`w-5 h-5 transition-colors ${selectedCallOnArrival === "false"
-                                    ? "text-mainColor"
-                                    : "text-gray-500 group-hover:text-mainColor"
+                                    ? "text-mainColor-dark"
+                                    : "text-gray-500 group-hover:text-mainColor-dark"
                                     }`} />
                                 <span className={`text-sm font-medium transition-colors ${selectedCallOnArrival === "false"
                                     ? "text-stone-700"

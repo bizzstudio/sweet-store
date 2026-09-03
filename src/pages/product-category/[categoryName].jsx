@@ -10,9 +10,8 @@ import ProductCard from "@component/product/ProductCard";
 import { SidebarContext } from "@context/SidebarContext";
 import { useRouter } from "next/router";
 import AttributeServices from "@services/AttributeServices";
-import MinimalTitle from "@component/common/MinimalTitle";
 import MainBT from "@component/button/MainBT";
-import SortDropdown from "@component/common/SortDropdown";
+import CatalogHeader from "@component/category/CatalogHeader";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 
 // כמה מוצרים נטענים בכל פעם. הקטגוריה הגדולה בחנות מונה ~3,600 מוצרים, ולכן
@@ -26,7 +25,7 @@ const CategoryPage = ({ products, totalProducts, attributes }) => {
     const { offers, categories, setIsLoading } = useContext(SidebarContext);
     const router = useRouter();
     const { categoryName } = router.query; // זה יכול להיות slug או שם
-    const { showingTranslateValue, findMainCategory } = useUtilsFunction();
+    const { showingTranslateValue, findMainCategory, getCategorySlug } = useUtilsFunction();
 
     // מציאת הקטגוריה המלאה לפי slug או שם
     const currentCategory = findMainCategory(categories, categoryName);
@@ -120,31 +119,20 @@ const CategoryPage = ({ products, totalProducts, attributes }) => {
             description={`גלו את מגוון המוצרים בקטגוריית ${displayCategoryName}. איכות מובטחת, מחירים מעולים ומשלוח מהיר.`}
         >
             <div className="mx-auto max-w-screen-2xl px-3 sm:px-10">
-                <div className="flex py-5">
+                <div className="flex pb-5">
                     <div className="flex w-full">
                         <div className="w-full">
-                            <div className="my-3 bg-mainColor-light border border-gray-100 rounded-md p-3">
-                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                                    <MinimalTitle title={displayCategoryName} />
-                                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-                                        <h6 className="text-sm font-serif text-right">
-                                            {t("common:totalI")}{" "}
-                                            <span className="font-bold">{total}</span>{" "}
-                                            {t("common:itemsFound")}
-                                        </h6>
-
-                                        {/* הוספת רכיב המיון */}
-                                        {total > 0 && (
-                                            <div className="flex justify-center sm:justify-end">
-                                                <SortDropdown
-                                                    sortedField={sortedField}
-                                                    setSortedField={handleSortChange}
-                                                />
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
+                            <CatalogHeader
+                                title={displayCategoryName}
+                                breadcrumbs={[{ label: displayCategoryName }]}
+                                totalProducts={total}
+                                parentCategory={currentCategory}
+                                parentCategorySlug={
+                                    currentCategory ? getCategorySlug(currentCategory) : null
+                                }
+                                sortedField={sortedField}
+                                onSortChange={handleSortChange}
+                            />
 
                             {items.length === 0 && !isFetching && (
                                 <div className="flex flex-col items-center text-center align-middle mx-auto p-5 my-5">
@@ -165,28 +153,45 @@ const CategoryPage = ({ products, totalProducts, attributes }) => {
                                 gridTemplateColumns מ-window.innerWidth בתוך ה-render —
                                 ערך שנקרא פעם אחת ולא מתעדכן בסיבוב מסך או בשינוי גודל
                                 חלון, ומונע כל אפשרות לרנדר את העמוד בשרת. */}
-                            <div className="grid grid-cols-1 xss:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3 lg:gap-3">
+                            {/* ‎<ul> ולא ‎<div>: קורא מסך מכריז "רשימה בת 48
+                                פריטים" ומאפשר קפיצה בין הפריטים. ‎list-none
+                                נדרש כי ‎@tailwind base מאפס את הסימון ממילא.
+                                ‎xl:grid-cols-6 הורד ל-5: בשש עמודות הכרטיס
+                                צר מכדי להכיל שם מוצר בשתי שורות + כפתור
+                                "הוסף לסל" עם טקסט. */}
+                            <ul className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 md:gap-3 list-none p-0">
                                 {items.map((product) => (
-                                    <ProductCard
-                                        key={product._id}
-                                        product={product}
-                                        attributes={attributes}
-                                        offers={offers}
-                                    />
+                                    <li key={product._id} className="flex">
+                                        <div className="w-full">
+                                            <ProductCard
+                                                product={product}
+                                                attributes={attributes}
+                                                offers={offers}
+                                            />
+                                        </div>
+                                    </li>
                                 ))}
-                            </div>
+                            </ul>
 
                             {hasMore && (
-                                <div className="w-full flex justify-center mt-5">
+                                <div className="w-full flex justify-center mt-6">
                                     <MainBT
                                         disabled={isFetching}
                                         onClick={() => fetchPage(page + 1, sortedField, { append: true })}
-                                        className="!w-auto px-6"
+                                        // ‎aria-busy: הכפתור מתחלף לטקסט "טוען"
+                                        // אבל בלי זה קורא מסך לא מכריז את השינוי
+                                        aria-busy={isFetching}
+                                        className="!w-auto px-8"
                                     >
                                         {isFetching ? t("common:loadingMore") : t("common:loadMoreBtn")}
                                     </MainBT>
                                 </div>
                             )}
+                            {/* אזור הכרזה חי: אחרי "טען עוד" הפוקוס נשאר על
+                                הכפתור ואין שום סימן שמוצרים חדשים נוספו. */}
+                            <p className="sr-only" role="status" aria-live="polite">
+                                {items.length} / {total}
+                            </p>
                         </div>
                     </div>
                 </div>

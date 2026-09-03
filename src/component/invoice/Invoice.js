@@ -11,6 +11,7 @@ import OrderTable from "@component/order/OrderTable";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 import useTranslation from "next-translate/useTranslation";
 import useGetSetting from "@hooks/useGetSetting";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const Invoice = ({ data, printRef, globalSetting, currency }) => {
   // console.log('invoice data',data)
@@ -48,9 +49,9 @@ const Invoice = ({ data, printRef, globalSetting, currency }) => {
                 switch (data?.status?.name) {
                   case "delivered":
                   case "POS-Completed":
-                    return <span className="text-mainColor">{data?.status?.heName}</span>;
+                    return <span className="text-mainColor-dark">{data?.status?.heName}</span>;
                   case "Pending":
-                    return <span className="text-gray-400">{data?.status?.heName}</span>;
+                    return <span className="text-gray-500">{data?.status?.heName}</span>;
                   case "Cancel":
                     return <span className="text-red-500">{data?.status?.heName}</span>;
                   case "Processing":
@@ -146,19 +147,25 @@ const Invoice = ({ data, printRef, globalSetting, currency }) => {
                   >
                     {t("common:quantity")}
                   </th>
-                  <th
-                    scope="col"
-                    className="font-serif font-semibold px-6 py-2 text-gray-700 uppercase tracking-wider text-center"
-                  >
-                    {t("common:itemPrice")}
-                  </th>
+                  {/* חנות ללא מחירים — שתי הכותרות יורדות יחד עם התאים
+                      שמייצר OrderTable.js. ראה src/utils/priceVisibility.js */}
+                  {!HIDE_PRICES && (
+                    <>
+                      <th
+                        scope="col"
+                        className="font-serif font-semibold px-6 py-2 text-gray-700 uppercase tracking-wider text-center"
+                      >
+                        {t("common:itemPrice")}
+                      </th>
 
-                  <th
-                    scope="col"
-                    className="font-serif font-semibold px-6 py-2 text-gray-700 uppercase tracking-wider text-right"
-                  >
-                    {t("common:amount")}
-                  </th>
+                      <th
+                        scope="col"
+                        className="font-serif font-semibold px-6 py-2 text-gray-700 uppercase tracking-wider text-right"
+                      >
+                        {t("common:amount")}
+                      </th>
+                    </>
+                  )}
                 </tr>
               </thead>
               <OrderTable data={data} currency={currency} />
@@ -178,6 +185,7 @@ const Invoice = ({ data, printRef, globalSetting, currency }) => {
               {t(`common:${data?.paymentMethod}`, {}, { default: data?.paymentMethod })}
             </span>
           </div>
+          {!HIDE_PRICES && (
           <div className="mb-3 md:mb-0 lg:mb-0  flex flex-col sm:flex-wrap">
             <span className="mb-1 font-bold font-serif text-sm uppercase text-gray-600 block">
               {t("common:shippingCost")}
@@ -188,6 +196,8 @@ const Invoice = ({ data, printRef, globalSetting, currency }) => {
               {getNumberTwo(data.shippingCost)}
             </span>
           </div>
+          )}
+          {!HIDE_PRICES && (
           <div className="mb-3 md:mb-0 lg:mb-0  flex flex-col sm:flex-wrap">
             <span className="mb-1 font-bold font-serif text-sm uppercase text-gray-600 block">
               {showingTranslateValue(
@@ -199,7 +209,8 @@ const Invoice = ({ data, printRef, globalSetting, currency }) => {
               {getNumberTwo(data.discount)}
             </span>
           </div>
-          {data.offerDiscount && data.offerDiscount > 0 && (
+          )}
+          {!HIDE_PRICES && data.offerDiscount && data.offerDiscount > 0 && (
             <div className="mb-3 md:mb-0 lg:mb-0  flex flex-col sm:flex-wrap">
               <span className="mb-1 font-bold font-serif text-sm uppercase text-gray-600 block">
                 {t("common:thresholdDiscount")}
@@ -210,15 +221,17 @@ const Invoice = ({ data, printRef, globalSetting, currency }) => {
               </span>
             </div>
           )}
-          <div className="flex flex-col sm:flex-wrap">
-            <span className="mb-1 font-bold font-serif text-sm uppercase text-gray-600 block">
-              {t("common:totalAmount")}
-            </span>
-            <span className="text-2xl font-serif font-bold text-red-500 block">
-              {currency}
-              {getNumberTwo(data.total)}
-            </span>
-          </div>
+          {!HIDE_PRICES && (
+            <div className="flex flex-col sm:flex-wrap">
+              <span className="mb-1 font-bold font-serif text-sm uppercase text-gray-600 block">
+                {t("common:totalAmount")}
+              </span>
+              <span className="text-2xl font-serif font-bold text-red-500 block">
+                {currency}
+                {getNumberTwo(data.total)}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>

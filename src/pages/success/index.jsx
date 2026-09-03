@@ -21,6 +21,7 @@ import googleAnalytics, { trackPurchase } from "@services/googleAnalytics";
 import { trackFbPurchase } from "@services/facebookPixel";
 import OrderServices from "@services/OrderServices";
 import { UserContext } from "@context/UserContext";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const Success = () => {
   const { isLoading, setIsLoading } = useContext(SidebarContext);
@@ -161,7 +162,10 @@ const Success = () => {
               <div className="mt-5 w-full max-w-md rounded-lg border-2 border-dashed border-amber-400 bg-amber-50 px-6 py-5 text-center">
                 <p className="text-lg font-bold text-amber-800">🎁 מתנה לקנייה הבאה!</p>
                 <p className="mt-1 text-sm text-gray-700">
-                  קיבלת קופון בשווי 25 ₪ לקנייה הבאה (בקנייה מעל 150 ₪). שמרו את הקוד:
+                  {/* ראה src/utils/priceVisibility.js */}
+                  {HIDE_PRICES
+                    ? "קיבלתם קופון הנחה לקנייה הבאה. שמרו את הקוד:"
+                    : "קיבלת קופון בשווי 25 ₪ לקנייה הבאה (בקנייה מעל 150 ₪). שמרו את הקוד:"}
                 </p>
                 {/* dir=ltr + ריווח מתון: הקוד חייב להיקרא בדיוק כפי שהוא, בלי תווים שנראים כרווח */}
                 <p

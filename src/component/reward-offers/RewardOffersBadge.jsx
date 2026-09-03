@@ -23,7 +23,7 @@ const RewardOffersBadge = ({ onClick, count = 0, className = "" }) => {
           : t("common:giftAvailable")}
       </span>
             {count > 1 && (
-                <span className="bg-white text-mainColor rounded-full px-2 py-0.5 text-xs font-bold ml-1">
+                <span className="bg-white text-mainColor-dark rounded-full px-2 py-0.5 text-xs font-bold ml-1">
                     {count}
                 </span>
             )}

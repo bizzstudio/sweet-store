@@ -105,7 +105,7 @@ const Uploader = ({ setImageUrl, imageUrl }) => {
           <FiUploadCloud className="text-3xl text-mainColor" />
         </span>
         <p className="text-sm mt-2">Drag your image here</p>
-        <em className="text-xs text-gray-400">
+        <em className="text-xs text-gray-500">
           (Only *.jpeg and *.png images will be accepted)
         </em>
       </div>

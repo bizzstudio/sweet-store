@@ -154,7 +154,9 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
       )}
 
       <>
-        <div
+        {/* ‎<header> ולא ‎<div>: אזור ציון banner שקורא מסך מנווט אליו ישירות.
+            לפני כן לא היה באתר אף landmark — כל העמוד היה ‎div אחד גדול. */}
+        <header
           ref={navbarRef}
           className={`${disableSticky ? "relative" : "sticky top-0"} z-20 bg-white flex xl:flex-row w-full drop-shadow-lg ${cashierPage ? "border-b" : ""}`}
         >
@@ -168,6 +170,7 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
                   ? CLOSED_HOME
                   : "/"
             }
+            aria-label={t("common:breadcrumbHome")}
             className="absolute right-0 top-0 h-full flex items-center px-3 sm:px-5 pointer-events-auto z-10"
             // תקרת רוחב: הלוגו רחב פי ~5.5 מגובהו, ובלעדיה הוא בלע במסך
             // צר כמעט את כל ההידר והשאיר לשורת החיפוש כמה עשרות פיקסלים
@@ -208,21 +211,44 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
                     <div className="w-full" />
                   ) : (
                   <div className="flex flex-col w-full max-w-[700px] mx-auto px-1.5 sm:px-2">
-                    <form onSubmit={handleSubmit}
+                    {/* ‎role="search" הופך את השורה לאזור ציון נפרד — קוראי מסך
+                        מציעים קפיצה ישירה ל"חיפוש" ברשימת אזורי הדף. */}
+                    <form onSubmit={handleSubmit} role="search" aria-label={t("common:submitSearch")}
                       className={`flex relative w-full h-[32px] sm:h-[40px] lg:min-w-[250px] items-center px-2 sm:px-3.5 rounded-[10px] transition-[border-radius] duration-500 ease-in-out bg-gray-100 focus-within:rounded-[1px] before:content-[''] before:absolute before:bg-mainColor before:transform before:scale-x-0 before:origin-center before:w-full before:h-[2px] before:left-0 before:bottom-0 before:rounded-[1px] before:transition-transform before:duration-300 before:ease-in-out focus-within:before:scale-100`}>
-                      <button type="submit" className="border-none bg-none text-[#8b8ba7] focus:text-mainColor text-base sm:text-lg flex-shrink-0">
-                        <IoSearchOutline />
+                      <button
+                        type="submit"
+                        aria-label={t("common:submitSearch")}
+                        className="border-none bg-none text-[#6b6b85] focus:text-mainColor-dark text-base sm:text-lg flex-shrink-0 px-1.5 h-full flex items-center"
+                      >
+                        <IoSearchOutline aria-hidden="true" />
                       </button>
+                      {/* ‎placeholder אינו תווית: הוא נעלם ברגע שמקלידים ואינו
+                          מוכרז באופן אמין. תווית ‎sr-only נותנת לשדה שם קבוע. */}
+                      <label htmlFor="store-search" className="sr-only">
+                        {t("common:search-placeholder")}
+                      </label>
                       <input
+                        id="store-search"
                         onChange={(e) => setSearchText(e.target.value)}
                         className="peer text-xs sm:text-sm bg-transparent w-full h-full px-1.5 sm:px-2 py-0 sm:py-[0.7em] border-none focus:outline-none focus:ring-0"
                         placeholder={t(`common:search-placeholder`)}
                         required
-                        type="text"
+                        type="search"
+                        autoComplete="off"
+                        // אין כאן ‎role="combobox": התבנית מחייבת ‎listbox של
+                        // ‎option-ים ומודל מקלדת של חצים + ‎aria-activedescendant,
+                        // וחלון התוצאות כאן הוא רשימת קישורים עם כפתורים בתוכה.
+                        // הכרזת המצב נעשית דרך המונה החי בחלון התוצאות עצמו
+                        // (ראה component/resultWindow/resultWindow.jsx).
                         value={searchText}
                       />
-                      <button onClick={() => { setSearchResults(), setSearchText("") }} type="reset" className="border-none peer-placeholder-shown:opacity-0 peer-placeholder-shown:invisible transition-opacity duration-300 flex-shrink-0" >
-                        <FaX size={10} className="sm:w-3 sm:h-3" />
+                      <button
+                        onClick={() => { setSearchResults(), setSearchText("") }}
+                        type="reset"
+                        aria-label={t("common:clearSearch")}
+                        className="border-none peer-placeholder-shown:opacity-0 peer-placeholder-shown:invisible transition-opacity duration-300 flex-shrink-0 px-1.5 h-full flex items-center"
+                      >
+                        <FaX size={10} className="sm:w-3 sm:h-3" aria-hidden="true" />
                       </button>
 
                       {/* כפתור התמלול הקולי */}
@@ -310,16 +336,24 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
                     {/* אין עגלה כשהחנות סגורה — אי אפשר להזמין */}
                     {!storeUiOff && (
                       <button
-                        aria-label="Total"
+                        // "Total" לא אומר דבר לקורא מסך בעברית, ולא מסר כמה
+                        // פריטים בעגלה. עכשיו התווית כוללת את המספר עצמו.
+                        aria-label={
+                          totalItems > 0
+                            ? `${t("common:openCart")} – ${t("common:cartItemsCount", { count: totalItems })}`
+                            : t("common:openCart")
+                        }
                         onClick={toggleCartDrawer}
-                        className="relative text-2xl font-bold"
+                        className="tap-target relative text-2xl font-bold"
                       >
                         {totalItems === 0 ? null :
-                          <span className="absolute z-10 top-0 right-0 inline-flex items-center justify-center p-1 h-5 text-xs font-medium leading-none text-red-100 transform -translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full" style={{ minWidth: '20px', aspectRatio: '1/1' }}>
+                          // ‎aria-hidden: המספר כבר נאמר ב-aria-label של הכפתור,
+                          // ובלעדיו קורא המסך מקריא אותו פעמיים.
+                          <span aria-hidden="true" className="absolute z-10 top-0 right-0 inline-flex items-center justify-center p-1 h-5 text-xs font-bold leading-none text-white transform -translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full" style={{ minWidth: '20px', aspectRatio: '1/1' }}>
                             {totalItems}
                           </span>
                         }
-                        <FiShoppingCart className="w-6 h-6 drop-shadow-xl" />
+                        <FiShoppingCart className="w-6 h-6 drop-shadow-xl" aria-hidden="true" />
                       </button>
                     )}
 
@@ -327,7 +361,7 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
                     {userInfo?.name ?
                       <Link
                         className="flex items-center justify-center bg-white hover:bg-mainColor hover:text-white text-2xl font-bold w-9 h-9 rounded-full leading-none outline outline-2 outline-mainColor outline-offset-2 hover:scale-110 hover:outline-none transition-all overflow-hidden"
-                        aria-label="Login"
+                        aria-label={t("common:userArea")}
                         href="/user/dashboard"
                       >
                         {imageUrl || userInfo?.image ?
@@ -345,12 +379,12 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
                       // כשהחנות סגורה ההתחברות היא עמוד מלא ולא מודאל
                       storeUiOff ?
                         <Link className="flex items-center justify-center bg-white hover:bg-mainColor hover:text-white text-2xl font-bold w-9 h-9 rounded-full leading-none outline outline-2 outline-mainColor outline-offset-2 hover:scale-110 hover:outline-none transition-all overflow-hidden"
-                          aria-label="Login"
+                          aria-label={t("common:loginToAccount")}
                           href={LOGIN_PATH}>
                           <FiUser className="w-6 h-6 drop-shadow-xl" />
                         </Link> :
                         <button className="flex items-center justify-center bg-white hover:bg-mainColor hover:text-white text-2xl font-bold w-9 h-9 rounded-full leading-none outline outline-2 outline-mainColor outline-offset-2 hover:scale-110 hover:outline-none transition-all overflow-hidden"
-                          aria-label="Login"
+                          aria-label={t("common:loginToAccount")}
                           onClick={() => setModalOpen(!modalOpen)}>
                           <FiUser className="w-6 h-6 drop-shadow-xl" />
                         </button>
@@ -375,7 +409,7 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
               </div>
             </div>
           </div>
-        </div>
+        </header>
 
         {/* פס קטגוריות מתחת ל-navbar - בכל הרזולוציות (תמיד מתחת לחיפוש, לא עולה למעלה).
             כשהחנות סגורה אין גלישה בקטגוריות ולכן הפס יורד לגמרי */}

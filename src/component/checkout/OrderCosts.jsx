@@ -7,6 +7,7 @@ import Calculating from "@component/cart/Calculating";
 import CartItem from "@component/cart/CartItem";
 import useCart from "@hooks/useCart";
 import CheckInput from "@component/form/checkInput";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const OrderCosts = ({
     storeCustomizationSetting,
@@ -67,7 +68,12 @@ const OrderCosts = ({
                     </div>
                 </div>
 
+                {/* חנות ללא מחירים — כל שורות הסכומים יורדות, מינימום ההזמנה
+                    כלול. הכלל עדיין נאכף ב-useCheckoutSubmit, שמנסח את
+                    ההודעה בלי סכום. ראה src/utils/priceVisibility.js */}
+
                 {/* עלות ההזמנה */}
+                {!HIDE_PRICES && (
                 <div className="flex items-center py-2 text-sm w-full font-semibold text-gray-500 last:border-b-0 last:text-base last:pb-0 gap-1.5">
                     {showingTranslateValue(
                         storeCustomizationSetting?.checkout?.sub_total
@@ -86,9 +92,10 @@ const OrderCosts = ({
                         </span>
                     )}
                 </div>
+                )}
 
                 {/* מחיר משלוח - מוצג רק אם יש כתובת נבחרת וזמינה למשלוח */}
-                {((city || guestChosenCity?.city_name_he) && isDeliverable === true) && (
+                {(!HIDE_PRICES && (city || guestChosenCity?.city_name_he) && isDeliverable === true) && (
                     <div className="flex items-center py-2 text-sm w-full font-semibold text-gray-500 last:border-b-0 last:text-base last:pb-0 gap-1.5">
                         {showingTranslateValue(
                             storeCustomizationSetting?.checkout?.shipping_cost
@@ -108,7 +115,7 @@ const OrderCosts = ({
 
                 {/* הבטחת קופון לקנייה הבאה — כשהלקוח משלם משלוח (לא הגיע לסף המשלוח החינם)
                     ורק אם עדיין זכאי (ההטבה חד-פעמית לכל לקוח) */}
-                {(rewardEligible &&
+                {(!HIDE_PRICES && rewardEligible &&
                     (city || guestChosenCity?.city_name_he) &&
                     isDeliverable === true &&
                     Number(shippingCost) > 0 &&
@@ -124,7 +131,7 @@ const OrderCosts = ({
                 )}
 
                 {/* הנחת קופון — רק כשהוחל קופון בפועל */}
-                {couponInfo.couponCode && (
+                {!HIDE_PRICES && couponInfo.couponCode && (
                     <div className="flex items-center py-2 text-sm w-full font-semibold text-gray-500 last:border-b-0 last:text-base last:pb-0 gap-1.5">
                         {showingTranslateValue(
                             storeCustomizationSetting?.checkout?.discount
@@ -156,7 +163,7 @@ const OrderCosts = ({
                 )}
 
                 {/* הנחת מבצע קניה מעל סכום */}
-                {thresholdDiscount > 0 && thresholdDiscountOffer && (
+                {!HIDE_PRICES && thresholdDiscount > 0 && thresholdDiscountOffer && (
                     <div className="flex items-center py-2 text-sm w-full font-semibold text-gray-500 last:border-b-0 last:text-base last:pb-0 gap-1.5">
                         {t("thresholdDiscount")}
                         <span className="ml-auto flex-shrink-0 font-bold text-orange-400">
@@ -170,6 +177,7 @@ const OrderCosts = ({
                 )}
 
                 {/* סה"כ */}
+                {!HIDE_PRICES && (
                 <div className="border-t mt-4">
                     <div className="flex items-center font-bold font-serif justify-between pt-5 text-sm uppercase">
                         {showingTranslateValue(
@@ -185,9 +193,11 @@ const OrderCosts = ({
                         </span>
                     </div>
                 </div>
+                )}
 
-                {/* צ'קבוקס ניוזלטר */}
-                <div className="flex items-center gap-2 mt-4 pt-4 border-t">
+                {/* צ'קבוקס ניוזלטר — כשכל שורות הסכומים מוסתרות אין ביניהן
+                    לבין רשימת המוצרים תוכן, ושני קווי ההפרדה נצמדים זה לזה. */}
+                <div className={`flex items-center gap-2 mt-4 ${HIDE_PRICES ? "" : "pt-4 border-t"}`}>
                     <CheckInput
                         id="checkoutNewsletterOptIn"
                         type="checkbox"

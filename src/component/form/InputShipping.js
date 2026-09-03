@@ -47,19 +47,19 @@ const InputShipping = ({
       <label className={`label w-full px-1.5 ${isDeliverable && isDeliveryOpen ? "cursor-pointer" : "cursor-not-allowed"}`}>
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="text-3xl text-gray-400">
+            <span className="text-3xl text-gray-500">
               {icon}
             </span>
             <div>
-              <h6 className={`flex items-center gap-1 font-serif font-medium text-base ${isDeliverable && isDeliveryOpen ? "text-gray-600" : "text-gray-400"} `}>
-                {value == 1 ? t("common:pickup") : t("common:shipping")} {note && <span className="text-base text-gray-400" title={note}><FiInfo /></span>}
+              <h6 className={`flex items-center gap-1 font-serif font-medium text-base ${isDeliverable && isDeliveryOpen ? "text-gray-600" : "text-gray-500"} `}>
+                {value == 1 ? t("common:pickup") : t("common:shipping")} {note && <span className="text-base text-gray-500" title={note}><FiInfo /></span>}
               </h6>
               {!isDeliveryOpen ?
-                <p className={nextTime ? "text-sm text-red-500 -mt-1 pl-3" : "text-sm text-gray-400 -mt-1"}>
+                <p className={nextTime ? "text-sm text-red-500 -mt-1 pl-3" : "text-sm text-gray-500 -mt-1"}>
                   {t("common:deliveriesNotAvailable")}
                 </p>
                 :
-                !isDeliverable && <p className={nextTime ? "text-sm text-red-500 -mt-1 pl-3" : "text-sm text-gray-400 -mt-1"}>
+                !isDeliverable && <p className={nextTime ? "text-sm text-red-500 -mt-1 pl-3" : "text-sm text-gray-500 -mt-1"}>
                   {nextTime ? `${t("common:nextAvailable")} ${formatDate(nextTime)}` : t("common:cannotDeliver")}
                 </p>}
             </div>
@@ -75,7 +75,7 @@ const InputShipping = ({
             type="radio"
             disabled={!isDeliveryOpen || !isDeliverable}
             value={value}
-            className={`form-radio outline-none focus:ring-0 text-blackbg-transparent cursor-pointer ${!isDeliverable || !isDeliveryOpen ? "cursor-not-allowed" : ""}`}
+            className={`form-radio outline-none focus:ring-0 text-black bg-transparent cursor-pointer ${!isDeliverable || !isDeliveryOpen ? "cursor-not-allowed" : ""}`}
           />
         </div>
       </label>

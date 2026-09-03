@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 import { IoBagHandle } from "react-icons/io5";
 import ReactPaginate from "react-paginate";
 import { FiZoomIn } from "react-icons/fi";
@@ -199,12 +200,12 @@ const MyOrders = () => {
             {loading ? (
               <Loading loading={loading} />
             ) : error ? (
-              <h2 className="text-xl text-center my-10 mx-auto w-11/12 text-red-400">
+              <h2 className="text-xl text-center my-10 mx-auto w-11/12 text-red-600">
                 {error}
               </h2>
             ) : data?.orders?.length === 0 ? (
               <div className="text-center">
-                <span className="flex justify-center my-30 pt-16 text-blackfont-semibold text-6xl text-mainColor">
+                <span className="flex justify-center my-30 pt-16 text-black font-semibold text-6xl text-mainColor">
                   <IoBagHandle />
                 </span>
                 <h2 className="font-medium text-md my-4 text-gray-600">
@@ -260,12 +261,16 @@ const MyOrders = () => {
                             >
                               {t("common:Status")}
                             </th>
-                            <th
-                              scope="col"
-                              className="text-center text-xs font-serif font-semibold md:px-6 px-2 py-2 text-gray-700 uppercase tracking-wider"
-                            >
-                              {t("common:total")}
-                            </th>
+                            {/* חנות ללא מחירים — הכותרת יורדת יחד עם התא
+                                שמייצר אותה ב-OrderHistory.js */}
+                            {!HIDE_PRICES && (
+                              <th
+                                scope="col"
+                                className="text-center text-xs font-serif font-semibold md:px-6 px-2 py-2 text-gray-700 uppercase tracking-wider"
+                              >
+                                {t("common:total")}
+                              </th>
+                            )}
                             <th
                               scope="col"
                               className="text-center text-xs font-serif font-semibold md:px-6 px-2 py-2 text-gray-700 uppercase tracking-wider"

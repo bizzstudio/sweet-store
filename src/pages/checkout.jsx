@@ -179,10 +179,10 @@ const Checkout = () => {
           if (data.guestCity) {
             try {
               const cityData = typeof data.guestCity === 'string' ? JSON.parse(data.guestCity) : data.guestCity;
+              // העיר נשמרת ב-state בלבד ולא בטופס: בורר העיר אינו רשום
+              // ב-react-hook-form, ו-guestChosenCity הוא המקור היחיד שנקרא
+              // בשליחת ההזמנה (useCheckoutSubmit).
               setGuestChosenCity(cityData);
-              // עדכון הערך בטופס מיד כשטוענים את העיר
-              setValue("guestCity", cityData);
-              setValue("chosenCity", cityData);
             } catch (e) {
               console.error("Error parsing guestCity:", e);
             }
@@ -463,7 +463,20 @@ const Checkout = () => {
 
     // עדיפות לתיבת אישור התקנון אם היא חסרה
     const targetId = formErrors?.acceptedTerms ? "terms-accept-section" : null;
-    const element = targetId ? document.getElementById(targetId) : null;
+    let element = targetId ? document.getElementById(targetId) : null;
+
+    /*
+     * שדות האורח.
+     *
+     * בלי הענף הזה נוצר כפתור מת: השדה guestCity אינו רשום ב-react-hook-form,
+     * ולכן שגיאה ידנית שנקבעה עליו (setError) אינה מתנקה בוולידציה הבאה —
+     * ‏handleSubmit רואה טופס לא תקין, לא קורא ל-submitHandler, ומגיע לכאן.
+     * כשאין תקנון חסר, element היה null ושום דבר לא קרה: הלחיצה השנייה נראתה
+     * כאילו הכפתור פשוט לא מגיב.
+     */
+    if (!element && Object.keys(formErrors || {}).some((k) => k.startsWith("guest"))) {
+      element = guestAddressFormRef?.current || null;
+    }
 
     if (element) {
       // קיזוז לפי גובה ההידר הנעוץ האמיתי (--header-h) + מרווח, כדי שהשדה לא ייחבא
@@ -475,10 +488,14 @@ const Checkout = () => {
       const offsetPosition =
         element.getBoundingClientRect().top + window.pageYOffset - headerH - 33;
       window.scrollTo({ top: offsetPosition, behavior: "smooth" });
-      // מיקוד הצ'קבוקס לנגישות
-      const checkbox = document.getElementById("checkoutAcceptedTerms");
-      if (checkbox) {
-        setTimeout(() => checkbox.focus({ preventScroll: true }), 400);
+
+      // מיקוד לנגישות — רק כשהיעד הוא באמת תיבת התקנון. בלי התנאי הזה גלילה
+      // לטופס האורח הייתה ממקדת את הצ'קבוקס שבתחתית העמוד
+      if (targetId) {
+        const checkbox = document.getElementById("checkoutAcceptedTerms");
+        if (checkbox) {
+          setTimeout(() => checkbox.focus({ preventScroll: true }), 400);
+        }
       }
     }
   };
@@ -828,7 +845,7 @@ const Checkout = () => {
                     alt="websiteClose"
                   />
                   <h2 className="text-4xl font-bold mt-5 text-center">{t("common:storeClose")}</h2>
-                  <p className="text-gray-400 text-center">{t("common:storeCloseMessage")}</p>
+                  <p className="text-gray-500 text-center">{t("common:storeCloseMessage")}</p>
                 </div>
               )}
             </div>

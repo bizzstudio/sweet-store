@@ -11,6 +11,7 @@ import { SidebarContext } from "@context/SidebarContext";
 import Loading from "@component/preloader/Loading";
 import AttributeServices from "@services/AttributeServices";
 import { useRouter } from "next/router";
+import Breadcrumbs from "@component/breadcrumb/Breadcrumbs";
 
 // זהה ל-PAGE_SIZE של עמוד הקטגוריה. עד כה החיפוש קיבל limit(100) קשיח מהשרת
 // והציג "סה״כ 100 פריטים נמצאו" גם כשהיו יותר — כלומר גם קטיעה שקטה של
@@ -93,15 +94,35 @@ const Search = ({ products, totalProducts, attributes }) => {
       description={t("common:searchDescription")}
     >
       <div className="mx-auto max-w-screen-2xl px-3 sm:px-10">
-        <div className="flex py-5">
+        <div className="flex pb-5">
           <div className="flex w-full">
             <div className="w-full">
+              <div className="pt-3 pb-2">
+                <Breadcrumbs
+                  items={[
+                    {
+                      label: query?.query
+                        ? `${t("common:resultsFor")} "${query.query}"`
+                        : t("common:search"),
+                    },
+                  ]}
+                />
+              </div>
+
+              {/* ‎<h1> — לעמוד החיפוש לא הייתה כותרת ראשית כלל, רק ‎<h6> עם
+                  מונה. משתמש קורא-מסך שנחת כאן לא ידע על מה הוא מסתכל. */}
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+                {query?.query
+                  ? `${t("common:resultsFor")} "${query.query}"`
+                  : t("common:search")}
+              </h1>
+
               {items.length === 0 && !isFetching ? (
                 <div className="flex flex-col items-center text-center align-middle mx-auto p-5 my-5">
                   <Image
                     className="my-4"
                     src="/no-result.svg"
-                    alt="no-result"
+                    alt=""
                     width={400}
                     height={380}
                   />
@@ -110,14 +131,16 @@ const Search = ({ products, totalProducts, attributes }) => {
                   </h2>
                 </div>
               ) : (
-                <div className="flex justify-between my-3 bg-mainColor-light border border-gray-100 rounded p-3">
-                  <h6 className="text-sm font-serif">
+                <div className="flex justify-between mb-3 bg-white border border-gray-200 rounded-xl px-4 py-3">
+                  {/* ‎role="status" — מספר התוצאות מתעדכן אחרי "טען עוד"
+                      ואחרי חיפוש חדש, וצריך להיות מוכרז. */}
+                  <p role="status" aria-live="polite" className="text-sm text-gray-800">
                     {t("common:totalI")}{" "}
                     {/* המספר מגיע מ-countDocuments על כל ההתאמות, ולא מאורך
                         העמוד שהתקבל — אחרת הוא מציג את גודל העמוד כסך הכול */}
-                    <span className="font-bold">{total}</span>{" "}
+                    <span className="font-bold text-gray-900">{total}</span>{" "}
                     {t("common:itemsFound")}
-                  </h6>
+                  </p>
                 </div>
               )}
 
@@ -129,20 +152,26 @@ const Search = ({ products, totalProducts, attributes }) => {
                       gridTemplateColumns מ-window.innerWidth בתוך ה-render — ערך
                       שנקרא פעם אחת ולא מתעדכן בסיבוב מסך או בשינוי גודל חלון,
                       ומונע כל אפשרות לרנדר את העמוד בשרת. */}
-                  <div className="grid grid-cols-1 xss:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3 lg:gap-3">
+                  {/* ‎<ul> — ראה ההערה ב-pages/product-category/[categoryName].jsx */}
+                  <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 md:gap-3 list-none p-0">
                     {items.map((product) => (
-                      <ProductCard
-                        key={product._id}
-                        product={product}
-                        attributes={attributes}
-                        offers={offers}
-                      />
+                      <li key={product._id} className="flex">
+                        <div className="w-full">
+                          <ProductCard
+                            product={product}
+                            attributes={attributes}
+                            offers={offers}
+                          />
+                        </div>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
 
                   {hasMore && (
                     <button
+                      type="button"
                       disabled={isFetching}
+                      aria-busy={isFetching}
                       onClick={() => fetchPage(page + 1)}
                       className={`w-auto mx-auto mt-6 flex items-center gap-2 font-semibold cursor-pointer transition-all bg-mainColor text-white px-6 py-1.5 h-11 rounded-lg border-mainColor-dark border-b-[4px] hover:brightness-110 hover:-translate-y-[1px] hover:border-b-[6px] active:border-b-[2px] active:brightness-90 active:translate-y-[2px] ${
                         isFetching ? "opacity-40 cursor-not-allowed pointer-events-none" : ""

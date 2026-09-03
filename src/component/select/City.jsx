@@ -3,7 +3,9 @@ import React, { useEffect, useState } from "react";
 import Select from "react-select";
 import useTranslation from "next-translate/useTranslation";
 
-const City = ({ setValue, placeholder }) => {
+// inputId מקשר את השדה לתווית שמעליו (htmlFor). בלי זה react-select מייצר
+// מזהה אקראי משלו, ולקורא מסך השדה מוכרז כתיבת חיפוש בלי שם.
+const City = ({ setValue, placeholder, inputId, ariaLabel }) => {
   const { t } = useTranslation();
 
   const [cities, setCities] = useState([]);
@@ -85,6 +87,8 @@ const City = ({ setValue, placeholder }) => {
   return (
     <Select
       options={options}
+      inputId={inputId}
+      aria-label={inputId ? undefined : ariaLabel || t("common:selectCity")}
       onChange={(selectedOption) => setValue(selectedOption ? selectedOption.value : null)}
       placeholder={getPlaceholderText()}
       styles={customStyles}

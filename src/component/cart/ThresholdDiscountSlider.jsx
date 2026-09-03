@@ -7,6 +7,7 @@ import useCart from "@hooks/useCart";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 import { IoSparkles, IoGift } from "react-icons/io5";
 import { AiFillFire } from "react-icons/ai";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const ThresholdDiscountSlider = () => {
     const { t } = useTranslation();
@@ -165,6 +166,12 @@ const ThresholdDiscountSlider = () => {
 
     // אם אין מבצעי THRESHOLD_DISCOUNT, לא מציגים כלום
     if (!thresholdDiscountOffers.length) {
+        return null;
+    }
+
+    // חנות ללא מחירים — הסליידר כולו בנוי על "כמה שקלים נותרו לסף",
+    // ואין לו משמעות בלי סכומים. ראה src/utils/priceVisibility.js
+    if (HIDE_PRICES) {
         return null;
     }
 

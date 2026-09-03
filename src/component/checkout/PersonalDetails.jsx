@@ -4,6 +4,7 @@ import { CiUser } from "react-icons/ci";
 import useTranslation from "next-translate/useTranslation";
 import GuestAddressForm from "@component/guestAddress/GuestAddressForm";
 import NoDeliveryWarning from "@component/checkout/NoDeliveryWarning";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const PersonalDetails = ({
     userInfo,
@@ -46,7 +47,7 @@ const PersonalDetails = ({
                                         {city && (
                                             <p className="text-sm text-gray-600 leading-relaxed">
                                                 <span className="font-medium">{city}</span>
-                                                {minimumOrderAmount != null && isDeliverable === true && (
+                                                {!HIDE_PRICES && minimumOrderAmount != null && isDeliverable === true && (
                                                     <span className="mr-1 text-xs text-mainColor-dark font-semibold">
                                                         {" "}(מינימום קנייה: {minimumOrderAmount}₪)
                                                     </span>

@@ -1,9 +1,11 @@
 // src/component/modal/MainModal.js
 import React, { Fragment, useRef } from "react";
+import useTranslation from "next-translate/useTranslation";
 import { Dialog, Transition } from "@headlessui/react";
 import { IoClose } from "react-icons/io5";
 
 const MainModal = ({ modalOpen, setModalOpen, children, z = null, onClose }) => {
+  const { t } = useTranslation();
   const cancelButtonRef = useRef();
 
   const handleClose = () => {
@@ -58,9 +60,13 @@ const MainModal = ({ modalOpen, setModalOpen, children, z = null, onClose }) => 
                     ref={cancelButtonRef}
                     onClick={handleClose}
                     type="button"
-                    className="inline-flex justify-center p-1 sm:p-2 sm:text-base text-sm font-medium text-white bg-mainColor border-none rounded-full outline -outline-offset-1 sm:outline-[8px] outline-4 outline-white"
+                    // הכפתור מכיל אייקון בלבד ולא היה לו שם נגיש. הוא גם מקבל
+                    // את הפוקוס הראשון בפתיחת המודל (initialFocus), כך
+                    // שקורא מסך הכריז "לחצן" בלי שום הסבר.
+                    aria-label={t("common:closeBtn")}
+                    className="tap-target focus-ring-light inline-flex justify-center p-1.5 sm:p-2 sm:text-base text-sm font-medium text-white bg-mainColor-dark border-none rounded-full outline -outline-offset-1 sm:outline-[8px] outline-4 outline-white"
                   >
-                    <IoClose />
+                    <IoClose aria-hidden="true" />
                   </button>
                 </div>
               </div>

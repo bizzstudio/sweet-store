@@ -6,6 +6,7 @@ import useTranslation from "next-translate/useTranslation";
 import Cookies from "js-cookie";
 import Calculating from "@component/cart/Calculating";
 import { asset } from "@utils/basePath";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const CheckoutActions = ({
     isEmpty,
@@ -55,9 +56,11 @@ const CheckoutActions = ({
                         storeCustomizationSetting?.checkout
                             ?.confirm_button
                     )}
-                    <span className="text-xs text-green-100 mb-[1px] font-normal">
-                        ({t("common:minimumPurchaseAmount", { amount: minimumOrderAmount })})
-                    </span>
+                    {!HIDE_PRICES && (
+                        <span className="text-xs text-green-100 mb-[1px] font-normal">
+                            ({t("common:minimumPurchaseAmount", { amount: minimumOrderAmount })})
+                        </span>
+                    )}
                 </span>
             )}
         </div>

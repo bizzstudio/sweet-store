@@ -11,6 +11,7 @@ import {
 
 import { SidebarContext } from "@context/SidebarContext";
 import useUtilsFunction from "@hooks/useUtilsFunction";
+import useTranslation from "next-translate/useTranslation";
 
 // פונקציה להחזיר אייקונים לפי קטגוריה (זמנית - צריך להגיע מהשרת)
 const CATEGORY_ICON_FALLBACK = "/category-icons/general.svg";
@@ -86,6 +87,7 @@ const CategoryItem = ({ category, showingTranslateValue, onCategoryClick, onSubC
   const [show, setShow] = useState(false);
   const toggleShow = () => setShow(!show);
   const { getCategorySlug } = useUtilsFunction();
+  const { t } = useTranslation();
 
   const categoryTitle = showingTranslateValue(category.name);
   const categorySlug = getCategorySlug(category);
@@ -97,22 +99,27 @@ const CategoryItem = ({ category, showingTranslateValue, onCategoryClick, onSubC
       <div className="flex items-center rounded-md hover:bg-mainColor-light w-full hover:text-mainColor-dark cursor-pointer select-none">
         <Link
           href={`/product-category/${categorySlug}`}
-          onMouseDown={onCategoryClick}
-          className="p-2 flex items-center w-full gap-3 group"
+          // ‎onMouseDown לא נורה בניווט מקלדת (Enter) ולא באירועי מגע מסוימים,
+          // ולכן המגירה נשארה פתוחה מעל עמוד היעד. ‎onClick נורה בכל המקרים.
+          onClick={onCategoryClick}
+          className="py-2.5 px-2 flex items-center w-full gap-3 group min-h-[44px]"
         >
-          <div className="relative w-[40px] h-[40px]">
+          {/* שתי התמונות הן אותו אייקון בשני מצבי ריחוף — קישוט טהור לצד שם
+              הקטגוריה. ‎alt="Category BW" / "Category Color" גרם לקורא מסך
+              להקריא שתי מחרוזות אנגליות חסרות משמעות לפני כל שם קטגוריה. */}
+          <div aria-hidden="true" className="relative w-[40px] h-[40px] shrink-0">
             <Image
               src={icon.bw}
               width={40}
               height={40}
-              alt="Category BW"
+              alt=""
               className="absolute top-0 left-0 object-contain transition-opacity duration-200 group-hover:opacity-0"
             />
             <Image
               src={icon.color}
               width={40}
               height={40}
-              alt="Category Color"
+              alt=""
               className="absolute top-0 left-0 object-contain opacity-0 transition-opacity duration-200 group-hover:opacity-100"
             />
           </div>
@@ -122,16 +129,24 @@ const CategoryItem = ({ category, showingTranslateValue, onCategoryClick, onSubC
         </Link>
 
         {hasChildren && (
-          <span
+          // ‎<span onClick> — לא מקבל פוקוס, לא מגיב ל-Enter/רווח ולא מוכרז
+          // כרכיב לחיץ. במובייל זו הדרך היחידה להגיע לתת-הקטגוריות, כלומר
+          // הן היו בלתי נגישות לחלוטין במקלדת ובקורא מסך.
+          <button
+            type="button"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               toggleShow();
             }}
-            className="p-2 text-gray-400 hover:text-mainColor-dark"
+            aria-expanded={show}
+            aria-label={`${show ? t("common:closeMenu") : t("common:openMenu")} – ${categoryTitle}`}
+            className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-600 hover:text-mainColor-dark"
           >
-            {show ? <IoChevronDownOutline /> : <IoChevronBackOutline />}
-          </span>
+            {show
+              ? <IoChevronDownOutline aria-hidden="true" />
+              : <IoChevronBackOutline aria-hidden="true" />}
+          </button>
         )}
       </div>
 
@@ -144,10 +159,11 @@ const CategoryItem = ({ category, showingTranslateValue, onCategoryClick, onSubC
               <li key={child._id}>
                 <Link
                   href={`/product-category/${categorySlug}/${childSlug}`}
-                  onMouseDown={() => onSubCategoryClick(child)}
-                  className="flex items-center gap-1 font-serif py-1 text-sm text-gray-600 hover:text-mainColor-dark"
+                  onClick={() => onSubCategoryClick(child)}
+                  // ‎py-1 = שורה בגובה ~30px. ‎py-2.5 מגיע ל-44px התקניים.
+                  className="flex items-center gap-1 font-serif py-2.5 text-sm text-gray-700 hover:text-mainColor-dark min-h-[44px]"
                 >
-                  <span className="text-lg text-gray-500 pe-1">
+                  <span aria-hidden="true" className="text-lg text-gray-500 pe-1">
                     {/* <IoRemoveSharp /> */}
                     •
                   </span>

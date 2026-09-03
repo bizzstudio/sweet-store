@@ -24,7 +24,7 @@ const Failed = () => {
           <div className='w-full mx-auto flex flex-col justify-center items-center gap-5 py-20 px-10 lg:px-0'>
             <img className="md:w-1/5 w-2/3" src={failedImg.src} alt="הרכישה נכשלה" />
             <h1 className="text-4xl text-center font-bold">{t("common:purchaseFailed")}</h1>
-            <p className="text-gray-400 text-lg text-center">{t("common:orderFaildText")}</p>
+            <p className="text-gray-500 text-lg text-center">{t("common:orderFaildText")}</p>
             <div className="flex items-center justify-center flex-wrap gap-5 mt-3 h-11">
               <Link href="/" target="_top">
                 <MainBT className='!w-fit px-6'>

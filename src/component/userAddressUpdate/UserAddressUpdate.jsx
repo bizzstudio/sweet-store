@@ -220,8 +220,9 @@ const UserAddressUpdate = () => {
                   </div>
 
                   <div className="col-span-6 xs:col-span-3 sm:col-span-3">
-                    <Label label={t("common:city")} />
+                    <Label label={t("common:city")} htmlFor="addressUpdateCity" />
                     <City
+                      inputId="addressUpdateCity"
                       setValue={setChosenCity}
                       placeholder={JSON.stringify(chosenCity)}
                     />

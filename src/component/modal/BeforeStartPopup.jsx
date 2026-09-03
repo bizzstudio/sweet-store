@@ -43,6 +43,7 @@ import MainBT from "@component/button/MainBT";
 import useTranslation from "next-translate/useTranslation";
 import useGetSetting from "@hooks/useGetSetting";
 import useUtilsFunction from "@hooks/useUtilsFunction";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const BeforeStartPopup = ({ onClose }) => {
     const { t } = useTranslation();
@@ -148,7 +149,7 @@ const BeforeStartPopup = ({ onClose }) => {
 
             {/* קומפוננטת העיר */}
             <div className="">
-                <City setValue={setChosenCity} placeholder={null} />
+                <City setValue={setChosenCity} placeholder={null} ariaLabel="עיר המגורים" />
             </div>
 
             {/* הצגת הודעת המשלוח (או מצב טוען) */}
@@ -178,7 +179,7 @@ const BeforeStartPopup = ({ onClose }) => {
                             )}
                         </p>
                         {/* מינימום קנייה – רק כשיש משלוחים זמינים */}
-                        {deliveryMessage.message?.includes("יש משלוחים זמינים") && cityMinimumOrder !== null && (
+                        {!HIDE_PRICES && deliveryMessage.message?.includes("יש משלוחים זמינים") && cityMinimumOrder !== null && (
                             <p className="text-center text-base font-semibold mt-2 text-mainColor-dark">
                                 מינימום קנייה: {cityMinimumOrder}₪
                             </p>
@@ -193,7 +194,13 @@ const BeforeStartPopup = ({ onClose }) => {
                         {(deliveryMessage.message?.includes("אין עדיין משלוחים") || deliveryMessage.message?.includes("לא זמינים פרטי משלוח")) && chosenCity?.city_name_he && (
                             <div className="flex justify-center mt-3">
                                 <a
-                                    href={`https://wa.me/972${(deliveryMessage.phoneNumber || "0522071809").replace(/-/g, "").replace(/^0/, "")}?text=${encodeURIComponent(`שלום, אבקש לברר אפשרות משלוח לעיר ${chosenCity.city_name_he.trim()}.`)}`}
+                                    /* ברירת המחדל היא מספר הווטסאפ של העסק מהסביבה, ולא מספר קשיח.
+                                       עד 30/08/26 ישב כאן "0522071809" — מספר שנשאר מהתבנית
+                                       שממנה הפרויקט שוכפל, כלומר לקוח שעירו אינה במשלוחים
+                                       נשלח לפתוח שיחה עם מישהו אחר. */
+                                    href={`https://wa.me/${(deliveryMessage.phoneNumber
+                                        ? `972${String(deliveryMessage.phoneNumber).replace(/-/g, "").replace(/^0/, "")}`
+                                        : process.env.NEXT_PUBLIC_CUSTOMER_SERVICE || "972504447055")}?text=${encodeURIComponent(`שלום, אבקש לברר אפשרות משלוח לעיר ${chosenCity.city_name_he.trim()}.`)}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center justify-center px-4 py-2 rounded-md bg-[#25D366] hover:bg-[#20bd5a] text-white font-medium text-sm transition-colors"

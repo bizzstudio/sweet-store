@@ -2,6 +2,7 @@ import React from "react";
 import Cookies from "js-cookie";
 
 import { assetFromSetting } from "@utils/basePath";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const CartItemPreview = ({ item }) => {
 
@@ -48,7 +49,7 @@ const CartItemPreview = ({ item }) => {
           <div className="font-bold text-sm md:text-base text-heading leading-5">
             {item?.isWelcomeGift || item?.isCouponFreeProduct || (item?.isRewardProduct && (item?.rewardPrice ?? 0) === 0) ? (
               <span className="text-mainColor-dark">{currentLang ? "חינם" : "Free"}</span>
-            ) : (
+            ) : HIDE_PRICES ? null : (
               <span>{item?.prices?.price || "0"}₪</span>
             )}
           </div>

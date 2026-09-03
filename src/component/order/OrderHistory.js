@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import useTranslation from "next-translate/useTranslation";
 import Cookies from "js-cookie";
 import 'dayjs/locale/he'; // ייבוא תאריכים בעברית
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const OrderHistory = ({ order, currency }) => {
 
@@ -13,9 +14,9 @@ const OrderHistory = ({ order, currency }) => {
   useEffect(() => {
     const fetchStatus = async () => {
       if (order?.status?.name === "Delivered")
-        setStatus(<span className="text-blackmax-md:w-min max-md:flex max-md:mx-auto">{order?.status?.heName}</span>);
+        setStatus(<span className="text-black max-md:w-min max-md:flex max-md:mx-auto">{order?.status?.heName}</span>);
       else if (order?.status?.name === "Pending")
-        setStatus(<span className="text-gray-400 max-md:w-min max-md:flex max-md:mx-auto">{order?.status?.heName}</span>);
+        setStatus(<span className="text-gray-500 max-md:w-min max-md:flex max-md:mx-auto">{order?.status?.heName}</span>);
       else if (order?.status?.name === "Cancel")
         setStatus(<span className="text-red-500 max-md:w-min max-md:flex max-md:mx-auto">{order?.status?.heName}</span>);
       else if (order?.status?.name === "Processing")
@@ -85,12 +86,16 @@ const OrderHistory = ({ order, currency }) => {
       <td className="px-1 md:px-5 py-3 leading-6 text-center md:whitespace-nowrap font-medium text-sm max-md:w-min">
         {status}
       </td>
-      <td className="px-1 md:px-5 py-3 leading-6 text-center whitespace-nowrap">
-        <span className="text-sm font-bold">
-          {currency}
-          {parseFloat(order?.total).toFixed(2)} ₪
-        </span>
-      </td>
+      {/* חנות ללא מחירים — עמודת הסכום יורדת יחד עם הכותרת שלה
+          ב-my-orders.js וב-recent-order.js. ראה src/utils/priceVisibility.js */}
+      {!HIDE_PRICES && (
+        <td className="px-1 md:px-5 py-3 leading-6 text-center whitespace-nowrap">
+          <span className="text-sm font-bold">
+            {currency}
+            {parseFloat(order?.total).toFixed(2)} ₪
+          </span>
+        </td>
+      )}
     </>
   );
 };

@@ -31,7 +31,13 @@ const Category = ({ onLinkClick }) => {
   // console.log('categoies :>> ', categories);
 
   return (
-    <div className="flex flex-col w-full h-full bg-mainColor-superLight overflow-y-auto">
+    // ‎rc-drawer אינו מוסיף סמנטיקת דיאלוג — ראה ההערה ב-component/cart/Cart.js
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("common:categories")}
+      className="flex flex-col w-full h-full bg-mainColor-superLight overflow-y-auto"
+    >
       {categoryDrawerOpen && (
         <div className="w-full flex flex-col justify-center items-center">
           {/* לוגו וכפתור סגירה */}
@@ -55,11 +61,12 @@ const Category = ({ onLinkClick }) => {
               </Link>
             </h2> */}
             <button
+              type="button"
               onClick={closeCategoryDrawer}
-              className="absolute left-4 top-4 z-10 inline-flex justify-center px-2 py-2 text-base font-medium text-white bg-mainColor border-none rounded-full outline -outline-offset-1 outline-[8px] outline-white"
-              aria-label="close"
+              className="tap-target focus-ring-light absolute left-4 top-4 z-10 inline-flex justify-center px-2.5 py-2.5 text-base font-medium text-white bg-mainColor-dark border-none rounded-full outline -outline-offset-1 outline-[8px] outline-white"
+              aria-label={t("common:closeBtn")}
             >
-              <IoClose />
+              <IoClose aria-hidden="true" />
             </button>
           </div>
 
@@ -69,7 +76,8 @@ const Category = ({ onLinkClick }) => {
               width={60}
               height={60}
               src={storeCustomizationSetting?.navbar?.logo}
-              alt="logo"
+              alt=""
+              aria-hidden="true"
               className="object-contain h-[60px] w-[60px]"
             />
             <h2 className="font-semibold font-serif text-xl mt-3 text-heading">

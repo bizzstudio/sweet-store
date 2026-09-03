@@ -2,6 +2,7 @@
 import React, { useContext, useState } from "react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
 
 import { TbCategoryPlus, TbDiscount, TbHomeDot } from "react-icons/tb";
 import { MdOutlineSettingsBackupRestore } from "react-icons/md";
@@ -20,6 +21,7 @@ import { FiRefreshCcw, FiSearch } from "react-icons/fi";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 
 const MobileFooter = () => {
+  const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
   const { toggleCartDrawer, toggleCategoryDrawer, categories } = useContext(SidebarContext);
   const { totalItems } = useCart();
@@ -58,7 +60,11 @@ const MobileFooter = () => {
         <CategoryDrawer className="w-6 h-6 drop-shadow-xl" />
       </div>
 
-      <footer
+      {/* ‎<nav> ולא ‎<footer>: הרכיב הזה הוא סרגל ניווט (בית / קטגוריות /
+          עגלה / אזור אישי) ולא "מידע על התוכן". ‎<footer> היה מכריז אותו
+          כאזור ‎contentinfo, שהוא התפקיד של הכותרת התחתונה בדסקטופ. */}
+      <nav
+        aria-label={t("common:mainNavigation")}
         className="lg:hidden fixed z-30 bottom-0 w-full rounded-t-3xl"
         style={{
           boxShadow:
@@ -73,12 +79,12 @@ const MobileFooter = () => {
             <button
               aria-label={lblAllProducts}
               onClick={toggleCategoryDrawer}
-              className="grid grid-cols-1 gap-0.5 items-center justify-center h-full focus:outline-none"
+              className="grid grid-cols-1 gap-0.5 items-center justify-center h-full min-h-[44px]"
             >
               <div className="w-[6vw] h-[6vw] min-w-[24px] min-h-[24px] max-w-[32px] max-h-[32px] flex items-center justify-center mx-auto">
-                <TbCategoryPlus className="w-full h-full drop-shadow" />
+                <TbCategoryPlus className="w-full h-full drop-shadow" aria-hidden="true" />
               </div>
-              <span className="text-[10px] leading-tight">{lblAllProducts}</span>
+              <span className="text-[12px] font-medium leading-tight">{lblAllProducts}</span>
             </button>
 
             {/* 2. מבצעים – רק אם קטגוריית המבצעים קיימת; אחרת חיפוש */}
@@ -86,30 +92,36 @@ const MobileFooter = () => {
               <Link
                 href={`/product-category/${offersCategorySlug}`}
                 aria-label={lblDeals}
-                className="grid grid-cols-1 gap-0.5 items-center justify-center h-full text-red-600"
+                aria-current={router.asPath.includes(offersCategorySlug) ? "page" : undefined}
+                className="grid grid-cols-1 gap-0.5 items-center justify-center h-full min-h-[44px] text-red-700"
               >
                 <div className="w-[6vw] h-[6vw] min-w-[24px] min-h-[24px] max-w-[32px] max-h-[32px] flex items-center justify-center mx-auto">
-                  <BsFire className="w-full h-full drop-shadow" />
+                  <BsFire className="w-full h-full drop-shadow" aria-hidden="true" />
                 </div>
-                <span className="text-[10px] leading-tight">{lblDeals}</span>
+                <span className="text-[12px] font-medium leading-tight">{lblDeals}</span>
               </Link>
             ) : (
               <Link
                 href="/search"
                 aria-label={lblSearch}
-                className="grid grid-cols-1 gap-0.5 items-center justify-center h-full"
+                aria-current={router.pathname === "/search" ? "page" : undefined}
+                className="grid grid-cols-1 gap-0.5 items-center justify-center h-full min-h-[44px]"
               >
                 <div className="w-[6vw] h-[6vw] min-w-[24px] min-h-[24px] max-w-[32px] max-h-[32px] flex items-center justify-center mx-auto">
-                  <FiSearch className="w-full h-full drop-shadow" />
+                  <FiSearch className="w-full h-full drop-shadow" aria-hidden="true" />
                 </div>
-                <span className="text-[10px] leading-tight">{lblSearch}</span>
+                <span className="text-[12px] font-medium leading-tight">{lblSearch}</span>
               </Link>
             )}
 
             {/* 3. עגלה – מעוצב כמו בתמונה */}
             <button
               onClick={toggleCartDrawer}
-              aria-label={lblCart}
+              aria-label={
+                totalItems > 0
+                  ? `${t("common:openCart")} – ${t("common:cartItemsCount", { count: totalItems })}`
+                  : t("common:openCart")
+              }
               className="relative grid grid-cols-1 items-center justify-center"
               style={{ marginTop: 'calc(-1 * (15vw + 12px))' }}
             >
@@ -122,9 +134,9 @@ const MobileFooter = () => {
                 }}
               >
                 <div className="relative flex items-center justify-center mx-auto" style={{ width: 'clamp(32px, 9vw, 44px)', height: 'clamp(32px, 9vw, 44px)' }}>
-                  <RiShoppingCartLine className="w-full h-full" />
+                  <RiShoppingCartLine className="w-full h-full" aria-hidden="true" />
                   {totalItems > 0 && (
-                    <span className="absolute text-[9px] xs:text-[11px] sm:text-[12px] font-bold top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <span aria-hidden="true" className="absolute text-[11px] xs:text-[12px] sm:text-[13px] font-bold top-[45%] left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                       {totalItems}
                     </span>
                   )}
@@ -138,23 +150,24 @@ const MobileFooter = () => {
               <Link
                 href="/user/my-orders"
                 aria-label={lblRestore}
-                className="grid grid-cols-1 gap-0.5 items-center justify-center h-full"
+                aria-current={router.pathname === "/user/my-orders" ? "page" : undefined}
+                className="grid grid-cols-1 gap-0.5 items-center justify-center h-full min-h-[44px]"
               >
                 <div className="w-[6vw] h-[6vw] min-w-[24px] min-h-[24px] max-w-[32px] max-h-[32px] flex items-center justify-center mx-auto">
-                  <FiRefreshCcw className="w-full h-full drop-shadow" />
+                  <FiRefreshCcw className="w-full h-full drop-shadow" aria-hidden="true" />
                 </div>
-                <span className="text-[10px] leading-tight">{lblRestore}</span>
+                <span className="text-[12px] font-medium leading-tight">{lblRestore}</span>
               </Link>
             ) : (
               <button
                 aria-label={lblLogin}
                 onClick={() => setModalOpen(true)}
-                className="grid grid-cols-1 gap-0.5 items-center justify-center h-full"
+                className="grid grid-cols-1 gap-0.5 items-center justify-center h-full min-h-[44px]"
               >
                 <div className="w-[6vw] h-[6vw] min-w-[24px] min-h-[24px] max-w-[32px] max-h-[32px] flex items-center justify-center mx-auto">
-                  <RiUserAddLine className="w-full h-full drop-shadow" />
+                  <RiUserAddLine className="w-full h-full drop-shadow" aria-hidden="true" />
                 </div>
-                <span className="text-[10px] leading-tight">{lblLogin}</span>
+                <span className="text-[12px] font-medium leading-tight">{lblLogin}</span>
               </button>
             )}
 
@@ -162,16 +175,17 @@ const MobileFooter = () => {
             <Link
               href="/"
               aria-label={lblHome}
-              className="grid grid-cols-1 gap-0.5 items-center justify-center h-full"
+              aria-current={router.pathname === "/" ? "page" : undefined}
+              className="grid grid-cols-1 gap-0.5 items-center justify-center h-full min-h-[44px]"
             >
               <div className="w-[6vw] h-[6vw] min-w-[24px] min-h-[24px] max-w-[32px] max-h-[32px] flex items-center justify-center mx-auto">
-                <TbHomeDot className="w-full h-full drop-shadow" />
+                <TbHomeDot className="w-full h-full drop-shadow" aria-hidden="true" />
               </div>
-              <span className="text-[10px] leading-tight">{lblHome}</span>
+              <span className="text-[12px] font-medium leading-tight">{lblHome}</span>
             </Link>
           </div>
         </div>
-      </footer>
+      </nav>
     </>
   );
 };

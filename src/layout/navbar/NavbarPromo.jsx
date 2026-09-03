@@ -14,6 +14,7 @@ import { SidebarContext } from "@context/SidebarContext";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 import Image from "@component/common/Img";
 import LoginModal from "@component/modal/LoginModal";
+import useTranslation from "next-translate/useTranslation";
 
 // גודל אייקון הקטגוריה. היה משוכפל שלוש פעמים במחרוזת אחת ארוכה (ולכן גם
 // התיישן בשלושה מקומות שונים), והיה גדול מדי — 67px בדסקטופ, כך שסרגל של חמש
@@ -23,6 +24,7 @@ const CATEGORY_ICON_CLASS =
   "object-contain shrink-0 2xl:w-[46px] 2xl:h-[46px] xl:w-[42px] xl:h-[42px] lg:w-[38px] lg:h-[38px] md:w-[34px] md:h-[34px] sm:w-[32px] sm:h-[32px] w-[30px] h-[30px]";
 
 const NavbarPromo = () => {
+  const { t } = useTranslation();
   const [LoginModalOpen, setLoginModalOpen] = useState(false);
   const [activePopover, setActivePopover] = useState(null);
   const { storeCustomizationSetting } = useGetSetting();
@@ -165,7 +167,12 @@ const NavbarPromo = () => {
         <LoginModal modalOpen={LoginModalOpen} setModalOpen={setLoginModalOpen} />
       )}
 
-      <div className={`${asPath === "/" ? "bg-mainColor-superLight" : "bg-white"} w-full relative`}>
+      {/* ‎<nav> ולא ‎<div>: פס הקטגוריות הוא הניווט הראשי של החנות, וכאזור
+          ציון מסומן קורא מסך יכול לקפוץ אליו ישירות במקום לגלול דרך ההידר. */}
+      <nav
+        aria-label={t("common:categoriesNav")}
+        className={`${asPath === "/" ? "bg-mainColor-superLight" : "bg-white"} w-full relative`}
+      >
         {/* אין יותר paddingRight לפי גובה הלוגו: הלוגו היה נמתח ל-135% מגובה
             ה-navbar וגלש אל תוך הפס הזה, ולכן הפס נאלץ לפנות לו מקום. מאז
             שהלוגו ממורכז בתוך ה-navbar אין גלישה, והריפוד רק דחף את הקטגוריות
@@ -182,7 +189,7 @@ const NavbarPromo = () => {
                 <button
                   onClick={scrollLeft}
                   className="pointer-events-auto flex items-center justify-center w-7 h-7 rounded-full bg-white/95 shadow-md ring-1 ring-gray-200 hover:bg-white hover:scale-105 transition-all duration-200"
-                  aria-label="גלול שמאלה"
+                  aria-label={t("common:scrollCategoriesLeft")}
                 >
                   <FaAnglesLeft className="w-3.5 h-3.5 text-mainColor left-right-animation" />
                 </button>
@@ -198,7 +205,7 @@ const NavbarPromo = () => {
                 <button
                   onClick={scrollRight}
                   className="pointer-events-auto flex items-center justify-center w-7 h-7 rounded-full bg-white/95 shadow-md ring-1 ring-gray-200 hover:bg-white hover:scale-105 transition-all duration-200"
-                  aria-label="גלול ימינה"
+                  aria-label={t("common:scrollCategoriesRight")}
                 >
                   <FaAnglesRight className="w-3.5 h-3.5 text-mainColor right-left-animation" />
                 </button>
@@ -230,14 +237,43 @@ const NavbarPromo = () => {
                         setActivePopover(category._id)
                       }
                       onMouseLeave={() => setActivePopover(null)}
+                      // התפריט נפתח קודם רק ב-‎onMouseEnter, כלומר משתמש מקלדת
+                      // או קורא מסך לא יכלו להגיע לתת-הקטגוריות בכלל. אירועי
+                      // focus ב-React עולים במעלה העץ, ולכן פוקוס על הקטגוריה
+                      // או על כל פריט בתת-התפריט מחזיק אותו פתוח.
+                      onFocus={() =>
+                        category.children?.length > 0 &&
+                        setActivePopover(category._id)
+                      }
+                      // ‎relatedTarget הוא האלמנט שמקבל את הפוקוס. סוגרים רק
+                      // כשהוא מחוץ לקבוצה — אחרת התפריט נסגר בכל Tab פנימי.
+                      onBlur={(e) => {
+                        if (!e.currentTarget.contains(e.relatedTarget)) {
+                          setActivePopover(null);
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Escape") setActivePopover(null);
+                      }}
                     >
                       <Link
                         onMouseEnter={() => setIsHover(index)}
                         onMouseLeave={() => setIsHover(null)}
                         href={"/product-category/" + categorySlug}
-                        className={`shrink-0 px-2 flex flex-col items-center xl:gap-2 md:gap-1 gap-0 rounded-md transform transition duration-300 hover:scale-105 hover:text-mainColor-dark ${selectedCategory == index ? "scale-105" : ""
+                        // ‎role="button" היה שגוי: זה קישור ניווט, ולא כפתור.
+                        // הוא גרם לקורא מסך להכריז "לחצן" ולמנוע מהמשתמש לדעת
+                        // שאפשר לפתוח אותו בלשונית חדשה.
+                        aria-current={selectedCategory == index ? "page" : undefined}
+                        // ‎aria-haspopup לא מוצהר: ערכו "true" שקול ל-"menu"
+                        // ומבטיח מודל מקלדת של תפריט (חצים) שאינו ממומש —
+                        // תת-התפריט כאן הוא רשימת קישורים בסדר Tab רגיל.
+                        aria-expanded={
+                          category.children?.length > 0
+                            ? activePopover === category._id
+                            : undefined
+                        }
+                        className={`shrink-0 px-2 py-1 flex flex-col items-center xl:gap-2 md:gap-1 gap-0 rounded-md transform transition duration-300 hover:scale-105 hover:text-mainColor-superDark ${selectedCategory == index ? "scale-105" : ""
                           }`}
-                        role="button"
                       >
                         {category.icon ? (
                           isHover == index || selectedCategory == index ? (
@@ -245,7 +281,7 @@ const NavbarPromo = () => {
                               src={category.coloredIcon}
                               width={130}
                               height={130}
-                              alt="Category"
+                              alt=""
                               className={CATEGORY_ICON_CLASS}
                             />
                           ) : (
@@ -253,7 +289,7 @@ const NavbarPromo = () => {
                               src={category.icon}
                               width={130}
                               height={130}
-                              alt="Category"
+                              alt=""
                               className={`${CATEGORY_ICON_CLASS} opacity-90`}
                             />
                           )
@@ -262,13 +298,18 @@ const NavbarPromo = () => {
                             src="/category-icons/general.svg"
                             width={400}
                             height={400}
-                            alt="category"
+                            alt=""
                             className={CATEGORY_ICON_CLASS}
                           />
                         )}
 
                         <div
-                          className={`inline-flex items-center justify-center text-center 2xl:text-[15px] xl:text-[14px] lg:text-[14px] md:text-[13px] sm:text-[13px] text-[12px] font-medium w-full whitespace-nowrap ${selectedCategory == index ? "text-mainColor-dark" : ""
+                          // הקטגוריה הפעילה סומנה קודם בצבע בלבד — מידע שאובד
+                          // למי שאינו מבחין בגוונים. עכשיו נוסף גם משקל גופן
+                          // וקו תחתון, בנוסף ל-aria-current שלמעלה.
+                          className={`inline-flex items-center justify-center text-center 2xl:text-[15px] xl:text-[14px] lg:text-[14px] md:text-[13px] sm:text-[13px] text-[12px] w-full whitespace-nowrap ${selectedCategory == index
+                            ? "text-mainColor-superDark font-bold underline underline-offset-4 decoration-2"
+                            : "font-medium text-gray-800"
                             }`}
                         >
                           {title}
@@ -291,7 +332,7 @@ const NavbarPromo = () => {
                       >
                         <div className="fixed sm:absolute top-[var(--header-h)] sm:top-[105%] left-1/2 sm:left-auto sm:end-0 -translate-x-1/2 sm:translate-x-0 z-20 min-w-[200px] bg-white shadow-lg rounded-md ring-1 ring-black ring-opacity-5"
                         >
-                          <ul dir="rtl">
+                          <ul dir="rtl" aria-label={t("common:subCategories")}>
                             {category.children &&
                               category.children.map((subCategory) => {
                                 const subCategorySlug =
@@ -300,9 +341,11 @@ const NavbarPromo = () => {
                                   <li key={subCategory._id}>
                                     <Link
                                       href={`/product-category/${categorySlug}/${subCategorySlug}`}
-                                      className="px-2 py-1 flex items-center gap-1 text-base font-medium text-gray-700 hover:text-black hover:bg-gray-100 rounded-md transition-all duration-100"
+                                      // ‎py-1 נתן שורה בגובה ~30px — מתחת לשטח
+                                      // המגע התקני. ‎py-2.5 מביא אותה ל-44px.
+                                      className="px-3 py-2.5 flex items-center gap-1 text-base font-medium text-gray-800 hover:text-black hover:bg-gray-100 rounded-md transition-all duration-100"
                                     >
-                                      <span className="text-lg text-gray-500 pe-1">
+                                      <span aria-hidden="true" className="text-lg text-gray-500 pe-1">
                                         •
                                       </span>
                                       <span className="whitespace-nowrap">
@@ -323,7 +366,7 @@ const NavbarPromo = () => {
             </div>
           </div>
         </div>
-      </div>
+      </nav>
     </>
   );
 };

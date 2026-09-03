@@ -89,7 +89,7 @@ const FeatureCategory = () => {
                               e.stopPropagation();
                               setActivePopover(activePopover === category?._id ? null : category?._id);
                             }}
-                            className="flex items-center gap-1 text-xs text-gray-400 hover:text-customRed-light transition-all duration-150 font-serif"
+                            className="flex items-center gap-1 text-xs text-gray-500 hover:text-customRed-light transition-all duration-150 font-serif"
                           >
                             <span className="text-sm">
                               <ChevronDownIcon

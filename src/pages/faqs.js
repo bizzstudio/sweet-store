@@ -41,7 +41,7 @@ const Faq = () => {
                 <Disclosure>
                   {({ open }) => (
                     <>
-                      <Disclosure.Button className="flex justify-between w-full px-4 py-3 text-base font-medium text-left text-gray-600 focus:text-blackbg-mainColor-superLight hover:bg-mainColor-superLight rounded-lg focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75">
+                      <Disclosure.Button className="flex justify-between w-full px-4 py-3 text-base font-medium text-left text-gray-600 focus:text-black focus:bg-mainColor-superLight hover:bg-mainColor-superLight rounded-lg focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75">
                         <span>
                           {showingTranslateValue(
                             storeCustomizationSetting?.faq?.faq_one
@@ -66,7 +66,7 @@ const Faq = () => {
                 <Disclosure as="div" className="mt-2">
                   {({ open }) => (
                     <>
-                      <Disclosure.Button className="flex justify-between w-full px-4 py-3 text-base font-medium text-left text-gray-600 focus:text-blackbg-mainColor-superLight hover:bg-mainColor-superLight rounded-lg focus:outline-none">
+                      <Disclosure.Button className="flex justify-between w-full px-4 py-3 text-base font-medium text-left text-gray-600 focus:text-black focus:bg-mainColor-superLight hover:bg-mainColor-superLight rounded-lg focus:outline-none">
                         <span>
                           {" "}
                           {showingTranslateValue(
@@ -92,7 +92,7 @@ const Faq = () => {
                 <Disclosure as="div" className="mt-2">
                   {({ open }) => (
                     <>
-                      <Disclosure.Button className="flex justify-between w-full px-4 py-3 text-base font-medium text-left text-gray-600 focus:text-blackbg-mainColor-superLight hover:bg-mainColor-superLight rounded-lg focus:outline-none">
+                      <Disclosure.Button className="flex justify-between w-full px-4 py-3 text-base font-medium text-left text-gray-600 focus:text-black focus:bg-mainColor-superLight hover:bg-mainColor-superLight rounded-lg focus:outline-none">
                         <span>
                           {" "}
                           {showingTranslateValue(
@@ -118,7 +118,7 @@ const Faq = () => {
                 <Disclosure as="div" className="mt-2">
                   {({ open }) => (
                     <>
-                      <Disclosure.Button className="flex justify-between w-full px-4 py-3 text-base font-medium text-left text-gray-600 focus:text-blackbg-mainColor-superLight hover:bg-mainColor-superLight rounded-lg focus:outline-none">
+                      <Disclosure.Button className="flex justify-between w-full px-4 py-3 text-base font-medium text-left text-gray-600 focus:text-black focus:bg-mainColor-superLight hover:bg-mainColor-superLight rounded-lg focus:outline-none">
                         <span>
                           {" "}
                           {showingTranslateValue(
@@ -144,7 +144,7 @@ const Faq = () => {
                 <Disclosure as="div" className="mt-2">
                   {({ open }) => (
                     <>
-                      <Disclosure.Button className="flex justify-between w-full px-4 py-3 text-base font-medium text-left text-gray-600 focus:text-blackbg-mainColor-superLight hover:bg-mainColor-superLight rounded-lg focus:outline-none">
+                      <Disclosure.Button className="flex justify-between w-full px-4 py-3 text-base font-medium text-left text-gray-600 focus:text-black focus:bg-mainColor-superLight hover:bg-mainColor-superLight rounded-lg focus:outline-none">
                         <span>
                           {showingTranslateValue(
                             storeCustomizationSetting?.faq?.faq_five
@@ -169,7 +169,7 @@ const Faq = () => {
                 <Disclosure as="div" className="mt-2">
                   {({ open }) => (
                     <>
-                      <Disclosure.Button className="flex justify-between w-full px-4 py-3 text-base font-medium text-left text-gray-600 focus:text-blackbg-mainColor-superLight hover:bg-mainColor-superLight rounded-lg focus:outline-none">
+                      <Disclosure.Button className="flex justify-between w-full px-4 py-3 text-base font-medium text-left text-gray-600 focus:text-black focus:bg-mainColor-superLight hover:bg-mainColor-superLight rounded-lg focus:outline-none">
                         <span>
                           {showingTranslateValue(
                             storeCustomizationSetting?.faq?.faq_six
@@ -194,7 +194,7 @@ const Faq = () => {
                 <Disclosure>
                   {({ open }) => (
                     <>
-                      <Disclosure.Button className="flex justify-between w-full px-4 py-3 text-base font-medium text-left text-gray-600 focus:text-blackbg-mainColor-superLight hover:bg-mainColor-superLight rounded-lg focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75">
+                      <Disclosure.Button className="flex justify-between w-full px-4 py-3 text-base font-medium text-left text-gray-600 focus:text-black focus:bg-mainColor-superLight hover:bg-mainColor-superLight rounded-lg focus:outline-none focus-visible:ring focus-visible:ring-purple-500 focus-visible:ring-opacity-75">
                         <span>
                           {" "}
                           {showingTranslateValue(
@@ -220,7 +220,7 @@ const Faq = () => {
                 <Disclosure as="div" className="mt-2">
                   {({ open }) => (
                     <>
-                      <Disclosure.Button className="flex justify-between w-full px-4 py-3 text-base font-medium text-left text-gray-600 focus:text-blackbg-mainColor-superLight hover:bg-mainColor-superLight rounded-lg focus:outline-none">
+                      <Disclosure.Button className="flex justify-between w-full px-4 py-3 text-base font-medium text-left text-gray-600 focus:text-black focus:bg-mainColor-superLight hover:bg-mainColor-superLight rounded-lg focus:outline-none">
                         <span>
                           {showingTranslateValue(
                             storeCustomizationSetting?.faq?.faq_eight

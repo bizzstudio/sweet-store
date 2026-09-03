@@ -17,11 +17,12 @@ import { trackFbInitiateCheckout } from "@services/facebookPixel";
 import Calculating from "./Calculating";
 import MainBT from "@component/button/MainBT";
 import ThresholdDiscountSlider from "./ThresholdDiscountSlider";
+import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const Cart = () => {
   const router = useRouter();
   const [modalOpen, setModalOpen] = useState(false);
-  const { isEmpty, items, customCartTotal } = useCart();
+  const { isEmpty, items, customCartTotal, totalItems } = useCart();
   const { toggleCartDrawer, closeCartDrawer } = useContext(SidebarContext);
   const { currency } = useUtilsFunction();
   const { t } = useTranslation();
@@ -91,18 +92,27 @@ const Cart = () => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
+      {/* חנות ללא מחירים — הכפתור מציג רק את מספר הפריטים במקום סכום לתשלום */}
       <span className="w-full font-medium font-serif text-xl flex flex-col justify-start items-start py-3 px-5">
-        <small className="text-sm font-light">
-          {t("common:totalToPay")}
-        </small>
-        <span>
-          {typeof customCartTotal === 'number' ?
-            <>
-              <small>{currency}</small>
-              {customCartTotal.toFixed(2)}
-            </>
-            : <Calculating />}
-        </span>
+        {HIDE_PRICES ? (
+          <span className="text-base">
+            {totalItems} {t("common:items")}
+          </span>
+        ) : (
+          <>
+            <small className="text-sm font-light">
+              {t("common:totalToPay")}
+            </small>
+            <span>
+              {typeof customCartTotal === 'number' ?
+                <>
+                  <small>{currency}</small>
+                  {customCartTotal.toFixed(2)}
+                </>
+                : <Calculating />}
+            </span>
+          </>
+        )}
         {/* <FiInfo title={t("common:additonalLikut")} className="cursor-pointer mb-0.5"/> */}
         {/* <small className="text-sm">{t("common:additonalLikut")}</small> */}
       </span>
@@ -119,20 +129,30 @@ const Cart = () => {
       {modalOpen && (
         <LoginModal modalOpen={modalOpen} setModalOpen={setModalOpen} />
       )}
-      <div className="flex flex-col w-full h-full justify-between items-middle bg-white rounded">
+      {/* ‎rc-drawer אינו מוסיף סמנטיקת דיאלוג בעצמו (בניגוד ל-Headless UI
+          שמשמש בשאר המודלים), ולכן העגלה נקראה כאזור אנונימי באמצע העמוד.
+          ‎role="dialog" + ‎aria-modal + ‎aria-labelledby נותנים לה זהות. */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cart-drawer-title"
+        className="flex flex-col w-full h-full justify-between items-middle bg-white rounded"
+      >
         <div className="w-full flex justify-between items-center relative px-5 py-4 border-b bg-mainColor-light border-gray-100">
-          <h2 className="font-semibold font-serif text-lg m-0 text-heading flex items-center gap-1 justify-center">
-            <span className="text-xl mr-2 mb-1">
+          <h2 id="cart-drawer-title" className="font-semibold font-serif text-lg m-0 text-heading flex items-center gap-1 justify-center">
+            <span aria-hidden="true" className="text-xl mr-2 mb-1">
               <IoBagCheckOutline />
             </span>
             {t("common:shoppingCartDrawerTitle")}
           </h2>
           <button
+            type="button"
             onClick={closeCartDrawer}
-            className="flex text-base items-center justify-center text-gray-500 p-2 focus:outline-none transition-opacity hover:text-red-400 group"
+            aria-label={t("common:closeBtn")}
+            className="tap-target flex text-base items-center justify-center text-gray-600 p-2 transition-opacity hover:text-red-700 group"
           >
-            <IoClose />
-            <span className="font-sens text-sm text-gray-500 ml-1 group-hover:text-red-400 pb-0.5">
+            <IoClose aria-hidden="true" />
+            <span aria-hidden="true" className="font-sens text-sm text-gray-600 ml-1 group-hover:text-red-700 pb-0.5">
               {t("common:closeBtn")}
             </span>
           </button>

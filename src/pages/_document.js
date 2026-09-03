@@ -55,6 +55,37 @@ class MyDocument extends Document {
     const { head, bodyStart, bodyEnd } = scriptSetting || {};
     const isDev = process.env.NODE_ENV === "development";
 
+    /*
+     * סקריפט הנגישות ו-Hotjar.
+     *
+     * שניהם היו כתובים קשיח כאן עם הרישיון והמזהה של הפרויקט שממנו הועתקה
+     * החנות: כתובת הווידג'ט מכילה את הנתיב "_tmarim-betomer_com-", ומזהה
+     * Hotjar 3341645 שייך לאותו נכס. כלומר ההנגשה של האתר הזה נסמכת על רישיון
+     * שהונפק לדומיין אחר, והתנהגות הגולשים כאן נאספת לחשבון של אתר אחר.
+     *
+     * הערכים הועברו למשתני סביבה. ברירת המחדל היא הערכים הקיימים, כדי ששום דבר
+     * לא ייפול בפריסה הבאה — אבל אפשר להצביע על הרישיון והנכס הנכונים בלי לגעת
+     * בקוד, ומחרוזת ריקה מכבה את הסקריפט לגמרי:
+     *
+     *   NEXT_PUBLIC_ACCESSIBILITY_SCRIPT_URL=...   (ריק = לא נטען)
+     *   NEXT_PUBLIC_HOTJAR_ID=...                  (ריק = לא נטען)
+     */
+    const accessibilityScriptUrl =
+      process.env.NEXT_PUBLIC_ACCESSIBILITY_SCRIPT_URL !== undefined
+        ? process.env.NEXT_PUBLIC_ACCESSIBILITY_SCRIPT_URL.trim()
+        : "https://system.user-a.co.il/Customers/3748629/_tmarim-betomer_com-/andifn1.js";
+
+    const hotjarId =
+      process.env.NEXT_PUBLIC_HOTJAR_ID !== undefined
+        ? process.env.NEXT_PUBLIC_HOTJAR_ID.trim()
+        : "3341645";
+
+    // הטמעת ערך בתוך <script> מוטבע: JSON.stringify אינו מחליף "<", ולכן ערך
+    // שמכיל "</script>" היה סוגר את התג ומאפשר הזרקת קוד. דורש שליטה על משתני
+    // הסביבה של השרת, ולכן אינו וקטור תקיפה מעשי — אבל זו הטמעה נכונה.
+    const toScriptLiteral = (value) =>
+      JSON.stringify(String(value)).replace(/</g, "\\u003c");
+
     // המרת קישורי תמונה לא מאובטחים (http://) ל-https:// כדי למנוע חסימת Mixed Content.
     // URL שכבר https או נתיב יחסי נשאר כמו שהוא — אין שינוי לוגיקה.
     const toHttps = (url) =>
@@ -267,17 +298,23 @@ class MyDocument extends Document {
     var c=document.createElement('script');
     c.src='https://bizzstudio.co.il/consent/cookie-consent.js';
     c.defer=true;document.head.appendChild(c);
-    (function(h,o,t,j,a,r){
-      h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
-      h._hjSettings={hjid:3341645,hjsv:6};
-      a=o.getElementsByTagName('head')[0];
-      r=o.createElement('script');r.async=1;
-      r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
-      a.appendChild(r);
-    })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
-    var s=document.createElement('script');
-    s.src='https://system.user-a.co.il/Customers/3748629/_tmarim-betomer_com-/andifn1.js';
-    s.id='andipath';document.body.appendChild(s);
+    var hjid=${toScriptLiteral(hotjarId)};
+    if(hjid){
+      (function(h,o,t,j,a,r){
+        h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+        h._hjSettings={hjid:hjid,hjsv:6};
+        a=o.getElementsByTagName('head')[0];
+        r=o.createElement('script');r.async=1;
+        r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+        a.appendChild(r);
+      })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+    }
+    var andiSrc=${toScriptLiteral(accessibilityScriptUrl)};
+    if(andiSrc){
+      var s=document.createElement('script');
+      s.src=andiSrc;
+      s.id='andipath';document.body.appendChild(s);
+    }
   }
   function schedule(){
     if('requestIdleCallback' in window){requestIdleCallback(loadLate,{timeout:4000});}

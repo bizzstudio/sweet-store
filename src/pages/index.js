@@ -89,7 +89,7 @@ const Home = ({ popularProducts, discountProducts, attributes, blogs, totalBlogs
           <Layout>
             <div className="min-h-screen w-full max-w-full overflow-hidden">
               <div className="bg-white">
-                <div className="mx-auto sm:py-5 max-w-screen-2x1 px-3 sm:px-10">
+                <div className="mx-auto sm:py-5 max-w-screen-2xl px-3 sm:px-10">
                   {/* פאנל המבצעים מוצג רק כשיש מה להציג בו. OfferCard מרנדר את
                       הכותרת "מבצעים אחרונים" גם ברשימה ריקה, וכשאין בקטלוג אף
                       מוצר בהנחה התוצאה הייתה קופסה ריקה לצד הקרוסלה. במצב הזה
@@ -124,7 +124,7 @@ const Home = ({ popularProducts, discountProducts, attributes, blogs, totalBlogs
               {/* feature category's */}
               {storeCustomizationSetting?.home?.featured_status && (
                 <div className="hidden md:block bg-gray-100 lg:py-12 py-10">
-                  <div className="mx-auto max-w-screen-2x1 px-3 sm:px-10">
+                  <div className="mx-auto max-w-screen-2xl px-3 sm:px-10">
                     {/* כותרת ותיאור */}
                     {(showingTranslateValue(storeCustomizationSetting?.home?.feature_title) || showingTranslateValue(storeCustomizationSetting?.home?.feature_description)) && (
                       <div className="mb-10 flex justify-center">
@@ -160,8 +160,14 @@ const Home = ({ popularProducts, discountProducts, attributes, blogs, totalBlogs
 
               {/* popular products */}
               {storeCustomizationSetting?.home?.popular_products_status && (
-                <div className="bg-mainColor-superLight lg:pt-10 lg:pb-4 py-4 mx-auto max-w-screen-2xl px-3 sm:px-10">
-                  <div className="w-full sm:mb-9 mb-5 bg-mainColor-light rounded p-3">
+                // ‎<section aria-labelledby> — לדף הבית לא היה אף אזור ציון ואף
+                // כותרת ‎<h2>: קורא מסך שמע רצף אחיד של 40 כרטיסי מוצר בלי לדעת
+                // איפה נגמרים ה"פופולריים" ומתחילים ה"מבצעים".
+                <section
+                  aria-labelledby="home-popular-title"
+                  className="bg-mainColor-superLight lg:pt-10 lg:pb-4 py-4 mx-auto max-w-screen-2xl px-3 sm:px-10"
+                >
+                  <div id="home-popular-title" className="w-full sm:mb-9 mb-5 bg-mainColor-light rounded p-3">
                     <CMSkeleton
                       count={1}
                       height={30}
@@ -185,7 +191,10 @@ const Home = ({ popularProducts, discountProducts, attributes, blogs, totalBlogs
                           loading={loading}
                         />
                       ) : (
-                        <div className="grid grid-cols-1 xss:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2 md:gap-3 lg:gap-3">
+                        // הגריד יושר לזה של עמודי הקטגוריה: 2 עמודות בנייד
+                        // (ולא 1 — כרטיס ברוחב מסך מלא הראה מוצר אחד בגלילה)
+                        // ועד 5 בדסקטופ.
+                        <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 md:gap-3 list-none p-0">
                           {sortedPopularProducts
                             ?.slice(
                               0,
@@ -193,18 +202,21 @@ const Home = ({ popularProducts, discountProducts, attributes, blogs, totalBlogs
                                 ?.popular_product_limit
                             )
                             .map((product) => (
-                              <ProductCard
-                                key={product._id}
-                                product={product}
-                                attributes={attributes}
-                                offers={offers}
-                              />
+                              <li key={product._id} className="flex">
+                                <div className="w-full">
+                                  <ProductCard
+                                    product={product}
+                                    attributes={attributes}
+                                    offers={offers}
+                                  />
+                                </div>
+                              </li>
                             ))}
-                        </div>
+                        </ul>
                       )}
                     </div>
                   </div>
-                </div>
+                </section>
               )}
 
               {/* promotional banner card */}
@@ -221,11 +233,12 @@ const Home = ({ popularProducts, discountProducts, attributes, blogs, totalBlogs
               {/* discounted products */}
               {storeCustomizationSetting?.home?.discount_product_status &&
                 discountProducts?.length > 0 && (
-                  <div
+                  <section
                     id="discount"
+                    aria-labelledby="home-discount-title"
                     className="bg-mainColor-superLight lg:py-10 py-4 mx-auto max-w-screen-2xl px-3 sm:px-10"
                   >
-                    <div className="w-full sm:mb-9 mb-5 bg-mainColor-light rounded p-3">
+                    <div id="home-discount-title" className="w-full sm:mb-9 mb-5 bg-mainColor-light rounded p-3">
                       <CMSkeleton
                         count={1}
                         height={30}
@@ -249,31 +262,37 @@ const Home = ({ popularProducts, discountProducts, attributes, blogs, totalBlogs
                             loading={loading}
                           />
                         ) : (
-                          <div className="grid grid-cols-1 xss:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2 md:gap-3 lg:gap-3">
+                          <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 md:gap-3 list-none p-0">
                             {sortedDiscountProducts
                               ?.slice(
                                 0,
                                 storeCustomizationSetting?.home
                                   ?.latest_discount_product_limit
                               )
-                              .map((product, index) => (
-                                <ProductCard
-                                  key={product._id + index}
-                                  product={product}
-                                  attributes={attributes}
-                                  offers={offers}
-                                />
+                              .map((product) => (
+                                <li key={product._id} className="flex">
+                                  <div className="w-full">
+                                    <ProductCard
+                                      product={product}
+                                      attributes={attributes}
+                                      offers={offers}
+                                    />
+                                  </div>
+                                </li>
                               ))}
-                          </div>
+                          </ul>
                         )}
                       </div>
                     </div>
-                  </div>
+                  </section>
                 )}
 
               {/* Blog Section */}
               {blogs && blogs.length > 0 && (
-                <div className="bg-mainColor-light px-3 sm:px-10 md:px-14 lg:px-20 2xl:px-40 py-5">
+                <section
+                  aria-label={t("common:blogsTitle")}
+                  className="bg-mainColor-light px-3 sm:px-10 md:px-14 lg:px-20 2xl:px-40 py-5"
+                >
                   <div className="flex justify-between items-center my-3 bg-mainColor-superLight border border-gray-100 rounded-md p-3">
                     <MinimalTitle title={t("common:blogsTitle")} subtitle={t("common:blogsSubtitle")} />
                   </div>
@@ -302,7 +321,7 @@ const Home = ({ popularProducts, discountProducts, attributes, blogs, totalBlogs
                       </Link>
                     </div>
                   )}
-                </div>
+                </section>
               )}
             </div>
           </Layout>
@@ -341,7 +360,11 @@ export const getServerSideProps = async (context) => {
   };
 
   try {
-    const [data, attributes, blogsData] = await Promise.all([
+    // allSettled ולא all: שלוש הקריאות אינן תלויות זו בזו, ועם Promise.all
+    // כשל של אחת מהן הפיל את שלושתן — דף הבית חזר בלי מוצרים פופולריים ובלי
+    // מבצעים. הכי כואב בקריאת הבלוגים, שהיא הפחות חשובה מבין השלוש (הפיצ'ר
+    // אפילו כבוי בפאנל). כל קריאה נופלת עכשיו לבד, לברירת המחדל שלה.
+    const [productsRes, attributesRes, blogsRes] = await Promise.allSettled([
       ProductServices.getShowingStoreProducts({
         category: _id ? _id : "",
         title: query ? query : "",
@@ -357,6 +380,24 @@ export const getServerSideProps = async (context) => {
       }),
     ]);
 
+    for (const [name, result] of [
+      ["products", productsRes],
+      ["attributes", attributesRes],
+      ["blogs", blogsRes],
+    ]) {
+      if (result.status === "rejected") {
+        console.error(
+          `getServerSideProps (index): ${name} failed —`,
+          result.reason?.message || result.reason
+        );
+      }
+    }
+
+    const data = productsRes.status === "fulfilled" ? productsRes.value : null;
+    const attributes =
+      attributesRes.status === "fulfilled" ? attributesRes.value : [];
+    const blogsData = blogsRes.status === "fulfilled" ? blogsRes.value : null;
+
     const sortedPopularProducts = data?.popularProducts ?? [];
     const sortedDiscountProducts = data?.discountedProducts ?? [];
 
@@ -368,7 +409,9 @@ export const getServerSideProps = async (context) => {
         attributes: attributes ?? [],
         blogs: blogsData?.blogs ?? [],
         totalBlogs: blogsData?.totalBlogs ?? 0,
-        error: false,
+        // רק כשל בקריאת המוצרים הוא כשל של העמוד. שים לב שהדגל הזה אינו נקרא
+        // כרגע בקומפוננטה — השם error נתפס שם על ידי useGetSetting
+        error: productsRes.status === "rejected",
       },
     };
   } catch (err) {

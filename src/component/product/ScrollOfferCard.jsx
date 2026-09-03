@@ -127,7 +127,7 @@ const ScrollOfferCard = ({ product, attributes, offers = [] }) => {
           <div className="flex justify-between items-center gap-2 text-heading text-sm sm:text-base space-s-2 md:text-base lg:text-xl">
             <div>
               <div className="relative">
-                <span className="text-gray-400 font-medium text-xs d-block">
+                <span className="text-gray-500 font-medium text-xs d-block">
                   {product.unit}
                 </span>
                 <h2 className="text-heading lg:max-w-[150px] xl:max-w-[180px] 2xl:max-w-[300px] mb-0 block text-base font-medium text-gray-600" style={{
@@ -206,8 +206,8 @@ const ScrollOfferCard = ({ product, attributes, offers = [] }) => {
               <button
                 // disabled={product?.stock <= 0}
                 onClick={() => handleAddItem(product)}
-                aria-label="cart"
-                className={product?.stock <= 0 ? "h-9 px-2 flex items-center justify-center border border-gray-200 rounded text-gray-400" : "h-9 px-2 flex items-center justify-center border border-gray-200 rounded text-mainColor-dark hover:bg-mainColor-dark hover:text-white transition-all"}
+                aria-label={t("common:addProductToCart", { name: showingTranslateValue(product?.title) })}
+                className={product?.stock <= 0 ? "h-9 px-2 flex items-center justify-center border border-gray-200 rounded text-gray-500" : "h-9 px-2 flex items-center justify-center border border-gray-200 rounded text-mainColor-dark hover:bg-mainColor-dark hover:text-white transition-all"}
               >
                 {" "}
                 {product?.variants?.length > 0 ?
