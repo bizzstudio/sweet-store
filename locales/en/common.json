@@ -526,6 +526,13 @@
   "deliveryNationwide": "Delivery Nationwide",
   "minimumOrderAmount": "Minimum order for {{city}} is {{amount}}₪",
   "minimumPurchaseAmount": "Minimum purchase {{amount}}₪",
+  "proceedToOrderBtn": "Continue to order",
+  "completeOrderNoPayment": "Complete order",
+  "saveOrder": "Save order",
+  "orderSavedSuccessfully": "Order saved successfully",
+  "thankYouForOrder": "Thank you for your order!",
+  "orderSavedInProcess": "Your order has been received and passed to our team. An order summary email is on its way.",
+  "noPayment": "No payment",
   "existingUserSkipDetails": "Existing user? Click here to skip entering details",
 
   "/=================* Invoice * =================/": "",

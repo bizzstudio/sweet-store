@@ -528,6 +528,13 @@
     "deliveryNationwide": "משלוחים לכל הארץ",
     "minimumOrderAmount": "מינימום הזמנה ל{{city}} הוא {{amount}}₪",
     "minimumPurchaseAmount": "מינימום קנייה {{amount}}₪",
+    "proceedToOrderBtn": "המשך להזמנה",
+    "completeOrderNoPayment": "השלמת ההזמנה",
+    "saveOrder": "שמירת ההזמנה",
+    "orderSavedSuccessfully": "ההזמנה נשמרה בהצלחה",
+    "thankYouForOrder": "תודה על ההזמנה!",
+    "orderSavedInProcess": "ההזמנה התקבלה ועברה לטיפול הצוות. ברגעים אלו נשלח אליך אימייל סיכום הזמנה.",
+    "noPayment": "ללא תשלום",
     "existingUserSkipDetails": "משתמשים קיימים? לחצו כאן לדילוג על שלב הזנת הפרטים",
   
     "/=================* Invoice * =================/": "",

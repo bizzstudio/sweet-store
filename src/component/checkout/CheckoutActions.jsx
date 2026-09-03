@@ -7,6 +7,7 @@ import Cookies from "js-cookie";
 import Calculating from "@component/cart/Calculating";
 import { asset } from "@utils/basePath";
 import { HIDE_PRICES } from "@utils/priceVisibility";
+import { PAYMENT_DISABLED } from "@utils/paymentDisabled";
 
 const CheckoutActions = ({
     isEmpty,
@@ -52,10 +53,18 @@ const CheckoutActions = ({
             ) : (
                 <span className={currentLang ? "flex justify-center gap-2 text-center items-center" : "flex flex-row-reverse justify-center gap-2 text-center items-center"}>
                     <IoCheckmarkCircle className="text-2xl" />
-                    {showingTranslateValue(
-                        storeCustomizationSetting?.checkout
-                            ?.confirm_button
-                    )}
+                    {/*
+                      * חנות ללא תשלום (ראה src/utils/paymentDisabled.js): הכיתוב
+                      * קבוע בקוד ולא נלקח מ-confirm_button שבהגדרות החנות. ההגדרה
+                      * ההיא נערכת באדמין ואומרת "לתשלום", וטקסט כזה על כפתור
+                      * שרק שומר הזמנה היה מבטיח ללקוח מסך סליקה שלא קיים.
+                      */}
+                    {PAYMENT_DISABLED
+                        ? t("common:saveOrder")
+                        : showingTranslateValue(
+                            storeCustomizationSetting?.checkout
+                                ?.confirm_button
+                        )}
                     {!HIDE_PRICES && (
                         <span className="text-xs text-green-100 mb-[1px] font-normal">
                             ({t("common:minimumPurchaseAmount", { amount: minimumOrderAmount })})
@@ -66,7 +75,8 @@ const CheckoutActions = ({
         </div>
     );
 
-    const isPaymentDisabled = isEmpty || isCheckoutSubmit || typeof customCartTotal !== 'number';
+    // חסימת הכפתור עצמו (עגלה ריקה / שליחה בתהליך) — לא קשור למתג PAYMENT_DISABLED
+    const isSubmitBlocked = isEmpty || isCheckoutSubmit || typeof customCartTotal !== 'number';
 
     return (
         <>
@@ -90,7 +100,7 @@ const CheckoutActions = ({
                 <div className="flex-1 hidden sm:block">
                     <button
                         type="submit"
-                        disabled={isPaymentDisabled}
+                        disabled={isSubmitBlocked}
                         className="payment-glow-btn text-sm font-serif font-medium flex justify-center items-center w-full"
                     >
                         {paymentButtonContent}
@@ -106,7 +116,7 @@ const CheckoutActions = ({
                 <button
                     type="submit"
                     form={formId}
-                    disabled={isPaymentDisabled}
+                    disabled={isSubmitBlocked}
                     className="payment-glow-btn payment-glow-btn--floating text-sm font-serif font-medium flex justify-center items-center w-full"
                 >
                     {paymentButtonContent}

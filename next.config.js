@@ -37,6 +37,11 @@ const baseConfig = {
   // hydration mismatch וריצוד. ברירת המחדל היא "true" (בלי מחירים).
   env: {
     NEXT_PUBLIC_HIDE_PRICES: process.env.NEXT_PUBLIC_HIDE_PRICES ?? "true",
+    // כיבוי שלב התשלום (ראה src/utils/paymentDisabled.js). כאן מאותה סיבה
+    // כמו הסתרת המחירים: הערך חייב להיצרב בזמן ה-build לשני ה-bundles, אחרת
+    // ה-SSR והדפדפן יכולים לחלוק על טקסט הכפתור ולגרום ל-hydration mismatch.
+    // ברירת המחדל היא "true" (ללא תשלום — שמירת הזמנה בלבד).
+    NEXT_PUBLIC_PAYMENT_DISABLED: process.env.NEXT_PUBLIC_PAYMENT_DISABLED ?? "true",
   },
   eslint: { ignoreDuringBuilds: true },
   i18n: { locales: ["he"], defaultLocale: "he" },

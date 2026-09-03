@@ -18,6 +18,7 @@ import Calculating from "./Calculating";
 import MainBT from "@component/button/MainBT";
 import ThresholdDiscountSlider from "./ThresholdDiscountSlider";
 import { HIDE_PRICES } from "@utils/priceVisibility";
+import { PAYMENT_DISABLED } from "@utils/paymentDisabled";
 
 const Cart = () => {
   const router = useRouter();
@@ -119,7 +120,8 @@ const Cart = () => {
       <span
         className="whitespace-nowrap rounded-lg font-bold font-serif text-stone-800 cursor-pointer px-5 py-2"
       >
-        {t("common:proceedToCheckoutBtn")}
+        {/* חנות ללא תשלום — ראה src/utils/paymentDisabled.js */}
+        {PAYMENT_DISABLED ? t("common:proceedToOrderBtn") : t("common:proceedToCheckoutBtn")}
       </span>
     </MainBT>
   );

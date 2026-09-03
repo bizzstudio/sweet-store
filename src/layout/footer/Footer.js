@@ -18,6 +18,7 @@ import { UserContext } from "@context/UserContext";
 import useGetSetting from "@hooks/useGetSetting";
 import CMSkeleton from "@component/preloader/CMSkeleton";
 import useUtilsFunction from "@hooks/useUtilsFunction";
+import { PAYMENT_DISABLED } from "@utils/paymentDisabled";
 
 const Footer = () => {
   const { t } = useTranslation();
@@ -445,7 +446,11 @@ const Footer = () => {
             )}
 
             {/* Payment Methods - Third Column */}
-            {storeCustomizationSetting?.footer?.payment_method_status && (
+            {/*
+              * חנות ללא תשלום (ראה src/utils/paymentDisabled.js): לוגואי
+              * חברות האשראי מבטיחים סליקה באתר שלא קיימת כרגע.
+              */}
+            {!PAYMENT_DISABLED && storeCustomizationSetting?.footer?.payment_method_status && (
               <div className="col-span-1 order-3">
                 <div className="text-center lg:text-right">
                   <ul>

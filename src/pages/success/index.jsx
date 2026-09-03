@@ -22,6 +22,7 @@ import { trackFbPurchase } from "@services/facebookPixel";
 import OrderServices from "@services/OrderServices";
 import { UserContext } from "@context/UserContext";
 import { HIDE_PRICES } from "@utils/priceVisibility";
+import { PAYMENT_DISABLED } from "@utils/paymentDisabled";
 
 const Success = () => {
   const { isLoading, setIsLoading } = useContext(SidebarContext);
@@ -148,14 +149,29 @@ const Success = () => {
 
   return (
     <>
-      <Layout title={t("common:orderCompletedSuccessfully")} description={t("common:orderCompletedDescription")}>
+      {/*
+        * חנות ללא תשלום (ראה src/utils/paymentDisabled.js): אין כאן "רכישה".
+        * הכיתוב מדבר על הזמנה שנשמרה ועברה לטיפול — לא על תשלום שהתקבל.
+        */}
+      <Layout
+        title={PAYMENT_DISABLED ? t("common:orderSavedSuccessfully") : t("common:orderCompletedSuccessfully")}
+        description={t("common:orderCompletedDescription")}
+      >
         {(isLoading || !paymentVerified) ? (
           <Loading loading={true} />
         ) : (
           <div className='w-full mx-auto flex flex-col justify-center items-center gap-2 py-20 px-10 lg:px-0'>
-            <img className="md:w-1/5 w-2/3 mr-8" src={cartSuccess.src} alt="הרכישה הושלמה בהצלחה" />
-            <h1 className="text-4xl text-center font-bold">{t("common:thankYouForPurchase")}</h1>
-            <h3 className="text-xl text-center">{t("common:orsderInProcess")}</h3>
+            <img
+              className="md:w-1/5 w-2/3 mr-8"
+              src={cartSuccess.src}
+              alt={PAYMENT_DISABLED ? "ההזמנה נשמרה בהצלחה" : "הרכישה הושלמה בהצלחה"}
+            />
+            <h1 className="text-4xl text-center font-bold">
+              {PAYMENT_DISABLED ? t("common:thankYouForOrder") : t("common:thankYouForPurchase")}
+            </h1>
+            <h3 className="text-xl text-center">
+              {PAYMENT_DISABLED ? t("common:orderSavedInProcess") : t("common:orsderInProcess")}
+            </h3>
 
             {/* קופון "לקנייה הבאה" — למי ששילם משלוח ולא הגיע למשלוח חינם */}
             {order?.rewardCouponCode && (

@@ -61,6 +61,18 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
   const [minimumOrderAmount, setMinimumOrderAmount] = useState(process.env.NEXT_PUBLIC_ENV === 'dev' ? 1 : 150);
   const guestAddressFormRef = useRef(null);
 
+  /*
+   * נעילת שליחה כפולה.
+   *
+   * הכפתור נחסם דרך isCheckoutSubmit, אבל setState של React אינו מיידי:
+   * שתי הקשות מהירות (double-tap במובייל) יכולות שתיהן להיכנס ל-submitHandler
+   * לפני שהרינדור המחודש חוסם את הכפתור. במסלול התשלום התוצאה הייתה טיוטה
+   * כפולה שהשנייה מוחקת את הראשונה; בחנות ללא תשלום כל שליחה היא **הזמנה
+   * אמיתית** שיורדת מהמלאי ומפיקה תעודת משלוח — כלומר כפילות של ממש.
+   * ref מתעדכן מיידית ולכן חוסם בפועל.
+   */
+  const isSubmittingRef = useRef(false);
+
   const router = useRouter();
   // const stripe = useStripe();
   // const elements = useElements();
@@ -232,6 +244,9 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
 
   // שליחת ההזמנה לשרת
   const submitHandler = async (data) => {
+    // שליחה כבר בדרך — ראה isSubmittingRef
+    if (isSubmittingRef.current) return;
+
     try {
       // console.log('items :>> ', items);
 
@@ -354,6 +369,7 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
 
       dispatch({ type: "SAVE_SHIPPING_ADDRESS", payload: data });
       Cookies.set("shippingAddress", JSON.stringify(data));
+      isSubmittingRef.current = true;
       setIsCheckoutSubmit(true);
       setError("");
 
@@ -391,6 +407,7 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
         setValue("customerName", "");
         setValue("customerPhone", "");
 
+        isSubmittingRef.current = false;
         setIsCheckoutSubmit(false);
 
         // החזרת פונקציה לניקוי שם הלקוח בקומפוננטה
@@ -469,10 +486,43 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
           orderService = OrderServices.addGuestOrder(orderInfo);
         }
 
+        /*
+         * בזרימה ללא תשלום מפנים ל-/success, והמעבר בין העמודים אינו מיידי.
+         * שחרור הכפתור ב-finally היה פותח חלון של כמה מאות אלפיות שנייה שבו
+         * הלקוח רואה כפתור פעיל על הזמנה שכבר נשמרה — ולחיצה בו יוצרת הזמנה
+         * שנייה אמיתית. לכן בזרימה הזו הכפתור נשאר נעול עד עזיבת העמוד.
+         */
+        let navigatingAway = false;
+
         // יצירת ההזמנה בדטאבייס עם סטטוס Pending
         await orderService
           .then((res) => {
-            setPaymentSrc(res.paymentUrl);
+            /*
+             * חנות ללא תשלום: השרת כבר סגר את ההזמנה והעביר אותה לאדמין, ולא
+             * החזיר paymentUrl אלא את מזהה ההזמנה והטוקן — מפנים ישירות לעמוד
+             * התודה, בלי שלב סליקה.
+             *
+             * התנאי נשען על res.paymentDisabled שהשרת מחזיר, ובכוונה *לא* על
+             * המתג המקומי PAYMENT_DISABLED: המתג בחנות נצרב ב-build ואילו
+             * המתג בשרת הוא משתנה סביבה, ושניהם יכולים להיפרד לרגע (פריסה
+             * חלקית, build ישן). מי שיודע מה באמת קרה להזמנה הוא השרת. המתג
+             * המקומי אחראי רק על הניסוח בממשק.
+             * ראה src/utils/paymentDisabled.js
+             *
+             * ההפניה נעשית כאן ולא דרך setPaymentSrc: המסלול של paymentSrc
+             * רץ ב-render של checkout.jsx ומיועד לכתובת חיצונית של קארדקום.
+             */
+            if (res?.paymentDisabled) {
+              navigatingAway = true;
+              const orderId = res?.orderId || "";
+              const token = res?.orderToken || "";
+              // ניקוי העגלה נעשה בעמוד ה-/success, כמו במסלול התשלום.
+              router.push(
+                `/success?orderId=${encodeURIComponent(orderId)}${token ? `&token=${encodeURIComponent(token)}` : ""}`
+              );
+            } else {
+              setPaymentSrc(res.paymentUrl);
+            }
 
             // רישום לפלאשי - גם לאורחים וגם למשתמשים רשומים
             if (userInfo) {
@@ -528,11 +578,17 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
               notifyError(error?.response?.data?.message || "שגיאה ביצירת ההזמנה. מומלץ לרוקן את העגלה ולנסות שוב.");
             }
           }).finally(() => {
-            setIsCheckoutSubmit(false);
+            if (!navigatingAway) {
+              isSubmittingRef.current = false;
+              setIsCheckoutSubmit(false);
+            }
           })
       }
     } catch (err) {
       console.error("Error in submitHandler:", err);
+      // שחרור לפני כל הסתעפות — כולל ה-return של 409 — אחרת הכפתור נשאר
+      // חסום לצמיתות ואי אפשר לשלוח שוב אחרי תיקון העגלה.
+      isSubmittingRef.current = false;
 
       // טיפול בקונפליקטים
       if (err?.response?.status === 409) {

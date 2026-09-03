@@ -24,6 +24,7 @@ import { notifyError, notifySuccess } from "@utils/toast";
 import useAddToCart from "@hooks/useAddToCart";
 import SubModal from "@component/modal/SubModal";
 import addingToCart from 'public/addingToCart.svg'
+import { PAYMENT_DISABLED } from "@utils/paymentDisabled";
 
 const MyOrders = () => {
   const router = useRouter();
@@ -222,7 +223,7 @@ const MyOrders = () => {
                     className="flex flex-grow gap-1 items-center justify-center mx-auto px-3 py-1 bg-mainColor-light text-xs text-mainColor-dark font-semibold rounded-full cursor-auto text-center"
                   >
                     <MdPayment size={17} /> <span>=</span>
-                    {t("common:payNow")}
+                    {PAYMENT_DISABLED ? t("common:completeOrderNoPayment") : t("common:payNow")}
                   </div>
                   <div
                     className="flex flex-grow gap-1 items-center justify-center px-3 py-1 bg-mainColor-light text-xs text-mainColor-dark font-semibold rounded-full cursor-auto text-center"
@@ -292,7 +293,7 @@ const MyOrders = () => {
                                       onClick={(e) => { e.stopPropagation(); restoreOrder(order); }}
                                     >
                                       <MdPayment size={17} />
-                                      {t("common:payNow")}
+                                      {PAYMENT_DISABLED ? t("common:completeOrderNoPayment") : t("common:payNow")}
                                     </button>
                                     <button
                                       disabled={loadingRestore}
