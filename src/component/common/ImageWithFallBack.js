@@ -8,7 +8,7 @@ import useTranslation from "next-translate/useTranslation";
 // אלפי בקשות לדומיין חיצוני שאינו בשליטתנו. הקובץ המקומי מוגש מאותו origin,
 // נשמר במטמון עם שאר הנכסים, ואינו נשבר אם Cloudinary לא זמין.
 const ImageWithFallback = ({
-  fallback = "/logo/logo-stacked.png",
+  fallback = "/logo/candy.svg",
   alt,
   src,
   outOfStock,

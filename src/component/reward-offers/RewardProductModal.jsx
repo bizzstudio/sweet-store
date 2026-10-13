@@ -10,6 +10,7 @@ import { notifySuccess } from "@utils/toast";
 import MainBT from "@component/button/MainBT";
 import MainModal from "@component/modal/MainModal";
 import { HIDE_PRICES } from "@utils/priceVisibility";
+import { assetFromSetting } from "@utils/basePath";
 
 const RewardProductModal = ({
     isOpen,
@@ -42,7 +43,8 @@ const RewardProductModal = ({
 
     const choiceProducts = requiresChoice ? rewardProducts : [];
     const activeProduct = rewardProduct;
-    const displayImage = offer?.image || activeProduct?.image?.[0] || "/gift_silan.png";
+    // ‎<img> רגיל ולא next/image, ולכן ה-basePath לא נוסף לבד — ראה src/utils/basePath.js.
+    const displayImage = assetFromSetting(offer?.image || activeProduct?.image?.[0], "/gift_silan.png");
     const offerTitle = showingTranslateValue(offerName) || showingTranslateValue(offer?.name) || '';
     const productTitle = showingTranslateValue(activeProduct?.title) || '';
 
@@ -174,7 +176,7 @@ const RewardProductModal = ({
                                             className="relative rounded-xl border-2 border-gray-200 p-2 text-right transition-all hover:border-mainColor hover:bg-mainColor/5 hover:shadow-md focus:border-mainColor"
                                         >
                                             <img
-                                                src={product?.image?.[0] || "/gift_silan.png"}
+                                                src={assetFromSetting(product?.image?.[0], "/gift_silan.png")}
                                                 alt={title}
                                                 className="w-full h-24 object-contain mb-2"
                                             />

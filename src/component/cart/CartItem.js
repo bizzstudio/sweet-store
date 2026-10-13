@@ -116,7 +116,7 @@ const CartItem = ({ item, currency, updateTotalPrice }) => {
   // ‎<img> רגיל ולא next/image, ולכן ה-basePath לא נוסף לבד — ראה src/utils/basePath.js.
   // הפרמטר השני של assetFromSetting מטפל גם במקרה שהערך קיים אך ריק (מוצר
   // שנשמר עם image: [""]), שאחרת היה מייצר <img src=""> ובקשה חוזרת לעמוד עצמו.
-  const PLACEHOLDER = "/logo/logo-stacked.png";
+  const PLACEHOLDER = "/logo/candy.svg";
   const rawImage = Array.isArray(item?.image) ? item.image[0] : item?.image;
   const imageSrc = assetFromSetting(rawImage, PLACEHOLDER);
 

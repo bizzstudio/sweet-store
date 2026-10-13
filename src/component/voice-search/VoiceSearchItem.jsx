@@ -49,7 +49,7 @@ const VoiceSearchItem = ({ item, currency, onQuantityChange, onRemove }) => {
             >
                 <img
                     key={item._id}
-                    src={assetFromSetting(item.image?.[0], "/logo/logo-stacked.png")}
+                    src={assetFromSetting(item.image?.[0], "/logo/candy.svg")}
                     width={60}
                     height={60}
                     alt={currentLang ? item.title?.he : item.title?.en}

@@ -377,8 +377,12 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
   // JSON-LD מחייב כתובת מוחלטת. הגיבוי היה תמונת דמו ב-Cloudinary של הפרויקט
   // המקורי — ומכיוון שלאף מוצר בקטלוג אין תמונה, כל המוצרים היו מפרסמים
   // בנתוני המבנה תמונה מדומיין זר שאינו בשליטתנו.
-  const productImage =
-    product?.image?.[0] || `${siteUrl}/logo/logo-stacked.png`;
+  // נתיב ‎/product-images/ הוא אייקון שנוצר אוטומטית (ויחסי, לא מוחלט) — בחנות
+  // הוא מוחלף בסוכריה, וכאן בלוגו: מנועי חיפוש ורשתות לא מקבלים SVG כתמונת מוצר.
+  const realImage = /^https?:\/\//i.test(product?.image?.[0] || "")
+    ? product.image[0]
+    : null;
+  const productImage = realImage || `${siteUrl}/logo/logo-stacked.png`;
   const basePrice = price || product?.prices?.price || 0;
   const availability =
     stock > 0
