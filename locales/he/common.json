@@ -417,6 +417,7 @@
   
     "checkout": "תשלום",
     "deliveryDetails": "פרטי משלוח",
+    "generalDetails": "פרטים כלליים",
     "checkoutDescription": "דף תשלום",
     "pickup": "איסוף עצמי",
     "shipping": "משלוח עד הבית (בתוספת תשלום)",

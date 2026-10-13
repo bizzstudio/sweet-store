@@ -301,38 +301,6 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
           hasError = true;
         }
 
-        if (!guestChosenCity) {
-          setFormError("guestCity", {
-            type: "manual",
-            message: t("invalidCity"),
-          });
-          hasError = true;
-        }
-
-        if (!data.guestStreet?.trim()) {
-          setFormError("guestStreet", {
-            type: "manual",
-            message: t("invalidStreet"),
-          });
-          hasError = true;
-        }
-
-        if (!data.guestHouseNumber?.trim()) {
-          setFormError("guestHouseNumber", {
-            type: "manual",
-            message: t("invalidHouseNumber"),
-          });
-          hasError = true;
-        }
-
-        if (!data.guestApartmentNumber?.trim()) {
-          setFormError("guestApartmentNumber", {
-            type: "manual",
-            message: t("invalidApartmentNumber"),
-          });
-          hasError = true;
-        }
-
         // אם יש שגיאות, גלול לטופס ועצור את השליחה
         if (hasError) {
           if (guestAddressFormRef?.current) {
@@ -349,14 +317,15 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
         }
       }
 
-      // וולידציות כלליות (לכל המשתמשים)
-      if (isDeliverable !== undefined && !isDeliverable) {
+      // בדיקות המשלוח חלות על לקוח מחובר בלבד: אורח אינו ממלא כתובת (אין
+      // משלוחים), ולכן אין לו יעד שאפשר לבדוק או מינימום הזמנה שנגזר ממנו.
+      if (userInfo && isDeliverable !== undefined && !isDeliverable) {
         notifyError(t("noDeliveryToAddress"));
         window.scrollTo({ top: 0, behavior: "smooth" });
         return; // עצור את הביצוע
       }
 
-      if (isDeliveryMetod !== undefined && !isDeliveryMetod) {
+      if (userInfo && isDeliveryMetod !== undefined && !isDeliveryMetod) {
         notifyError(t("selectDeliveryMethod"));
         window.scrollTo({ top: 0, behavior: "smooth" });
         return; // עצור את הביצוע
@@ -369,10 +338,11 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
       // ראה src/utils/priceVisibility.js
       if (
         !HIDE_PRICES &&
+        userInfo &&
         minimumOrderAmount !== undefined &&
         customCartTotal < minimumOrderAmount
       ) {
-        const cityName = userInfo?.address?.city?.city_name_he || guestChosenCity?.city_name_he || "";
+        const cityName = userInfo?.address?.city?.city_name_he || "";
         notifyError(t("minimumOrderAmount", { amount: minimumOrderAmount, city: cityName }));
         window.scrollTo({ top: 0, behavior: "smooth" });
         return; // עצור את הביצוע
@@ -456,33 +426,16 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
 
           orderService = OrderServices.addOrder(orderInfo);
         } else { // משתמש אורח - הזמנה כאורח
-          /*
-           * העיר מגיעה מ-guestChosenCity, לא מהטופס.
-           *
-           * בורר העיר הוא react-select שכותב ל-state בלבד ואינו רשום
-           * ב-react-hook-form, ולכן data.guestCity היה ריק בכל הזמנה ראשונה של
-           * אורח. הערך נשלח undefined, השרת דחה ב-400 ("נא להזין את כל השדות
-           * החובה"), והאורח לא יכול היה להזמין בלחיצה הראשונה.
-           *
-           * בנקודה הזו הערך מובטח: הוולידציה למעלה עוצרת שליחה בלי עיר.
-           */
-          const guestCity = guestChosenCity;
-
           orderInfo = {
             // פרטי היוזר האורח
             name: data.guestName,
             lastName: data.guestLastName,
             email: data.guestEmail,
             phone: data.guestPhone,
-            city: guestCity,
-            street: data.guestStreet,
-            houseNumber: data.guestHouseNumber,
-            apartmentNumber: data.guestApartmentNumber,
-            floor: data.guestFloor || '',
-            entryCode: data.guestEntryCode || '',
 
             // פרטי ההזמנה
-            shippingOption: data.shippingOption || "2",
+            // אורח מזמין בלי כתובת, ולכן ההזמנה נרשמת כאיסוף ("1") ולא כמשלוח
+            shippingOption: "1",
             callOnArrival: data.callOnArrival,
             paymentMethod: "creditCard",
             status: "Pending",

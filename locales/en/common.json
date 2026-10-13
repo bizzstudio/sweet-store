@@ -416,6 +416,7 @@
 
   "checkout": "Checkout",
   "deliveryDetails": "Delivery Details",
+  "generalDetails": "General Details",
   "checkoutDescription": "this is checkout page",
   "pickup": "self-pickup",
   "shipping": "Delivery to your home (extra charge)",

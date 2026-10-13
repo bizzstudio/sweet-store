@@ -111,11 +111,6 @@ const Checkout = () => {
   const guestLastName = watch("guestLastName");
   const guestPhone = watch("guestPhone");
   const guestEmail = watch("guestEmail");
-  const guestStreet = watch("guestStreet");
-  const guestHouseNumber = watch("guestHouseNumber");
-  const guestApartmentNumber = watch("guestApartmentNumber");
-  const guestFloor = watch("guestFloor");
-  const guestEntryCode = watch("guestEntryCode");
 
   // רענון המבצעים בכניסה לעמוד התשלום
   const { refreshOffers } = useContext(SidebarContext);
@@ -160,28 +155,12 @@ const Checkout = () => {
           if (data.guestLastName) setValue("guestLastName", data.guestLastName);
           if (data.guestPhone) setValue("guestPhone", data.guestPhone);
           if (data.guestEmail) setValue("guestEmail", data.guestEmail);
-          if (data.guestStreet) setValue("guestStreet", data.guestStreet);
-          if (data.guestHouseNumber) setValue("guestHouseNumber", data.guestHouseNumber);
-          if (data.guestApartmentNumber) setValue("guestApartmentNumber", data.guestApartmentNumber);
-          if (data.guestFloor) setValue("guestFloor", data.guestFloor);
-          if (data.guestEntryCode) setValue("guestEntryCode", data.guestEntryCode);
-          if (data.guestCity) {
-            try {
-              const cityData = typeof data.guestCity === 'string' ? JSON.parse(data.guestCity) : data.guestCity;
-              // העיר נשמרת ב-state בלבד ולא בטופס: בורר העיר אינו רשום
-              // ב-react-hook-form, ו-guestChosenCity הוא המקור היחיד שנקרא
-              // בשליחת ההזמנה (useCheckoutSubmit).
-              setGuestChosenCity(cityData);
-            } catch (e) {
-              console.error("Error parsing guestCity:", e);
-            }
-          }
         } catch (error) {
           console.error("Error loading guest data from localStorage:", error);
         }
       }
     }
-  }, [setValue, userInfo, setGuestChosenCity]);
+  }, [setValue, userInfo]);
 
   // שמירת פרטי אורח ב-localStorage
   useEffect(() => {
@@ -191,12 +170,6 @@ const Checkout = () => {
         guestLastName,
         guestPhone,
         guestEmail,
-        guestStreet,
-        guestHouseNumber,
-        guestApartmentNumber,
-        guestFloor,
-        guestEntryCode,
-        guestCity: guestChosenCity ? JSON.stringify(guestChosenCity) : null,
       };
 
       // שמירה רק אם יש לפחות שדה אחד עם ערך
@@ -205,7 +178,7 @@ const Checkout = () => {
         localStorage.setItem('checkoutGuestData', JSON.stringify(guestData));
       }
     }
-  }, [guestName, guestLastName, guestPhone, guestEmail, guestStreet, guestHouseNumber, guestApartmentNumber, guestFloor, guestEntryCode, guestChosenCity, userInfo]);
+  }, [guestName, guestLastName, guestPhone, guestEmail, userInfo]);
 
   // שמירת העדפות משלוח ב-localStorage
   useEffect(() => {
@@ -314,11 +287,11 @@ const Checkout = () => {
     return { isTodayDeliverable, nextDeliverableDate };
   };
 
-  // בדיקת משלוח לפי כתובת - משתמש מחובר או אורח
+  // בדיקת משלוח לפי כתובת - משתמש מחובר בלבד (אורח אינו ממלא כתובת)
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const addressToCheck = userInfo?.address?.city?.city_name_he || guestChosenCity?.city_name_he;
+        const addressToCheck = userInfo?.address?.city?.city_name_he;
         if (!addressToCheck) return;
 
         let customerLabel = userInfo?.name
@@ -380,7 +353,7 @@ const Checkout = () => {
     };
 
     fetchData();
-  }, [city, guestChosenCity, userInfo, guestPhone]);
+  }, [city, userInfo]);
 
   // בדיקת זכאות לקופון "לקנייה הבאה" עבור לקוח מחובר.
   // עד לתשובת השרת לא מבטיחים כלום (false), כדי שלא תוצג הבטחה שגויה למי שכבר קיבל.

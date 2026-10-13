@@ -1,24 +1,22 @@
 // src/component/guestAddress/GuestAddressForm.jsx
 import React, { useEffect } from "react";
-import { IoLocationOutline } from "react-icons/io5";
+import { CiUser } from "react-icons/ci";
 import useTranslation from "next-translate/useTranslation";
 
 // Internal import
-import Label from "@component/form/Label";
 import Error from "@component/form/Error";
 import InputArea from "@component/form/InputArea";
 import useGetSetting from "@hooks/useGetSetting";
 import useUtilsFunction from "@hooks/useUtilsFunction";
-import City from "@component/select/City";
-import { HIDE_PRICES } from "@utils/priceVisibility";
 
-const GuestAddressForm = ({ register, errors, setError, clearErrors, watch, chosenCity, setChosenCity, minimumOrderAmount, isDeliverable }) => {
+// אין משלוחים בחנות, ולכן האורח ממלא פרטים כלליים בלבד — בלי כתובת.
+const GuestAddressForm = ({ register, errors, setError, clearErrors, watch }) => {
     const { storeCustomizationSetting } = useGetSetting();
     const { showingTranslateValue } = useUtilsFunction();
     const { t } = useTranslation();
 
     const validateInput = (data) => {
-        const { name, lastName, phone, street, houseNumber, apartmentNumber } = data;
+        const { name, lastName, phone } = data;
 
         // בדיקת רווחים בשדות שם פרטי ושם משפחה
         if (!name?.trim()) {
@@ -28,27 +26,6 @@ const GuestAddressForm = ({ register, errors, setError, clearErrors, watch, chos
 
         if (!lastName?.trim()) {
             setError('lastName', { type: 'manual', message: t('common:invalidLastName') });
-            return false;
-        }
-
-        // בדיקת רווחים בשדות כתובת
-        if (!street?.trim()) {
-            setError('street', { type: 'manual', message: t('common:invalidStreet') });
-            return false;
-        }
-
-        if (!houseNumber?.trim()) {
-            setError('houseNumber', { type: 'manual', message: t('common:invalidHouseNumber') });
-            return false;
-        }
-
-        if (!chosenCity) {
-            setError('city', { type: 'manual', message: t('common:invalidCity') });
-            return false;
-        }
-
-        if (!apartmentNumber?.trim()) {
-            setError('apartmentNumber', { type: 'manual', message: t('common:invalidApartmentNumber') });
             return false;
         }
 
@@ -74,23 +51,13 @@ const GuestAddressForm = ({ register, errors, setError, clearErrors, watch, chos
         if (window.guestAddressValidate) {
             window.guestAddressValidate.current = validateInput;
         }
-    }, [chosenCity, watch]);
-
-    // ניקוי error כשמבחרים עיר
-    useEffect(() => {
-        if (chosenCity && errors.guestCity) {
-            clearErrors("guestCity");
-        }
-    }, [chosenCity, errors.guestCity, clearErrors]);
+    }, [watch]);
 
     // מעקב אחרי השדות וניקוי errors כשהקלט תקין
     const guestName = watch("guestName");
     const guestLastName = watch("guestLastName");
     const guestPhone = watch("guestPhone");
     const guestEmail = watch("guestEmail");
-    const guestStreet = watch("guestStreet");
-    const guestHouseNumber = watch("guestHouseNumber");
-    const guestApartmentNumber = watch("guestApartmentNumber");
 
     const phoneRegex = /^05\d{8}$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -123,34 +90,13 @@ const GuestAddressForm = ({ register, errors, setError, clearErrors, watch, chos
         }
     }, [guestEmail, errors.guestEmail, clearErrors]);
 
-    // ניקוי error של רחוב
-    useEffect(() => {
-        if (guestStreet?.trim() && errors.guestStreet) {
-            clearErrors("guestStreet");
-        }
-    }, [guestStreet, errors.guestStreet, clearErrors]);
-
-    // ניקוי error של מספר בית
-    useEffect(() => {
-        if (guestHouseNumber?.trim() && errors.guestHouseNumber) {
-            clearErrors("guestHouseNumber");
-        }
-    }, [guestHouseNumber, errors.guestHouseNumber, clearErrors]);
-
-    // ניקוי error של מספר דירה
-    useEffect(() => {
-        if (guestApartmentNumber?.trim() && errors.guestApartmentNumber) {
-            clearErrors("guestApartmentNumber");
-        }
-    }, [guestApartmentNumber, errors.guestApartmentNumber, clearErrors]);
-
     return (
         <div className="w-full">
             <div className="bg-white border border-gray-200 rounded-lg">
                 <div className="p-4 sm:p-6">
                     <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2 mb-6">
-                        <IoLocationOutline className="text-mainColor-dark text-xl" />
-                        {t("common:deliveryDetails")}
+                        <CiUser className="text-mainColor-dark text-xl" />
+                        {t("common:generalDetails")}
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {/* שם פרטי */}
@@ -215,86 +161,6 @@ const GuestAddressForm = ({ register, errors, setError, clearErrors, watch, chos
                                 )}
                             />
                             <Error errorName={errors.guestEmail} />
-                        </div>
-
-                        {/* עיר */}
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <Label label={t("common:city")} htmlFor="guestCity" />
-                                {!HIDE_PRICES && minimumOrderAmount != null && isDeliverable === true && (
-                                    <span className="text-xs text-mainColor-dark font-semibold whitespace-nowrap">
-                                        (מינימום קנייה: {minimumOrderAmount}₪)
-                                    </span>
-                                )}
-                            </div>
-                            <City
-                                inputId="guestCity"
-                                setValue={setChosenCity}
-                                placeholder={chosenCity ? JSON.stringify(chosenCity) : t("common:selectCity")}
-                            />
-                            <Error errorName={errors.guestCity} />
-                        </div>
-
-                        {/* רחוב */}
-                        <div>
-                            <InputArea
-                                register={register}
-                                label={t("common:street")}
-                                name="guestStreet"
-                                type="text"
-                                placeholder={t("common:street")}
-                            />
-                            <Error errorName={errors.guestStreet} />
-                        </div>
-
-                        {/* מספר בית */}
-                        <div>
-                            <InputArea
-                                register={register}
-                                label={t("common:houseNumber")}
-                                name="guestHouseNumber"
-                                type="text"
-                                placeholder={t("common:houseNumber")}
-                            />
-                            <Error errorName={errors.guestHouseNumber} />
-                        </div>
-
-                        {/* מספר דירה */}
-                        <div>
-                            <InputArea
-                                register={register}
-                                label={t("common:apartmentNumber")}
-                                name="guestApartmentNumber"
-                                type="text"
-                                placeholder={t("common:apartmentNumber")}
-                            />
-                            <Error errorName={errors.guestApartmentNumber} />
-                        </div>
-
-                        {/* קומה */}
-                        <div>
-                            <InputArea
-                                register={register}
-                                label={t("common:floor")}
-                                name="guestFloor"
-                                type="number"
-                                placeholder={t("common:floor")}
-                                isRequired={false}
-                            />
-                            <Error errorName={errors.guestFloor} />
-                        </div>
-
-                        {/* קוד כניסה */}
-                        <div>
-                            <InputArea
-                                register={register}
-                                label={t("common:entryCode")}
-                                name="guestEntryCode"
-                                type="text"
-                                placeholder={t("common:entryCode")}
-                                isRequired={false}
-                            />
-                            <Error errorName={errors.guestEntryCode} />
                         </div>
                     </div>
                 </div>

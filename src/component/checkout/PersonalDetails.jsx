@@ -96,19 +96,6 @@ const PersonalDetails = ({
                         setError={setFormError}
                         clearErrors={clearErrors}
                         watch={watch}
-                        chosenCity={guestChosenCity}
-                        setChosenCity={setGuestChosenCity}
-                        minimumOrderAmount={minimumOrderAmount}
-                        isDeliverable={isDeliverable}
-                    />
-                    {/* הודעת אין משלוח - רק אם אין משלוח */}
-                    <NoDeliveryWarning
-                        isDeliverable={isDeliverable}
-                        city={city}
-                        guestChosenCity={guestChosenCity}
-                        nextTime={nextTime}
-                        availableDays={availableDays}
-                        setDeliveriesPopupOpen={setDeliveriesPopupOpen}
                     />
                 </div>
             )}
