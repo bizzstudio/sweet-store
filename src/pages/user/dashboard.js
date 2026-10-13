@@ -7,6 +7,7 @@ import { IoLockOpenOutline } from "react-icons/io5";
 import {
   FiCheck,
   FiFileText,
+  FiFolder,
   FiGrid,
   FiList,
   FiRefreshCw,
@@ -96,6 +97,13 @@ const Dashboard = ({ title, description, children }) => {
       ),
       href: "/user/my-orders",
       icon: FiList,
+    },
+    {
+      // הכותרת מקובץ התרגום ולא מהגדרות החנות: שם אין שדה כזה, ושדה חסר
+      // היה משאיר פריט תפריט בלי טקסט
+      title: t("common:myDocuments"),
+      href: "/user/my-documents",
+      icon: FiFolder,
     },
     {
       title: showingTranslateValue(

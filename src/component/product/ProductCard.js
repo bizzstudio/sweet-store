@@ -125,7 +125,7 @@ const ProductCard = ({ product, attributes, offers = [] }) => {
             hasImage ? "bg-white" : "bg-mainColor-superLight"
           }`}
         >
-          <div className={`relative w-full h-full ${hasImage ? "p-1.5" : "p-4 sm:p-5"}`}>
+          <div className={`relative w-full h-full ${hasImage ? "p-1.5" : "p-3"}`}>
             <ImageWithFallback
               // ‎product.image[0] הישיר קורס אם השדה חסר לגמרי; הסכימה אמנם
               // מבטיחה מערך, אבל מסמך שנוצר מחוץ למודל אינו מחויב לה

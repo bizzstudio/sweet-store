@@ -20,6 +20,8 @@ const ProductServices = {
     page = null,
     limit = null,
     sort = null,
+    // כל הקטלוג, בלי קטגוריה ובלי חיפוש — דף הבית. דורש page/limit.
+    all = false,
   }) => {
     // resolve the issue with URLs that include non-English letters.
     const rawSlug = String(slug ?? "").trim();
@@ -40,9 +42,10 @@ const ProductServices = {
       page || limit || sort
         ? `&page=${page || 1}&limit=${limit || 48}&sort=${encodeURIComponent(sort || "Popular")}`
         : "";
+    const allFlag = all ? "&all=1" : "";
 
     return requests.get(
-      `/products/store?category=${encodedCategory}&title=${encodedTitle}&slug=${encodedSlug}&sku=${sku}${pagination}`
+      `/products/store?category=${encodedCategory}&title=${encodedTitle}&slug=${encodedSlug}&sku=${sku}${pagination}${allFlag}`
     );
   },
 

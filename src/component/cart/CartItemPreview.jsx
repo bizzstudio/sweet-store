@@ -33,7 +33,7 @@ const CartItemPreview = ({ item }) => {
           // לעמוד עצמו. בקטלוג הזה לאף מוצר אין תמונה, כך שזה המצב הרגיל.
           src={assetFromSetting(
             Array.isArray(item?.image) ? item.image[0] : item?.image,
-            "/product-placeholder.svg"
+            "/logo/logo-stacked.png"
           )}
           width={60}
           height={60}

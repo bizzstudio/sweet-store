@@ -4,13 +4,6 @@ import Image from "@component/common/Img";
 import dynamic from "next/dynamic";
 import useTranslation from "next-translate/useTranslation";
 
-import {
-  FacebookIcon,
-  LinkedinIcon,
-  PinterestIcon,
-  TwitterIcon,
-  WhatsappIcon,
-} from "react-share";
 import { FaRegCopyright } from "react-icons/fa";
 
 // Internal import
@@ -342,136 +335,57 @@ const Footer = () => {
           )}
         </div>
 
-        <hr className="hr-line"></hr>
+        {(storeCustomizationSetting?.footer?.bottom_contact_status ||
+          (!PAYMENT_DISABLED && storeCustomizationSetting?.footer?.payment_method_status)) && (
+          <>
+            <hr className="hr-line"></hr>
 
-        <div className="mx-auto max-w-screen-2xl px-4 sm:px-10 bg-mainColor-superLight shadow-sm border border-mainColor-superLight rounded-lg">
-          <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 lg:gap-11 py-6 sm:py-8 items-center justify-center sm:justify-evenly">
-            {/* Social Links - First Column */}
-            {storeCustomizationSetting?.footer?.social_links_status && (
-              <div className="col-span-1 flex justify-center lg:justify-start order-1">
-                <div className="flex items-center flex-col">
-                  {(storeCustomizationSetting?.footer?.social_facebook ||
-                    storeCustomizationSetting?.footer?.social_twitter ||
-                    storeCustomizationSetting?.footer?.social_pinterest ||
-                    storeCustomizationSetting?.footer?.social_linkedin ||
-                    storeCustomizationSetting?.footer?.social_whatsapp) && (
-                      <span className="text-sm sm:text-base leading-7 font-medium block mb-3 sm:mb-2 pb-0.5 text-center lg:text-left">
-                        {t("common:footer-follow-us")}
-                      </span>
-                    )}
-                  <ul className="text-sm flex flex-wrap justify-center lg:justify-start gap-2 sm:gap-3">
-                    {storeCustomizationSetting?.footer?.social_facebook && (
-                      <li className="flex items-center transition ease-in-out duration-500">
-                        <Link
-                          href={`${storeCustomizationSetting?.footer?.social_facebook}`}
-                          aria-label={`פייסבוק – ${t("common:opensInNewWindow")}`}
-                          rel="noreferrer"
-                          target="_blank"
-                          className="block text-center mx-auto text-gray-500 hover:text-white p-1"
-                        >
-                          <FacebookIcon size={32} round />
-                        </Link>
-                      </li>
-                    )}
-                    {storeCustomizationSetting?.footer?.social_twitter && (
-                      <li className="flex items-center transition ease-in-out duration-500">
-                        <Link
-                          href={`${storeCustomizationSetting?.footer?.social_twitter}`}
-                          aria-label={`X (טוויטר) – ${t("common:opensInNewWindow")}`}
-                          rel="noreferrer"
-                          target="_blank"
-                          className="block text-center mx-auto text-gray-500 hover:text-white p-1"
-                        >
-                          <TwitterIcon size={32} round />
-                        </Link>
-                      </li>
-                    )}
-                    {storeCustomizationSetting?.footer?.social_pinterest && (
-                      <li className="flex items-center transition ease-in-out duration-500">
-                        <Link
-                          href={`${storeCustomizationSetting?.footer?.social_pinterest}`}
-                          aria-label={`פינטרסט – ${t("common:opensInNewWindow")}`}
-                          rel="noreferrer"
-                          target="_blank"
-                          className="block text-center mx-auto text-gray-500 hover:text-white p-1"
-                        >
-                          <PinterestIcon size={32} round />
-                        </Link>
-                      </li>
-                    )}
-                    {storeCustomizationSetting?.footer?.social_linkedin && (
-                      <li className="flex items-center transition ease-in-out duration-500">
-                        <Link
-                          href={`${storeCustomizationSetting?.footer?.social_linkedin}`}
-                          aria-label={`לינקדאין – ${t("common:opensInNewWindow")}`}
-                          rel="noreferrer"
-                          target="_blank"
-                          className="block text-center mx-auto text-gray-500 hover:text-white p-1"
-                        >
-                          <LinkedinIcon size={32} round />
-                        </Link>
-                      </li>
-                    )}
-                    {storeCustomizationSetting?.footer?.social_whatsapp && (
-                      <li className="flex items-center transition ease-in-out duration-500">
-                        <Link
-                          href={`${storeCustomizationSetting?.footer?.social_whatsapp}`}
-                          aria-label={`וואטסאפ – ${t("common:opensInNewWindow")}`}
-                          rel="noreferrer"
-                          target="_blank"
-                          className="block text-center mx-auto text-gray-500 hover:text-white p-1"
-                        >
-                          <WhatsappIcon size={32} round />
-                        </Link>
-                      </li>
-                    )}
-                  </ul>
-                </div>
-              </div>
-            )}
+            <div className="mx-auto max-w-screen-2xl px-4 sm:px-10 bg-mainColor-superLight shadow-sm border border-mainColor-superLight rounded-lg">
+              <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 lg:gap-11 py-6 sm:py-8 items-center justify-center sm:justify-evenly">
+                {/* Contact Info - Second Column */}
+                {storeCustomizationSetting?.footer?.bottom_contact_status && (
+                  <div className="col-span-1 text-center order-2">
+                    <div>
+                      <p className="text-sm sm:text-base leading-7 font-medium block mb-2">
+                        {t("common:footer-call-us")}
+                      </p>
+                      <h5 className="text-lg sm:text-xl lg:text-2xl font-bold text-black leading-7">
+                        {/* +012345-67900 */}
+                        {storeCustomizationSetting?.footer?.bottom_contact}
+                      </h5>
+                    </div>
+                  </div>
+                )}
 
-            {/* Contact Info - Second Column */}
-            {storeCustomizationSetting?.footer?.bottom_contact_status && (
-              <div className="col-span-1 text-center order-2">
-                <div>
-                  <p className="text-sm sm:text-base leading-7 font-medium block mb-2">
-                    {t("common:footer-call-us")}
-                  </p>
-                  <h5 className="text-lg sm:text-xl lg:text-2xl font-bold text-black leading-7">
-                    {/* +012345-67900 */}
-                    {storeCustomizationSetting?.footer?.bottom_contact}
-                  </h5>
-                </div>
+                {/* Payment Methods - Third Column */}
+                {/*
+                  * חנות ללא תשלום (ראה src/utils/paymentDisabled.js): לוגואי
+                  * חברות האשראי מבטיחים סליקה באתר שלא קיימת כרגע.
+                  */}
+                {!PAYMENT_DISABLED && storeCustomizationSetting?.footer?.payment_method_status && (
+                  <div className="col-span-1 order-3">
+                    <div className="text-center lg:text-right">
+                      <ul>
+                        <li className="transition hover:opacity-80 inline-flex w-full justify-center lg:justify-end">
+                          <Image
+                            width={350}
+                            height={200}
+                            className="w-full max-w-[300px] sm:max-w-[350px] h-auto"
+                            src={
+                              storeCustomizationSetting?.footer?.payment_method_img ||
+                              "/payment-method/payment-logo.png"
+                            }
+                            alt="payment method"
+                          />
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-
-            {/* Payment Methods - Third Column */}
-            {/*
-              * חנות ללא תשלום (ראה src/utils/paymentDisabled.js): לוגואי
-              * חברות האשראי מבטיחים סליקה באתר שלא קיימת כרגע.
-              */}
-            {!PAYMENT_DISABLED && storeCustomizationSetting?.footer?.payment_method_status && (
-              <div className="col-span-1 order-3">
-                <div className="text-center lg:text-right">
-                  <ul>
-                    <li className="transition hover:opacity-80 inline-flex w-full justify-center lg:justify-end">
-                      <Image
-                        width={350}
-                        height={200}
-                        className="w-full max-w-[300px] sm:max-w-[350px] h-auto"
-                        src={
-                          storeCustomizationSetting?.footer?.payment_method_img ||
-                          "/payment-method/payment-logo.png"
-                        }
-                        alt="payment method"
-                      />
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="mx-auto max-w-screen-2xl px-3 sm:px-10 flex justify-center py-4">

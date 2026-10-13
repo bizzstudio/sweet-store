@@ -122,8 +122,10 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
       break;
   }
 
+  // קופון נטען רק בקופה: בעמוד התשלום של החנות אין יותר הזנת קופון, ועוגייה
+  // ישנה הייתה מחילה הנחה שהלקוח לא רואה ולא יכול להסיר.
   useEffect(() => {
-    if (Cookies.get("couponInfo")) {
+    if (isCashierMode && Cookies.get("couponInfo")) {
       const coupon = JSON.parse(Cookies.get("couponInfo"));
       // console.log('coupon information',coupon)
       setCouponInfo(coupon);
@@ -131,6 +133,15 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
       setMinimumAmount(Number(coupon.minimumAmount) || 0);
     }
   }, [isCouponApplied]);
+
+  // מוצר חינם שנשאר בעגלה מקופון הרשמה ישן: בלי קופון השרת דוחה את ההזמנה
+  // ("מוצר חינם נמצא בעגלה ללא קופון הרשמה תקף"), והלקוח נתקע בלי דרך להסיר אותו.
+  useEffect(() => {
+    if (isCashierMode) return;
+    items.forEach((it) => {
+      if (it.isCouponFreeProduct) removeItem(it.id);
+    });
+  }, [isCashierMode, items]);
 
   // הסרת קופון אם העגלה ריקה או מתחת לסכום מינימום (כמו ב-/coupon/use בשרת)
   useEffect(() => {

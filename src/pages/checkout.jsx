@@ -23,7 +23,6 @@ import MissingProductsModal from "@component/modal/MissingProductsModal";
 import websiteClose from 'public/websiteClose2.svg'
 import Image from "@component/common/Img";
 import PriceUpdatedModal from "@component/modal/PriceUpdatedModal";
-import CouponModal from "@component/modal/CouponModal";
 import { SidebarContext } from "@context/SidebarContext";
 import AutoDeliveriesPopup from "@component/deliveriesPopup/AutoDeliveriesPopup";
 import { notifyError } from "@utils/toast";
@@ -32,7 +31,6 @@ import { trackBeginCheckout } from "@services/googleAnalytics";
 import OrderCosts from "@component/checkout/OrderCosts";
 import CheckoutCartProducts from "@component/checkout/CheckoutCartProducts";
 import PersonalDetails from "@component/checkout/PersonalDetails";
-import DeliveryOptions from "@component/checkout/DeliveryOptions";
 import CheckoutActions from "@component/checkout/CheckoutActions";
 import CheckoutPrompts from "@component/checkout/CheckoutPrompts";
 
@@ -56,7 +54,6 @@ const Checkout = () => {
   const [keySequence, setKeySequence] = useState([]);
   const [deliveriesPopupOpen, setDeliveriesPopupOpen] = useState(false);
   const [newsletterOptIn, setNewsletterOptIn] = useState(false);
-  const [couponModalOpen, setCouponModalOpen] = useState(false);
   // זכאות לקופון "לקנייה הבאה" — ההטבה חד-פעמית לכל לקוח, ולכן לא מבטיחים אותה למי שכבר קיבל
   const [rewardEligible, setRewardEligible] = useState(true);
 
@@ -73,10 +70,6 @@ const Checkout = () => {
     setShowCard,
     error,
     // stripe,
-    couponInfo,
-    couponRef,
-    handleCouponCode,
-    handleRemoveCoupon,
     discountAmount,
     thresholdDiscount,
     shippingCost,
@@ -112,7 +105,6 @@ const Checkout = () => {
   } = useCheckoutSubmit(false, newsletterOptIn);
 
   const selectedShippingOption = watch("shippingOption"); // עוקב אחרי הבחירה
-  const selectedCallOnArrival = watch("callOnArrival"); // עוקב אחרי בחירת אופן המשלוח
 
   // מעקב אחרי כל שדות האורח
   const guestName = watch("guestName");
@@ -150,9 +142,6 @@ const Checkout = () => {
     if (savedDeliveryPrefs) {
       try {
         const prefs = JSON.parse(savedDeliveryPrefs);
-        if (prefs.callOnArrival !== undefined) {
-          setValue("callOnArrival", prefs.callOnArrival);
-        }
         if (prefs.shippingOption) {
           setValue("shippingOption", prefs.shippingOption);
         }
@@ -222,12 +211,11 @@ const Checkout = () => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const deliveryPrefs = {
-        callOnArrival: selectedCallOnArrival,
         shippingOption: selectedShippingOption,
       };
       localStorage.setItem('checkoutDeliveryPrefs', JSON.stringify(deliveryPrefs));
     }
-  }, [selectedCallOnArrival, selectedShippingOption]);
+  }, [selectedShippingOption]);
 
   // בעת שחזור הזמנה הודעה על מוצרים לא זמינים
   useEffect(() => {
@@ -637,18 +625,6 @@ const Checkout = () => {
           </div>
         </MainModal>
       )}
-      {couponModalOpen && (
-        <MainModal modalOpen={couponModalOpen} setModalOpen={setCouponModalOpen}>
-          <div className="px-3 sm:px-11 py-8 pt-10 max-w-xl">
-            <CouponModal 
-              handleCouponCode={handleCouponCode} 
-              setModalOpen={setCouponModalOpen}
-              couponRef={couponRef}
-              couponInfo={couponInfo}
-            />
-          </div>
-        </MainModal>
-      )}
       <Layout title={t("common:checkout")} description={t("common:checkoutDescription")}>
         <div className="mx-auto max-w-screen-2xl px-3 sm:px-10">
           <div className="py-0 md:py-10 lg:py-12 px-0 2xl:max-w-screen-2xl w-full xl:max-w-screen-xl flex flex-col items-center gap-8">
@@ -675,12 +651,10 @@ const Checkout = () => {
                         {userInfo ? (
                           // משתמש מחובר - סדר רגיל
                           <>
-                            {/* כפתורי פעולה בולטים - כניסת משתמש קיים / הזנת קופון */}
+                            {/* כפתור פעולה בולט - כניסת משתמש קיים */}
                             <CheckoutPrompts
                               isGuest={!userInfo}
-                              hasCoupon={!!couponInfo?.couponCode}
                               onLoginClick={() => setShowLoginModal(true)}
-                              onCouponClick={() => setCouponModalOpen(true)}
                             />
 
                             {/* 1. פרטים אישיים */}
@@ -704,13 +678,6 @@ const Checkout = () => {
                               minimumOrderAmount={minimumOrderAmount}
                             />
 
-                            {/* 2. בחירת אופן המשלוח */}
-                            <DeliveryOptions
-                              register={register}
-                              selectedCallOnArrival={selectedCallOnArrival}
-                              isDeliverable={isDeliverable}
-                            />
-
                             {/* סיכום עלויות (כולל סיכום ההזמנה - רשימת המוצרים) */}
                             <OrderCosts
                               storeCustomizationSetting={storeCustomizationSetting}
@@ -719,10 +686,7 @@ const Checkout = () => {
                               customCartTotal={customCartTotal}
                               minimumOrderAmount={minimumOrderAmount}
                               shippingCost={shippingCost}
-                              discountAmount={discountAmount}
                               total={total}
-                              couponInfo={couponInfo}
-                              handleRemoveCoupon={handleRemoveCoupon}
                               isDeliverable={isDeliverable}
                               city={city}
                               guestChosenCity={guestChosenCity}
@@ -755,12 +719,10 @@ const Checkout = () => {
                         ) : (
                           // אורח - סדר מיוחד
                           <>
-                            {/* כפתורי פעולה בולטים - כניסת משתמש קיים / הזנת קופון */}
+                            {/* כפתור פעולה בולט - כניסת משתמש קיים */}
                             <CheckoutPrompts
                               isGuest={!userInfo}
-                              hasCoupon={!!couponInfo?.couponCode}
                               onLoginClick={() => setShowLoginModal(true)}
-                              onCouponClick={() => setCouponModalOpen(true)}
                             />
 
                             {/* 2. פרטים אישיים */}
@@ -784,13 +746,6 @@ const Checkout = () => {
                               minimumOrderAmount={minimumOrderAmount}
                             />
 
-                            {/* 3. בחירת אופן המשלוח */}
-                            <DeliveryOptions
-                              register={register}
-                              selectedCallOnArrival={selectedCallOnArrival}
-                              isDeliverable={isDeliverable}
-                            />
-
                             {/* סיכום עלויות (כולל סיכום ההזמנה - רשימת המוצרים) */}
                             <OrderCosts
                               storeCustomizationSetting={storeCustomizationSetting}
@@ -799,10 +754,7 @@ const Checkout = () => {
                               customCartTotal={customCartTotal}
                               minimumOrderAmount={minimumOrderAmount}
                               shippingCost={shippingCost}
-                              discountAmount={discountAmount}
                               total={total}
-                              couponInfo={couponInfo}
-                              handleRemoveCoupon={handleRemoveCoupon}
                               isDeliverable={isDeliverable}
                               city={city}
                               guestChosenCity={guestChosenCity}

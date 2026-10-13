@@ -21,6 +21,8 @@ import useUtilsFunction from "@hooks/useUtilsFunction";
 const CatalogHeader = ({
   title,
   breadcrumbs = [],
+  // דף הבית הוא ראש השרשרת — פירור בודד "דף הבית" בתוך דף הבית הוא רעש
+  hideBreadcrumbs = false,
   totalProducts,
   // הקטגוריה הראשית — ממנה נגזרות התת-קטגוריות המוצגות כשורת צ'יפים
   parentCategory,
@@ -36,9 +38,13 @@ const CatalogHeader = ({
 
   return (
     <header className="w-full">
-      <div className="pt-3 pb-2">
-        <Breadcrumbs items={breadcrumbs} />
-      </div>
+      {hideBreadcrumbs ? (
+        <div className="pt-3" />
+      ) : (
+        <div className="pt-3 pb-2">
+          <Breadcrumbs items={breadcrumbs} />
+        </div>
+      )}
 
       <div className="bg-white border border-gray-200 rounded-xl px-4 py-3.5 sm:px-5 sm:py-4">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">

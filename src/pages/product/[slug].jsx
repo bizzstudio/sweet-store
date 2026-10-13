@@ -378,7 +378,7 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
   // המקורי — ומכיוון שלאף מוצר בקטלוג אין תמונה, כל המוצרים היו מפרסמים
   // בנתוני המבנה תמונה מדומיין זר שאינו בשליטתנו.
   const productImage =
-    product?.image?.[0] || `${siteUrl}/product-placeholder.svg`;
+    product?.image?.[0] || `${siteUrl}/logo/logo-stacked.png`;
   const basePrice = price || product?.prices?.price || 0;
   const availability =
     stock > 0

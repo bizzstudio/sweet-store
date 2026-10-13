@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { FiPlus, FiMinus, FiTrash2 } from "react-icons/fi";
 import Cookies from "js-cookie";
 import { HIDE_PRICES } from "@utils/priceVisibility";
+import { assetFromSetting } from "@utils/basePath";
 
 const VoiceSearchItem = ({ item, currency, onQuantityChange, onRemove }) => {
     const router = useRouter();
@@ -48,7 +49,7 @@ const VoiceSearchItem = ({ item, currency, onQuantityChange, onRemove }) => {
             >
                 <img
                     key={item._id}
-                    src={item.image?.[0] || '/placeholder-image.jpg'}
+                    src={assetFromSetting(item.image?.[0], "/logo/logo-stacked.png")}
                     width={60}
                     height={60}
                     alt={currentLang ? item.title?.he : item.title?.en}

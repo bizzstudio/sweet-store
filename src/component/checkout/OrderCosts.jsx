@@ -16,10 +16,7 @@ const OrderCosts = ({
     customCartTotal,
     minimumOrderAmount,
     shippingCost,
-    discountAmount,
     total,
-    couponInfo,
-    handleRemoveCoupon,
     isDeliverable,
     city,
     guestChosenCity,
@@ -126,38 +123,6 @@ const OrderCosts = ({
                         <span>
                             לא הגעת למשלוח חינם — בסיום ההזמנה יחכה לך{" "}
                             <strong>קופון 25 ₪</strong> לקנייה הבאה!
-                        </span>
-                    </div>
-                )}
-
-                {/* הנחת קופון — רק כשהוחל קופון בפועל */}
-                {!HIDE_PRICES && couponInfo.couponCode && (
-                    <div className="flex items-center py-2 text-sm w-full font-semibold text-gray-500 last:border-b-0 last:text-base last:pb-0 gap-1.5">
-                        {showingTranslateValue(
-                            storeCustomizationSetting?.checkout?.discount
-                        )}
-                        <span className="ml-auto flex-shrink-0 font-bold text-orange-400">
-                            {currency}
-                            {discountAmount?.toFixed(2)}
-                        </span>
-                    </div>
-                )}
-                {couponInfo.couponCode && (
-                    <div className="flex items-center pb-4 lg:pb-4 text-sm w-full font-semibold text-heading last:border-b-0 last:text-base last:pb-0">
-                        <span className="bg-mainColor-superLight px-4 py-3 leading-tight w-full rounded-md flex flex-wrap items-center justify-between gap-2">
-                            <span className="flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
-                                <p className="text-mainColor-dark">{t("couponApplied")}</p>
-                                <span className="text-red-500 font-mono text-right break-all">
-                                    {couponInfo.couponCode}
-                                </span>
-                            </span>
-                            <button
-                                type="button"
-                                onClick={handleRemoveCoupon}
-                                className="shrink-0 text-sm font-medium text-gray-600 underline underline-offset-2 hover:text-red-600 transition-colors"
-                            >
-                                {t("removeCoupon")}
-                            </button>
                         </span>
                     </div>
                 )}
