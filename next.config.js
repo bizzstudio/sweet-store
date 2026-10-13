@@ -1,5 +1,22 @@
 // next.config.js
-const runtimeCaching = require("next-pwa/cache");
+const defaultRuntimeCaching = require("next-pwa/cache");
+
+// נתוני העמודים (‎/_next/data/…json) לא נשמרים ב-service worker בכלל.
+//
+// ברירת המחדל של next-pwa היא StaleWhileRevalidate: התשובה השמורה מוגשת מיד,
+// והרענון רץ ברקע. מאחר שיש לנו middleware, ה-prefetch של ‎<Link> מקבל מהשרת
+// "{}" ריק (x-middleware-skip) באותה כתובת בדיוק של הבקשה האמיתית — וה-"{}"
+// הזה נשמר במטמון. לחיצה על הלוגו קיבלה אותו בחזרה, ו-Next רינדר את דף הבית
+// עם props ריקים: בלי תרגומים ("common:allProducts"), ובלי מוצרים. הרענון
+// ברקע תיקן את המטמון, ולכן הלחיצה הבאה עבדה — "לפעמים כן, לפעמים לא".
+// מעבר לזה, המטמון הגיש רשימות מוצרים בנות עד 24 שעות.
+const runtimeCaching = defaultRuntimeCaching.map((entry) =>
+  entry.options?.cacheName === "next-data"
+    ? // options ריק ולא חסר: next-pwa ניגש ל-options.plugins של כל כלל כדי
+      // להוסיף את ה-fallback, וכלל בלי options מפיל את ה-build.
+      { urlPattern: entry.urlPattern, method: "GET", handler: "NetworkOnly", options: {} }
+    : entry
+);
 const nextTranslate = require("next-translate-plugin");
 
 // תת-הנתיב שממנו החנות מוגשת (ראה src/utils/basePath.js — אותו משתנה בדיוק).
