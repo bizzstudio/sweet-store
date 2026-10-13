@@ -3,7 +3,6 @@ import React from "react";
 import { CiUser } from "react-icons/ci";
 import useTranslation from "next-translate/useTranslation";
 import GuestAddressForm from "@component/guestAddress/GuestAddressForm";
-import NoDeliveryWarning from "@component/checkout/NoDeliveryWarning";
 import { HIDE_PRICES } from "@utils/priceVisibility";
 
 const PersonalDetails = ({
@@ -11,9 +10,6 @@ const PersonalDetails = ({
     city,
     setModalOpen,
     isDeliverable,
-    nextTime,
-    availableDays,
-    setDeliveriesPopupOpen,
     guestAddressFormRef,
     register,
     setValue,
@@ -72,16 +68,6 @@ const PersonalDetails = ({
                                         {t("common:changeAddress")}
                                     </button>
                                 </div>
-
-                                {/* הודעת אין משלוח - רק אם אין משלוח */}
-                                <NoDeliveryWarning
-                                    isDeliverable={isDeliverable}
-                                    city={city}
-                                    guestChosenCity={guestChosenCity}
-                                    nextTime={nextTime}
-                                    availableDays={availableDays}
-                                    setDeliveriesPopupOpen={setDeliveriesPopupOpen}
-                                />
                             </div>
                         </div>
                     </div>

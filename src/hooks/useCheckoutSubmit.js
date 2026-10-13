@@ -317,20 +317,6 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
         }
       }
 
-      // בדיקות המשלוח חלות על לקוח מחובר בלבד: אורח אינו ממלא כתובת (אין
-      // משלוחים), ולכן אין לו יעד שאפשר לבדוק או מינימום הזמנה שנגזר ממנו.
-      if (userInfo && isDeliverable !== undefined && !isDeliverable) {
-        notifyError(t("noDeliveryToAddress"));
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        return; // עצור את הביצוע
-      }
-
-      if (userInfo && isDeliveryMetod !== undefined && !isDeliveryMetod) {
-        notifyError(t("selectDeliveryMethod"));
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        return; // עצור את הביצוע
-      }
-
       // מינימום הזמנה: בחנות ללא מחירים הכלל אינו נאכף כלל. הלקוח לא רואה
       // סכומים, ולכן חסימה על סף שהוא לא יכול למדוד הייתה משאירה אותו תקוע
       // בלי דרך לדעת כמה חסר. השדה עצמו (‎minimumOrderAmount) עדיין נטען
@@ -412,7 +398,9 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
 
           orderInfo = {
             user_info: userDetails,
-            shippingOption: data.shippingOption,
+            // אין משלוחים בחנות: ההזמנה נרשמת תמיד כאיסוף ("1"), כמו אצל אורח,
+            // כדי שהשרת לא יחשב דמי משלוח לפי עיר הלקוח
+            shippingOption: "1",
             callOnArrival: data.callOnArrival,
             paymentMethod: "creditCard",
             status: "Pending",

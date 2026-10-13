@@ -1,5 +1,5 @@
 import React from "react";
-import { FiCreditCard, FiGift, FiPhoneCall, FiTruck } from "react-icons/fi";
+import { FiCreditCard, FiGift, FiPhoneCall } from "react-icons/fi";
 
 // Internal import
 import useGetSetting from "@hooks/useGetSetting";
@@ -10,14 +10,6 @@ const FeatureCard = () => {
   const { showingTranslateValue } = useUtilsFunction();
 
   const featurePromo = [
-    {
-      id: 1,
-      title: showingTranslateValue(
-        storeCustomizationSetting?.footer?.shipping_card
-      ),
-
-      icon: FiTruck,
-    },
     {
       id: 2,
       title: showingTranslateValue(
@@ -43,7 +35,7 @@ const FeatureCard = () => {
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 mx-auto">
+    <div className="grid grid-cols-3 mx-auto">
       {featurePromo.map((promo) => (
         <div
           key={promo.id}

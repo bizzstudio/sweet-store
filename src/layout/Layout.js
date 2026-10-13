@@ -25,7 +25,6 @@ import LotteryPopup, {
   markLotteryPopupSeen,
 } from "@component/modal/LotteryPopup";
 import StickyCart from "@component/cart/StickyCart";
-import FreeShippingBar from "@component/common/FreeShippingBar";
 import useCart from "@hooks/useCart";
 import useRegisterSuccessFlag from "@hooks/useRegisterSuccessFlag";
 import { UserContext } from "@context/UserContext";
@@ -203,7 +202,7 @@ const Layout = ({ title, description, children, cashierPage = false }) => {
     validateUserToken();
   }, []); // רץ רק פעם אחת בריענון
 
-  // מדידת גובה ההידר הנעוץ (פס משלוח חינם + ניווט) ל-CSS var גלובלי --header-h.
+  // מדידת גובה ההידר הנעוץ (הניווט) ל-CSS var גלובלי --header-h.
   // גובה ההידר דינמי (הבר מוצג/מוסתר לפי הגדרות ומצב עגלה), ולכן אלמנטים שיושבים
   // "מתחת להידר" (dropdown קטגוריות, סיידבר dashboard, גלילה לשגיאה ב-checkout)
   // מתייחסים למשתנה הזה במקום לערכי px קשיחים — נכון בכל מצב.
@@ -262,7 +261,7 @@ const Layout = ({ title, description, children, cashierPage = false }) => {
 
       <div className="font-sans">
         {/* דילוג על הניווט — הרכיב הראשון בסדר ה-Tab בכל עמוד. בלעדיו משתמש
-            מקלדת חייב לעבור את פס המשלוח, הלוגו, החיפוש, התפריט וכל פס
+            מקלדת חייב לעבור את הלוגו, החיפוש, התפריט וכל פס
             הקטגוריות (עשרות עצירות) לפני שהוא מגיע לתוכן העמוד. */}
         {!cashierPage && (
           <a href="#main-content" className="skip-to-content">
@@ -278,15 +277,12 @@ const Layout = ({ title, description, children, cashierPage = false }) => {
           {description && <meta name="description" content={description} />}
         </Head>
         {/* <NavBarTop /> */}
-        {/* פס משלוח חינם + ניווט נעוצים יחד למעלה לכל אורך הגלישה.
-            ה-Navbar מקבל disableSticky כדי שלא "יטפס" מעל הפס (מיכל sticky יחיד). */}
+        {/* הניווט נעוץ למעלה לכל אורך הגלישה במיכל sticky יחיד,
+            ולכן ה-Navbar עצמו מקבל disableSticky. */}
         {cashierPage ? (
           <Navbar cashierPage={cashierPage} />
         ) : (
           <div ref={headerRef} className="sticky top-0 z-20">
-            {/* פס משלוח חינם, העגלה הצפה והתפריט התחתון שייכים כולם לתהליך
-                ההזמנה — כשהחנות סגורה אין מה להזמין והם יורדים */}
-            {!storeUiOff && <FreeShippingBar />}
             <Navbar cashierPage={cashierPage} disableSticky />
           </div>
         )}

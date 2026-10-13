@@ -14,7 +14,6 @@ import useUtilsFunction from "@hooks/useUtilsFunction";
 import SettingServices from "@services/SettingServices";
 import { UserContext } from "@context/UserContext";
 import Loading from "@component/preloader/Loading";
-import DeliveryServices from "@services/DeliveryServices";
 import CustomerServices from "@services/CustomerServices";
 import MainModal from "@component/modal/MainModal";
 import UserAddressUpdate from "@component/userAddressUpdate/UserAddressUpdate";
@@ -24,7 +23,6 @@ import websiteClose from 'public/websiteClose2.svg'
 import Image from "@component/common/Img";
 import PriceUpdatedModal from "@component/modal/PriceUpdatedModal";
 import { SidebarContext } from "@context/SidebarContext";
-import AutoDeliveriesPopup from "@component/deliveriesPopup/AutoDeliveriesPopup";
 import { notifyError } from "@utils/toast";
 import { trackBeginCheckout } from "@services/googleAnalytics";
 // Checkout Components
@@ -43,16 +41,11 @@ const Checkout = () => {
 
   const { state: { userInfo } } = useContext(UserContext);
   const city = userInfo?.address?.city?.city_name_he;
-  const [availableDays, setAvailableDays] = useState([]);
-  const [nextTime, setNextTime] = useState(null);
-  const [deliveryPrice, setDeliveryPrice] = useState(0);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
-  const [isDeliveryOpen, setIsDeliveryOpen] = useState(true);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(true);
   const [missingProductsState, setMissingProductsState] = useState([]);
   const [keySequence, setKeySequence] = useState([]);
-  const [deliveriesPopupOpen, setDeliveriesPopupOpen] = useState(false);
   const [newsletterOptIn, setNewsletterOptIn] = useState(false);
   // זכאות לקופון "לקנייה הבאה" — ההטבה חד-פעמית לכל לקוח, ולכן לא מבטיחים אותה למי שכבר קיבל
   const [rewardEligible, setRewardEligible] = useState(true);
@@ -104,7 +97,6 @@ const Checkout = () => {
     guestAddressFormRef,
   } = useCheckoutSubmit(false, newsletterOptIn);
 
-  const selectedShippingOption = watch("shippingOption"); // עוקב אחרי הבחירה
 
   // מעקב אחרי כל שדות האורח
   const guestName = watch("guestName");
@@ -131,19 +123,6 @@ const Checkout = () => {
   // טעינת כל השדות מ-localStorage בעת טעינת העמוד
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
-    // טעינת העדפות משלוח (לכל המשתמשים)
-    const savedDeliveryPrefs = localStorage.getItem('checkoutDeliveryPrefs');
-    if (savedDeliveryPrefs) {
-      try {
-        const prefs = JSON.parse(savedDeliveryPrefs);
-        if (prefs.shippingOption) {
-          setValue("shippingOption", prefs.shippingOption);
-        }
-      } catch (error) {
-        console.error("Error loading delivery preferences from localStorage:", error);
-      }
-    }
 
     // טעינת פרטי אורח (רק אם המשתמש לא מחובר)
     if (!userInfo) {
@@ -180,16 +159,6 @@ const Checkout = () => {
     }
   }, [guestName, guestLastName, guestPhone, guestEmail, userInfo]);
 
-  // שמירת העדפות משלוח ב-localStorage
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const deliveryPrefs = {
-        shippingOption: selectedShippingOption,
-      };
-      localStorage.setItem('checkoutDeliveryPrefs', JSON.stringify(deliveryPrefs));
-    }
-  }, [selectedShippingOption]);
-
   // בעת שחזור הזמנה הודעה על מוצרים לא זמינים
   useEffect(() => {
     const missingProducts = localStorage.getItem("missingProducts");
@@ -219,11 +188,8 @@ const Checkout = () => {
     };
   }, [isCheckoutSubmit]);
 
-  // משיכת ההגדרות של המשלוחים וההזמנות ובדיקה אם זה מאופשר או לא
+  // משיכת הגדרת ההזמנות ובדיקה אם ההזמנה מאופשרת או לא
   useEffect(() => {
-    if (storeSetting.delivery_status !== undefined) {
-      setIsDeliveryOpen(storeSetting.delivery_status);
-    }
     if (storeSetting.optionToOrder_status !== undefined) {
       setIsCheckoutOpen(storeSetting.optionToOrder_status);
     }
@@ -245,115 +211,6 @@ const Checkout = () => {
     }
   }, [userInfo]);
 
-  // פונקציה לבדיקת כתובת
-  const isAddressDeliverable = async (address, customerLabel = "", customerPhoneVal = "") => {
-    const response = await DeliveryServices.getByCityName(address, {
-      customerName: customerLabel,
-      customerPhone: customerPhoneVal,
-    });
-    return response ? response : null; // יחזיר את עלות המשלוח או null אם אין משלוח לכתובת זו
-  };
-
-  // פונקציית בדיקה האם יש משלוח היום או מחר ואם לא מתי המשלוח הבא
-  const canOrderToday = (daysArray) => {
-    const now = new Date();
-    const currentHour = now.getHours();
-    const todayIndex = now.getDay() + 1; // תרגום ל-1 עד 7 במקום 0 עד 6
-    const nextDayIndex = (todayIndex % 7) + 1; // היום הבא עם תרגום ל-1 עד 7
-
-    let isTodayDeliverable;
-    if (currentHour < 13) {
-      // אם השעה היא לפני 13:00
-      isTodayDeliverable = daysArray.some(day => parseInt(day.value) === todayIndex);
-    } else {
-      // אם השעה היא אחרי 13:00
-      isTodayDeliverable = daysArray.some(day => parseInt(day.value) === nextDayIndex);
-    }
-
-    let nextDeliverableDate = null;
-    if (!isTodayDeliverable) {
-      // חיפוש היום הבא שבו ניתן לבצע משלוח
-      for (let i = 1; i < 8; i++) {
-        const futureDayIndex = ((todayIndex + i - 1) % 7) + 1; // תרגום ל-1 עד 7
-        if (daysArray.some(day => Number(day.value) === futureDayIndex)) {
-          nextDeliverableDate = new Date();
-          nextDeliverableDate.setDate(now.getDate() + i - 1);
-          nextDeliverableDate.setHours(13, 0, 0, 0); // הגדרת השעה ל-13:00
-          break;
-        }
-      }
-    }
-
-    return { isTodayDeliverable, nextDeliverableDate };
-  };
-
-  // בדיקת משלוח לפי כתובת - משתמש מחובר בלבד (אורח אינו ממלא כתובת)
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const addressToCheck = userInfo?.address?.city?.city_name_he;
-        if (!addressToCheck) return;
-
-        let customerLabel = userInfo?.name
-          ? [userInfo.name, userInfo.lastName].filter(Boolean).join(" ").trim()
-          : [guestName, guestLastName].filter(Boolean).join(" ").trim();
-
-        let customerPhoneVal =
-          (userInfo?.phone && String(userInfo.phone).trim()) ||
-          (guestPhone && String(guestPhone).trim()) ||
-          "";
-
-        if ((!customerLabel || !customerPhoneVal) && typeof window !== "undefined") {
-          try {
-            const rawGuest = localStorage.getItem("checkoutGuestData");
-            if (rawGuest) {
-              const g = JSON.parse(rawGuest);
-              if (!customerLabel) {
-                const gn = [g?.guestName, g?.guestLastName].filter(Boolean).join(" ").trim();
-                if (gn) customerLabel = gn;
-              }
-              if (!customerPhoneVal && g?.guestPhone) {
-                customerPhoneVal = String(g.guestPhone).trim();
-              }
-            }
-          } catch (_) {}
-        }
-
-        const check = await isAddressDeliverable(
-          addressToCheck,
-          customerLabel,
-          customerPhoneVal
-        );
-        const { isTodayDeliverable, nextDeliverableDate } = canOrderToday(check.days);
-
-        if (check?.days?.length > 0) {
-          setIsDeliverable(true);
-          setAvailableDays(check.days.map(d => d.value));
-          // הגדרת משלוח אוטומטית אם יש משלוח זמין
-          setValue("shippingOption", "2");
-          handleShippingCost(check.price);
-        } else {
-          setIsDeliverable(false);
-          setAvailableDays([]);
-          setNextTime(nextDeliverableDate);
-        }
-        setDeliveryPrice(check.price);
-        setMinimumOrderAmount(
-          process.env.NEXT_PUBLIC_ENV === 'dev'
-            ? 1
-            : (typeof check.minimumOrder === 'number' ? check.minimumOrder : 150)
-        );
-      } catch (error) {
-        if (error.response && error.response.status === 404) {
-          setIsDeliverable(false);
-        } else {
-          console.error(error);
-        }
-      }
-    };
-
-    fetchData();
-  }, [city, userInfo]);
 
   // בדיקת זכאות לקופון "לקנייה הבאה" עבור לקוח מחובר.
   // עד לתשובת השרת לא מבטיחים כלום (false), כדי שלא תוצג הבטחה שגויה למי שכבר קיבל.
@@ -382,37 +239,6 @@ const Checkout = () => {
     };
   }, [userInfo]);
 
-  // משלוח חינם מעל סכום קנייה — התאמת עלות המשלוח בהתאם להגדרות החנות ולסכום העגלה.
-  // deliveryPrice מחזיק את המחיר "האמיתי" של העיר; כאן מחליטים אם לאפס אותו.
-  // הבסיס הוא סכום המוצרים בלבד אחרי הנחת סף וקופון — *בלי* דמי המשלוח.
-  useEffect(() => {
-    if (!isDeliverable) return;
-
-    const freeShippingStatus = storeSetting?.free_shipping_status;
-    const freeShippingThreshold = Number(storeSetting?.free_shipping_threshold);
-    const eligibleAmount =
-      Number(customCartTotal) -
-      (Number(thresholdDiscount) || 0) -
-      (Number(discountAmount) || 0);
-
-    if (
-      freeShippingStatus &&
-      freeShippingThreshold > 0 &&
-      Number.isFinite(eligibleAmount) &&
-      eligibleAmount >= freeShippingThreshold
-    ) {
-      handleShippingCost(0);
-    } else {
-      handleShippingCost(deliveryPrice);
-    }
-  }, [
-    customCartTotal,
-    thresholdDiscount,
-    discountAmount,
-    deliveryPrice,
-    isDeliverable,
-    storeSetting,
-  ]);
 
   const navToPaymentPage = () => {
     router.push(paymentSrc)
@@ -591,13 +417,6 @@ const Checkout = () => {
       {showLoginModal && (
         <LoginModal modalOpen={showLoginModal} setModalOpen={setShowLoginModal} />
       )}
-      {deliveriesPopupOpen && (
-        <MainModal modalOpen={deliveriesPopupOpen} setModalOpen={setDeliveriesPopupOpen}>
-          <div className="px-3 sm:px-6 md:px-8 lg:px-11 py-4 sm:py-6 md:py-8 pt-10">
-            <AutoDeliveriesPopup closeCategoryDrawer={() => setDeliveriesPopupOpen(false)} />
-          </div>
-        </MainModal>
-      )}
       <Layout title={t("common:checkout")} description={t("common:checkoutDescription")}>
         <div className="mx-auto max-w-screen-2xl px-3 sm:px-10">
           <div className="py-0 md:py-10 lg:py-12 px-0 2xl:max-w-screen-2xl w-full xl:max-w-screen-xl flex flex-col items-center gap-8">
@@ -636,9 +455,6 @@ const Checkout = () => {
                               city={city}
                               setModalOpen={setModalOpen}
                               isDeliverable={isDeliverable}
-                              nextTime={nextTime}
-                              availableDays={availableDays}
-                              setDeliveriesPopupOpen={setDeliveriesPopupOpen}
                               guestAddressFormRef={guestAddressFormRef}
                               register={register}
                               setValue={setValue}
@@ -704,9 +520,6 @@ const Checkout = () => {
                               city={city}
                               setModalOpen={setModalOpen}
                               isDeliverable={isDeliverable}
-                              nextTime={nextTime}
-                              availableDays={availableDays}
-                              setDeliveriesPopupOpen={setDeliveriesPopupOpen}
                               guestAddressFormRef={guestAddressFormRef}
                               register={register}
                               setValue={setValue}

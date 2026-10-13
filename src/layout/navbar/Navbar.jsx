@@ -12,7 +12,6 @@ import { MdPointOfSale } from "react-icons/md";
 import useTranslation from "next-translate/useTranslation";
 import debounce from "lodash.debounce";
 import { RiCustomerServiceLine } from "react-icons/ri";
-import { TbTruckDelivery } from "react-icons/tb";
 import { IoInformationCircleOutline } from "react-icons/io5";
 import { FaList } from "react-icons/fa";
 
@@ -31,7 +30,6 @@ import useCart from "@hooks/useCart";
 import VoiceSearchButton from "@component/voice-search/VoiceSearchButton";
 import DropdownMenu from "@component/menu/DropdownMenu";
 import MainModal from "@component/modal/MainModal";
-import AutoDeliveriesPopup from "@component/deliveriesPopup/AutoDeliveriesPopup";
 import { STORE_CLOSED, CLOSED_HOME, LOGIN_PATH } from "@utils/storeMode";
 
 const Navbar = ({ cashierPage = false, disableSticky = false }) => {
@@ -47,7 +45,6 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
   const [searchResults, setSearchResults] = useState();
   const [attributes, setAttributes] = useState();
   const [modalOpen, setModalOpen] = useState(false);
-  const [deliveriesPopup, setDeliveriesPopup] = useState(false);
 
   const { toggleCartDrawer } = useContext(SidebarContext);
   const { state: { userInfo } } = useContext(UserContext);
@@ -140,13 +137,6 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
 
   return (
     <>
-      {deliveriesPopup && (
-        <MainModal modalOpen={deliveriesPopup} setModalOpen={setDeliveriesPopup}>
-          <div className="px-3 sm:px-6 md:px-8 lg:px-11 py-4 sm:py-6 md:py-8 pt-10">
-            <AutoDeliveriesPopup />
-          </div>
-        </MainModal>
-      )}
 
       {!storeUiOff && <CartDrawer />}
       {modalOpen && (
@@ -290,8 +280,7 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
                           ),
                           onClick: () => { }, // אין צורך בפעולה כי זה לינק
                         },
-                        // הבלוג ואזורי המשלוח שייכים לחנות הפעילה — כשהיא סגורה
-                        // הבלוג חסום ואין משלוחים, ולכן שני הפריטים יורדים
+                        // הבלוג שייך לחנות הפעילה — כשהיא סגורה הוא חסום, ולכן הפריט יורד
                         ...(storeUiOff ? [] : [
                           {
                             label: (
@@ -303,17 +292,6 @@ const Navbar = ({ cashierPage = false, disableSticky = false }) => {
                               </Link>
                             ),
                             onClick: () => { }, // אין צורך בפעולה כי זה לינק
-                          },
-                          {
-                            label: (
-                              <div className="group hover:underline">
-                                <div className="flex items-center justify-center gap-1.5 font-semibold">
-                                  <TbTruckDelivery size={24} />
-                                  <span>{t("common:deliveryAreas")}</span>
-                                </div>
-                              </div>
-                            ),
-                            onClick: () => setDeliveriesPopup(true),
                           },
                         ]),
                         {
