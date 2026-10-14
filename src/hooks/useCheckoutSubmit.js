@@ -59,7 +59,6 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
   const [guestChosenCity, setGuestChosenCity] = useState(null);
   const [isDeliverable, setIsDeliverable] = useState(null);
   const [minimumOrderAmount, setMinimumOrderAmount] = useState(process.env.NEXT_PUBLIC_ENV === 'dev' ? 1 : 150);
-  const guestAddressFormRef = useRef(null);
 
   /*
    * נעילת שליחה כפולה.
@@ -830,7 +829,6 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
     setIsDeliverable,
     minimumOrderAmount,
     setMinimumOrderAmount,
-    guestAddressFormRef,
   };
 };
 

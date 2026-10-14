@@ -1,7 +1,7 @@
 // src/component/checkout/CheckoutActions.jsx
 import React from "react";
 import Link from "next/link";
-import { IoReturnUpBackOutline, IoCheckmarkCircle, IoPersonCircle } from "react-icons/io5";
+import { IoReturnUpBackOutline, IoCheckmarkCircle } from "react-icons/io5";
 import useTranslation from "next-translate/useTranslation";
 import Cookies from "js-cookie";
 import Calculating from "@component/cart/Calculating";
@@ -17,9 +17,9 @@ const CheckoutActions = ({
     showingTranslateValue,
     minimumOrderAmount,
     formId = "checkout-form",
-    // אורח: אין רכישה בלי חשבון (מ-14/10/2026). הכפתור נשאר במקומו, אבל במקום
-    // לשלוח את הטופס הוא פותח התחברות. type="button" ולא submit — אחרת
-    // ולידציית שדות האורח הייתה רצה ודורשת פרטים שההתחברות ממילא ממלאת.
+    // אורח: אין רכישה בלי חשבון (מ-14/10/2026). הכפתור נראה אותו דבר ("שמירת
+    // ההזמנה"), אבל במקום לשלוח את הטופס הוא פותח התחברות. type="button" ולא
+    // submit — אחרת ולידציית הטופס (תקנון) הייתה רצה לפני ההתחברות.
     onLoginRequired,
 }) => {
     const { t } = useTranslation();
@@ -39,12 +39,7 @@ const CheckoutActions = ({
 
     const paymentButtonContent = (
         <div className="w-full flex items-center justify-center relative z-10">
-            {onLoginRequired ? (
-                <span className={currentLang ? "flex justify-center gap-2 text-center items-center" : "flex flex-row-reverse justify-center gap-2 text-center items-center"}>
-                    <IoPersonCircle className="text-2xl" />
-                    {t("common:loginToSaveOrder")}
-                </span>
-            ) : typeof customCartTotal !== 'number' ? (
+            {typeof customCartTotal !== 'number' ? (
                 <Calculating />
             ) : isCheckoutSubmit ? (
                 <span className="flex flex-row-reverse justify-center text-center items-center gap-2">

@@ -18,22 +18,6 @@ function readBrowserCustomerHints() {
         }
     } catch (_) {}
 
-    try {
-        if (!hints.customerName || !hints.customerPhone) {
-            const rawGuest = localStorage.getItem("checkoutGuestData");
-            if (rawGuest) {
-                const g = JSON.parse(rawGuest);
-                if (!hints.customerName) {
-                    const gn = [g?.guestName, g?.guestLastName].filter(Boolean).join(" ").trim();
-                    if (gn) hints.customerName = gn;
-                }
-                if (!hints.customerPhone && g?.guestPhone) {
-                    hints.customerPhone = String(g.guestPhone).trim();
-                }
-            }
-        }
-    } catch (_) {}
-
     return hints;
 }
 // import { getNextDeliveryMessage } from "@utils/getNextDeliveryMessage";

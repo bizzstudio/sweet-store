@@ -56,8 +56,6 @@ const Checkout = () => {
     submitWithRefreshOffers,
     handleShippingCost,
     register,
-    watch,
-    setValue,
     errors,
     showCard,
     setShowCard,
@@ -84,25 +82,15 @@ const Checkout = () => {
     priceConflicts,
     showLoginModal,
     setShowLoginModal,
-    setError: setFormError,
-    clearErrors,
 
     // סטייטים לוולידציה מהוק
     guestChosenCity,
-    setGuestChosenCity,
     isDeliverable,
     setIsDeliverable,
     minimumOrderAmount,
     setMinimumOrderAmount,
-    guestAddressFormRef,
   } = useCheckoutSubmit(false, newsletterOptIn);
 
-
-  // מעקב אחרי כל שדות האורח
-  const guestName = watch("guestName");
-  const guestLastName = watch("guestLastName");
-  const guestPhone = watch("guestPhone");
-  const guestEmail = watch("guestEmail");
 
   // רענון המבצעים בכניסה לעמוד התשלום
   const { refreshOffers } = useContext(SidebarContext);
@@ -119,45 +107,6 @@ const Checkout = () => {
     beginCheckoutFired.current = true;
     trackBeginCheckout(items, customCartTotal);
   }, [items, isEmpty, customCartTotal]);
-
-  // טעינת כל השדות מ-localStorage בעת טעינת העמוד
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    // טעינת פרטי אורח (רק אם המשתמש לא מחובר)
-    if (!userInfo) {
-      const savedGuestData = localStorage.getItem('checkoutGuestData');
-      if (savedGuestData) {
-        try {
-          const data = JSON.parse(savedGuestData);
-          if (data.guestName) setValue("guestName", data.guestName);
-          if (data.guestLastName) setValue("guestLastName", data.guestLastName);
-          if (data.guestPhone) setValue("guestPhone", data.guestPhone);
-          if (data.guestEmail) setValue("guestEmail", data.guestEmail);
-        } catch (error) {
-          console.error("Error loading guest data from localStorage:", error);
-        }
-      }
-    }
-  }, [setValue, userInfo]);
-
-  // שמירת פרטי אורח ב-localStorage
-  useEffect(() => {
-    if (typeof window !== 'undefined' && !userInfo) {
-      const guestData = {
-        guestName,
-        guestLastName,
-        guestPhone,
-        guestEmail,
-      };
-
-      // שמירה רק אם יש לפחות שדה אחד עם ערך
-      const hasData = Object.values(guestData).some(value => value !== null && value !== undefined && value !== '');
-      if (hasData) {
-        localStorage.setItem('checkoutGuestData', JSON.stringify(guestData));
-      }
-    }
-  }, [guestName, guestLastName, guestPhone, guestEmail, userInfo]);
 
   // בעת שחזור הזמנה הודעה על מוצרים לא זמינים
   useEffect(() => {
@@ -433,139 +382,61 @@ const Checkout = () => {
                   : <div className="mt-5 md:mt-0 md:col-span-2">
                     <form id="checkout-form" onSubmit={handleSubmit(submitHandler, onInvalidSubmit)}>
                       <div className="w-full flex flex-col gap-4 pb-6">
-                        {/* סדר שונה למשתמש מחובר ולאורח */}
-                        {userInfo ? (
-                          // משתמש מחובר - סדר רגיל
-                          <>
-                            {/* כפתור פעולה בולט - כניסת משתמש קיים */}
-                            <CheckoutPrompts
-                              isGuest={!userInfo}
-                              onLoginClick={() => setShowLoginModal(true)}
-                            />
+                        {/* אורח ומחובר באותו סדר: לאורח PersonalDetails ריק, והכפתור
+                            פותח התחברות במקום לשמור (אין רכישה כאורח) */}
+                        {/* כפתור פעולה בולט - כניסת משתמש קיים */}
+                        <CheckoutPrompts
+                          isGuest={!userInfo}
+                          onLoginClick={() => setShowLoginModal(true)}
+                        />
 
-                            {/* 1. פרטים אישיים */}
-                            <PersonalDetails
-                              userInfo={userInfo}
-                              city={city}
-                              setModalOpen={setModalOpen}
-                              isDeliverable={isDeliverable}
-                              guestAddressFormRef={guestAddressFormRef}
-                              register={register}
-                              setValue={setValue}
-                              errors={errors}
-                              setFormError={setFormError}
-                              clearErrors={clearErrors}
-                              watch={watch}
-                              guestChosenCity={guestChosenCity}
-                              setGuestChosenCity={setGuestChosenCity}
-                              minimumOrderAmount={minimumOrderAmount}
-                            />
+                        {/* 1. פרטים אישיים */}
+                        <PersonalDetails
+                          userInfo={userInfo}
+                          city={city}
+                          setModalOpen={setModalOpen}
+                          isDeliverable={isDeliverable}
+                          minimumOrderAmount={minimumOrderAmount}
+                        />
 
-                            {/* סיכום עלויות (כולל סיכום ההזמנה - רשימת המוצרים) */}
-                            <OrderCosts
-                              storeCustomizationSetting={storeCustomizationSetting}
-                              showingTranslateValue={showingTranslateValue}
-                              currency={currency}
-                              customCartTotal={customCartTotal}
-                              minimumOrderAmount={minimumOrderAmount}
-                              shippingCost={shippingCost}
-                              total={total}
-                              isDeliverable={isDeliverable}
-                              city={city}
-                              guestChosenCity={guestChosenCity}
-                              newsletterOptIn={newsletterOptIn}
-                              setNewsletterOptIn={setNewsletterOptIn}
-                              register={register}
-                              errors={errors}
-                              storeSetting={storeSetting}
-                              rewardEligible={rewardEligible}
-                              items={items}
-                              isEmpty={isEmpty}
-                            />
+                        {/* סיכום עלויות (כולל סיכום ההזמנה - רשימת המוצרים) */}
+                        <OrderCosts
+                          storeCustomizationSetting={storeCustomizationSetting}
+                          showingTranslateValue={showingTranslateValue}
+                          currency={currency}
+                          customCartTotal={customCartTotal}
+                          minimumOrderAmount={minimumOrderAmount}
+                          shippingCost={shippingCost}
+                          total={total}
+                          isDeliverable={isDeliverable}
+                          city={city}
+                          guestChosenCity={guestChosenCity}
+                          newsletterOptIn={newsletterOptIn}
+                          setNewsletterOptIn={setNewsletterOptIn}
+                          register={register}
+                          errors={errors}
+                          storeSetting={storeSetting}
+                          rewardEligible={rewardEligible}
+                          items={items}
+                          isEmpty={isEmpty}
+                        />
 
-                            {/* 5.5 מוצרי עגלה (עד 4 מוצרים שסומנו isCartpprod) */}
-                            <CheckoutCartProducts
-                              currency={currency}
-                              showingTranslateValue={showingTranslateValue}
-                            />
+                        {/* 5.5 מוצרי עגלה (עד 4 מוצרים שסומנו isCartpprod) */}
+                        <CheckoutCartProducts
+                          currency={currency}
+                          showingTranslateValue={showingTranslateValue}
+                        />
 
-                            {/* 6. כפתורי אישור וחזרה */}
-                            <CheckoutActions
-                              isEmpty={isEmpty}
-                              isCheckoutSubmit={isCheckoutSubmit}
-                              customCartTotal={customCartTotal}
-                              storeCustomizationSetting={storeCustomizationSetting}
-                              showingTranslateValue={showingTranslateValue}
-                              minimumOrderAmount={minimumOrderAmount}
-                            />
-                          </>
-                        ) : (
-                          // אורח - סדר מיוחד
-                          <>
-                            {/* כפתור פעולה בולט - כניסת משתמש קיים */}
-                            <CheckoutPrompts
-                              isGuest={!userInfo}
-                              onLoginClick={() => setShowLoginModal(true)}
-                            />
-
-                            {/* 2. פרטים אישיים */}
-                            <PersonalDetails
-                              userInfo={userInfo}
-                              city={city}
-                              setModalOpen={setModalOpen}
-                              isDeliverable={isDeliverable}
-                              guestAddressFormRef={guestAddressFormRef}
-                              register={register}
-                              setValue={setValue}
-                              errors={errors}
-                              setFormError={setFormError}
-                              clearErrors={clearErrors}
-                              watch={watch}
-                              guestChosenCity={guestChosenCity}
-                              setGuestChosenCity={setGuestChosenCity}
-                              minimumOrderAmount={minimumOrderAmount}
-                            />
-
-                            {/* סיכום עלויות (כולל סיכום ההזמנה - רשימת המוצרים) */}
-                            <OrderCosts
-                              storeCustomizationSetting={storeCustomizationSetting}
-                              showingTranslateValue={showingTranslateValue}
-                              currency={currency}
-                              customCartTotal={customCartTotal}
-                              minimumOrderAmount={minimumOrderAmount}
-                              shippingCost={shippingCost}
-                              total={total}
-                              isDeliverable={isDeliverable}
-                              city={city}
-                              guestChosenCity={guestChosenCity}
-                              newsletterOptIn={newsletterOptIn}
-                              setNewsletterOptIn={setNewsletterOptIn}
-                              register={register}
-                              errors={errors}
-                              storeSetting={storeSetting}
-                              rewardEligible={rewardEligible}
-                              items={items}
-                              isEmpty={isEmpty}
-                            />
-
-                            {/* 5.5 מוצרי עגלה (עד 4 מוצרים שסומנו isCartpprod) */}
-                            <CheckoutCartProducts
-                              currency={currency}
-                              showingTranslateValue={showingTranslateValue}
-                            />
-
-                            {/* 6. כפתורי אישור וחזרה */}
-                            <CheckoutActions
-                              isEmpty={isEmpty}
-                              isCheckoutSubmit={isCheckoutSubmit}
-                              customCartTotal={customCartTotal}
-                              storeCustomizationSetting={storeCustomizationSetting}
-                              showingTranslateValue={showingTranslateValue}
-                              minimumOrderAmount={minimumOrderAmount}
-                              onLoginRequired={() => setShowLoginModal(true)}
-                            />
-                          </>
-                        )}
+                        {/* 6. כפתורי אישור וחזרה */}
+                        <CheckoutActions
+                          isEmpty={isEmpty}
+                          isCheckoutSubmit={isCheckoutSubmit}
+                          customCartTotal={customCartTotal}
+                          storeCustomizationSetting={storeCustomizationSetting}
+                          showingTranslateValue={showingTranslateValue}
+                          minimumOrderAmount={minimumOrderAmount}
+                          onLoginRequired={userInfo ? undefined : () => setShowLoginModal(true)}
+                        />
                       </div>
                     </form>
                   </div>
