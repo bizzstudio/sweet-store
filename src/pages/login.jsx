@@ -1,11 +1,12 @@
 // src/pages/login.jsx
 //
-// עמוד ההתחברות הייעודי של מצב "חנות סגורה" (ראו src/utils/storeMode.js).
-// עומד בפני עצמו בלי ה-Layout של החנות — אין ניווט, חיפוש, קטגוריות או עגלה,
-// רק כניסה לאזור האישי. הניתוב אליו נעשה ב-middleware.
+// עמוד ההתחברות הייעודי (ראו src/utils/storeMode.js). עומד בפני עצמו בלי
+// ה-Layout של החנות — אין ניווט, חיפוש, קטגוריות או עגלה. הניתוב אליו נעשה
+// ב-middleware: בחנות סגורה לכל מבקר, ובחנות פתוחה לאורח שמנסה לסיים הזמנה.
 import Head from "next/head";
 import Image from "@component/common/Img";
 import Cookies from "js-cookie";
+import Link from "next/link";
 import { ToastContainer } from "react-toastify";
 
 // Internal import
@@ -14,6 +15,7 @@ import MainModal from "@component/modal/MainModal";
 import RegisterSuccess from "@component/login/RegisterSuccess";
 import useGetSetting from "@hooks/useGetSetting";
 import useRegisterSuccessFlag from "@hooks/useRegisterSuccessFlag";
+import { STORE_CLOSED } from "@utils/storeMode";
 
 const LoginPage = () => {
   const { storeCustomizationSetting } = useGetSetting();
@@ -68,13 +70,23 @@ const LoginPage = () => {
 
           <div className="bg-white rounded-2xl shadow-xl px-5 sm:px-10 pt-6 pb-8">
             <p className="text-center text-sm text-gray-600 leading-6">
-              החנות סגורה כרגע להזמנות. הכניסה מיועדת לאזור האישי — צפייה
-              בהזמנות שלכם ועדכון פרטים.
+              {STORE_CLOSED
+                ? "החנות סגורה כרגע להזמנות. הכניסה מיועדת לאזור האישי — צפייה בהזמנות שלכם ועדכון פרטים."
+                : "ההזמנה באתר זמינה ללקוחות רשומים בלבד. התחברו כדי להשלים את ההזמנה — העגלה שלכם שמורה."}
             </p>
 
             {/* setModalOpen מקבל פונקציה ריקה: כאן אין מודאל לסגור */}
             <Common setModalOpen={() => {}} />
           </div>
+
+          {/* בחנות פתוחה העמוד הוא תחנת ביניים בדרך לצ'קאאוט — דרך חזרה לקטלוג */}
+          {!STORE_CLOSED && (
+            <p className="text-center mt-4">
+              <Link href="/" className="text-sm text-gray-700 underline hover:text-gray-900">
+                חזרה לחנות
+              </Link>
+            </p>
+          )}
         </div>
       </div>
     </>

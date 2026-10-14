@@ -37,7 +37,6 @@ import ProductServices from "@services/ProductServices";
 import useUtilsFunction from "@hooks/useUtilsFunction";
 import Discount from "@component/common/Discount";
 import ImageCarousel from "@component/carousel/ImageCarousel";
-import useCart from "@hooks/useCart";
 import getOfferNames from "@component/offer/getOfferNames";
 import { isFreeGiftProduct } from "@utils/offerCalculations";
 import MainBT from "@component/button/MainBT";
@@ -68,7 +67,6 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
   const [variantTitle, setVariantTitle] = useState([]);
   const [variants, setVariants] = useState([]);
 
-  const { items } = useCart();
   const [offerTitle, setOfferTitle] = useState();
 
   // מוצר שניתן במתנה במבצע — לא ניתן לרכוש אותו כמוצר רגיל
@@ -284,18 +282,6 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
     const newItem = buildCartItem(p);
     if (!newItem) return;
     handleAddItem(newItem);
-  };
-
-  // רכישה מהירה: הוספת המוצר לעגלה (רק אם עוד לא נמצא בה) ומעבר לדף התשלום
-  const handleQuickBuy = (p) => {
-    const newItem = buildCartItem(p);
-    if (!newItem) return;
-
-    const alreadyInCart = items?.some((i) => i.id === newItem.id);
-    if (!alreadyInCart) {
-      handleAddItem(newItem);
-    }
-    router.push("/checkout");
   };
 
   const handleChangeImage = (img) => {
@@ -677,23 +663,12 @@ const ProductScreen = ({ product, attributes, relatedProducts }) => {
                                 </span>
                               </button>
                             </div>
-                            {/* במובייל: "הוסף לעגלה" ליד בורר הכמות ו"רכישה מהירה" בשורה נפרדת ברוחב מלא.
-                                מ-sm ומעלה: שני הכפתורים בטור אחד לצד בורר הכמות. */}
-                            <div className="contents sm:flex sm:flex-col sm:gap-3 sm:flex-1">
-                              <MainBT
-                                onClick={() => handleAddToCart(product)}
-                                className="text-sm flex-1 sm:flex-none w-auto sm:w-full h-12 px-6"
-                              >
-                                {t("common:addToCart")}
-                              </MainBT>
-                              <button
-                                type="button"
-                                onClick={() => handleQuickBuy(product)}
-                                className="basis-full sm:basis-auto w-full h-12 px-6 rounded-md bg-[#1d4356] text-white text-sm font-serif font-semibold transition duration-300 hover:bg-[#16333f] focus:outline-none"
-                              >
-                                {t("common:quickBuy")}
-                              </button>
-                            </div>
+                            <MainBT
+                              onClick={() => handleAddToCart(product)}
+                              className="text-sm flex-1 w-auto h-12 px-6"
+                            >
+                              {t("common:addToCart")}
+                            </MainBT>
                           </div>
                         </div>
                       )}

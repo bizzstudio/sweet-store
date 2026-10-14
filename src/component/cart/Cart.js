@@ -1,13 +1,12 @@
 // src/component/cart/Cart.js
 import { useRouter } from "next/router";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { IoBagCheckOutline, IoClose, IoBagHandle } from "react-icons/io5";
 import useTranslation from "next-translate/useTranslation";
 import Cookies from "js-cookie";
 
 // Internal import
 import CartItem from "@component/cart/CartItem";
-import LoginModal from "@component/modal/LoginModal";
 import { UserContext } from "@context/UserContext";
 import { SidebarContext } from "@context/SidebarContext";
 import useUtilsFunction from "@hooks/useUtilsFunction";
@@ -19,12 +18,12 @@ import MainBT from "@component/button/MainBT";
 import ThresholdDiscountSlider from "./ThresholdDiscountSlider";
 import { HIDE_PRICES } from "@utils/priceVisibility";
 import { PAYMENT_DISABLED } from "@utils/paymentDisabled";
+import { LOGIN_PATH } from "@utils/storeMode";
 
 const Cart = () => {
   const router = useRouter();
-  const [modalOpen, setModalOpen] = useState(false);
   const { isEmpty, items, customCartTotal, totalItems } = useCart();
-  const { toggleCartDrawer, closeCartDrawer } = useContext(SidebarContext);
+  const { closeCartDrawer } = useContext(SidebarContext);
   const { currency } = useUtilsFunction();
   const { t } = useTranslation();
   const buttonRef = useRef(null);
@@ -42,17 +41,6 @@ const Cart = () => {
     }
   }, [cartDrawerOpen]); // רק כשהעגלה נפתחת
 
-  const handleOpenLogin = () => {
-    router.push(
-      { pathname: router.pathname, query: { redirect: '/checkout' } },
-      router.asPath,
-      { shallow: true }
-    );
-    toggleCartDrawer();
-    setModalOpen(!modalOpen);
-  };
-
-
   const handleCheckoutClick = (e) => {
     e.stopPropagation(); // Prevent event propagation
 
@@ -65,7 +53,15 @@ const Cart = () => {
     }
 
     closeCartDrawer(); // Call the closeCartDrawer function
-    // אפשרות לרכוש כאורח - מעבר ישיר לעמוד התשלום
+
+    // רק לקוח רשום מסיים הזמנה — אורח עובר לעמוד ההתחברות וחוזר משם לצ'קאאוט.
+    // עמוד ולא חלון התחברות: אחרי הכניסה useLoginSubmit מרענן את הדף, ורק
+    // ב-‎/login?redirect=‎ ה-middleware יודע להשלים את המעבר לצ'קאאוט.
+    if (!userInfo) {
+      router.push({ pathname: LOGIN_PATH, query: { redirect: "/checkout" } });
+      return;
+    }
+
     if (userInfo && !userInfo?.address?.city) {
       localStorage.setItem("firstTime", true);
     } else {
@@ -128,9 +124,6 @@ const Cart = () => {
 
   return (
     <>
-      {modalOpen && (
-        <LoginModal modalOpen={modalOpen} setModalOpen={setModalOpen} />
-      )}
       {/* ‎rc-drawer אינו מוסיף סמנטיקת דיאלוג בעצמו (בניגוד ל-Headless UI
           שמשמש בשאר המודלים), ולכן העגלה נקראה כאזור אנונימי באמצע העמוד.
           ‎role="dialog" + ‎aria-modal + ‎aria-labelledby נותנים לה זהות. */}
@@ -186,19 +179,7 @@ const Cart = () => {
           {/* סליידר הנחת קניה מעל סכום */}
           <ThresholdDiscountSlider />
           
-          {items.length <= 0 ? (
-            checkoutClass
-          ) : (
-            <span>
-              {!userInfo ? (
-                <div onClick={handleOpenLogin}>{checkoutClass}</div>
-              ) : (
-                // <Link href="/checkout">{
-                checkoutClass
-                // }</Link>
-              )}
-            </span>
-          )}
+          {checkoutClass}
         </div>
       </div>
     </>

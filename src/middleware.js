@@ -7,8 +7,9 @@
 //   לקוח מחובר      ->  /user/dashboard לכל ניסיון גלישה בחנות
 //
 // חנות פתוחה (STORE_CLOSED=false):
-//   הקטלוג, החיפוש, העגלה והצ'קאאוט — כולל רכישה כאורח — חופשיים לכולם.
-//   ‎/user ו-‎/cashier-desk מחייבים עוגיית התחברות (AUTH_REQUIRED_PREFIXES).
+//   הקטלוג, החיפוש והעגלה חופשיים לכולם.
+//   ‎/user,‎ /cashier-desk ו-‎/checkout מחייבים עוגיית התחברות
+//   (AUTH_REQUIRED_PREFIXES) — אין רכישה כאורח.
 import { NextResponse } from "next/server";
 
 import {
@@ -55,9 +56,29 @@ export function middleware(request) {
 
   const toDashboard = () => redirectTo(CLOSED_HOME);
 
+  // עמוד ההתחברות, בשני המצבים: לקוח שכבר מחובר לא צריך אותו.
+  //
+  // כיבוד היעד שנשמר לפני ההתחברות. זה גם מה שמציל את הזרימה מהמירוץ
+  // שב-useLoginSubmit, שבו window.location.reload גובר על הניווט ומחזיר
+  // את הדפדפן לעמוד ההתחברות דווקא אחרי שהעוגייה כבר נכתבה. בחנות פתוחה
+  // זה המסלול של אורח שנשלח להתחבר באמצע הזמנה (‎/login?redirect=/checkout).
+  if (pathname === LOGIN_PATH) {
+    if (!isLoggedIn) return NextResponse.next();
+
+    const wanted = safeInternalPath(
+      request.nextUrl.searchParams.get("redirect")
+    );
+    // יעד שמצביע חזרה לעמוד ההתחברות היה יוצר לולאת הפניות
+    const backToLogin =
+      wanted === LOGIN_PATH || wanted?.startsWith(`${LOGIN_PATH}?`);
+
+    const fallback = STORE_CLOSED ? CLOSED_HOME : "/";
+    return redirectTo(wanted && !backToLogin ? wanted : fallback);
+  }
+
   // ── חנות פתוחה ─────────────────────────────────────────────────────────
-  // הקטלוג, החיפוש, העגלה והצ'קאאוט (כולל רכישה כאורח) חופשיים לכולם, אבל
-  // האזור האישי ועמדת הקופה עדיין מחייבים עוגיית התחברות. עד כה הם היו
+  // הקטלוג, החיפוש והעגלה חופשיים לכולם, אבל האזור האישי, עמדת הקופה
+  // והצ'קאאוט מחייבים עוגיית התחברות. עד כה הם היו
   // מוגנים רק בהפניה בצד הלקוח, כלומר ה-HTML נשלח לדפדפן לפני שההפניה רצה.
   if (!STORE_CLOSED) {
     // עמודי תוכן, התחברות, אימות אימייל ואיפוס סיסמה — פתוחים תמיד.
@@ -70,23 +91,6 @@ export function middleware(request) {
   }
 
   // ── חנות סגורה ─────────────────────────────────────────────────────────
-  // עמוד ההתחברות: לקוח שכבר מחובר לא צריך אותו
-  if (pathname === LOGIN_PATH) {
-    if (!isLoggedIn) return NextResponse.next();
-
-    // כיבוד היעד שנשמר לפני ההתחברות. זה גם מה שמציל את הזרימה מהמירוץ
-    // שב-useLoginSubmit, שבו window.location.reload גובר על הניווט ומחזיר
-    // את הדפדפן לעמוד ההתחברות דווקא אחרי שהעוגייה כבר נכתבה
-    const wanted = safeInternalPath(
-      request.nextUrl.searchParams.get("redirect")
-    );
-    // יעד שמצביע חזרה לעמוד ההתחברות היה יוצר לולאת הפניות
-    const backToLogin =
-      wanted === LOGIN_PATH || wanted?.startsWith(`${LOGIN_PATH}?`);
-
-    return redirectTo(wanted && !backToLogin ? wanted : CLOSED_HOME);
-  }
-
   // עמודי מידע ותקנון — פתוחים לכולם
   if (isPublicPath(pathname)) return NextResponse.next();
 

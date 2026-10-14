@@ -10,6 +10,7 @@ import ProductCard from "@component/product/ProductCard";
 import { SidebarContext } from "@context/SidebarContext";
 import Loading from "@component/preloader/Loading";
 import AttributeServices from "@services/AttributeServices";
+import CategoryServices from "@services/CategoryServices";
 import { useRouter } from "next/router";
 import Breadcrumbs from "@component/breadcrumb/Breadcrumbs";
 
@@ -192,8 +193,53 @@ const Search = ({ products, totalProducts, attributes }) => {
 
 export default Search;
 
+// מחזיר את מסלול ה-slugs (הורה/ילד) של קטגוריה לפי slug או שם, או null.
+// "+" בכתובת מפוענח כרווח, ולכן ‎?category=ח.ניקוי+ח"פ מגיע לכאן עם רווח —
+// משווים אחרי שמיישרים את שני הצדדים.
+const normalizeCategoryKey = (value) =>
+  String(value ?? "").replace(/\+/g, " ").replace(/\s+/g, " ").trim();
+
+const findCategoryPath = (nodes, identifier, trail = []) => {
+  const wanted = normalizeCategoryKey(identifier);
+  for (const node of nodes || []) {
+    const slug = node.slug || node.name?.he || node.name?.en;
+    const path = [...trail, slug];
+    if (
+      wanted &&
+      [node.slug, node.name?.he, node.name?.en].some(
+        (candidate) => normalizeCategoryKey(candidate) === wanted
+      )
+    ) {
+      return path;
+    }
+    const found = findCategoryPath(node.children, identifier, path);
+    if (found) return found;
+  }
+  return null;
+};
+
 export const getServerSideProps = async (context) => {
-  const { query, _id } = context.query;
+  const { query, _id, category } = context.query;
+
+  // קישורי הפוטר שמוגדרים בפאנל הם בצורת ‎/search?category=<שם>, אבל העמוד הזה
+  // מעולם לא קרא את category — ולכן כל קישור כזה נחת על "הקלידו בשורת החיפוש".
+  // מפנים לעמוד הקטגוריה עצמו, לפי slug או שם.
+  if (category && !_id && !query) {
+    try {
+      const categories = await CategoryServices.getShowingCategory();
+      const path = findCategoryPath(categories?.[0]?.children, String(category).trim());
+      if (path) {
+        return {
+          redirect: {
+            destination: `/product-category/${path.map(encodeURIComponent).join("/")}`,
+            permanent: false,
+          },
+        };
+      }
+    } catch (err) {
+      console.error("getServerSideProps (search category):", err?.message || err);
+    }
+  }
 
   try {
     const [data, attributes] = await Promise.all([

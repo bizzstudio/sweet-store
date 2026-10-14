@@ -25,6 +25,7 @@ import PriceUpdatedModal from "@component/modal/PriceUpdatedModal";
 import { SidebarContext } from "@context/SidebarContext";
 import { notifyError } from "@utils/toast";
 import { trackBeginCheckout } from "@services/googleAnalytics";
+import { LOGIN_PATH } from "@utils/storeMode";
 // Checkout Components
 import OrderCosts from "@component/checkout/OrderCosts";
 import CheckoutCartProducts from "@component/checkout/CheckoutCartProducts";
@@ -206,8 +207,9 @@ const Checkout = () => {
         setLoading(false);
       }
     } else {
-      // אורח - אפשר להמשיך לעמוד התשלום
-      setLoading(false);
+      // אין רכישה כאורח — מעבר להתחברות וחזרה לכאן אחריה. ה-middleware חוסם
+      // רק טעינה מלאה של העמוד; ניווט פנימי (מהעגלה, "קנייה מהירה") מגיע לכאן
+      router.replace({ pathname: LOGIN_PATH, query: { redirect: "/checkout" } });
     }
   }, [userInfo]);
 
