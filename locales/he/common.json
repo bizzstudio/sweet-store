@@ -531,6 +531,7 @@
     "proceedToOrderBtn": "המשך להזמנה",
     "completeOrderNoPayment": "השלמת ההזמנה",
     "saveOrder": "שמירת ההזמנה",
+    "loginToSaveOrder": "התחברות לשמירת ההזמנה",
     "orderSavedSuccessfully": "ההזמנה נשמרה בהצלחה",
     "thankYouForOrder": "תודה על ההזמנה!",
     "orderSavedInProcess": "ההזמנה התקבלה ועברה לטיפול הצוות. ברגעים אלו נשלח אליך אימייל סיכום הזמנה.",

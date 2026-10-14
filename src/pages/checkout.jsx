@@ -25,7 +25,6 @@ import PriceUpdatedModal from "@component/modal/PriceUpdatedModal";
 import { SidebarContext } from "@context/SidebarContext";
 import { notifyError } from "@utils/toast";
 import { trackBeginCheckout } from "@services/googleAnalytics";
-import { LOGIN_PATH } from "@utils/storeMode";
 // Checkout Components
 import OrderCosts from "@component/checkout/OrderCosts";
 import CheckoutCartProducts from "@component/checkout/CheckoutCartProducts";
@@ -207,9 +206,8 @@ const Checkout = () => {
         setLoading(false);
       }
     } else {
-      // אין רכישה כאורח — מעבר להתחברות וחזרה לכאן אחריה. ה-middleware חוסם
-      // רק טעינה מלאה של העמוד; ניווט פנימי (מהעגלה, "קנייה מהירה") מגיע לכאן
-      router.replace({ pathname: LOGIN_PATH, query: { redirect: "/checkout" } });
+      // אורח רואה את העמוד, אבל כפתור השמירה פותח אצלו התחברות (CheckoutActions)
+      setLoading(false);
     }
   }, [userInfo]);
 
@@ -250,22 +248,17 @@ const Checkout = () => {
   const onInvalidSubmit = (formErrors) => {
     if (typeof window === "undefined") return;
 
+    // אורח (Enter בשדה, בלי תקנון מסומן): אותה תשובה כמו בכפתור — התחברות.
+    // אין טעם להפנות אותו לשדה חסר בטופס שהוא ממילא לא יכול לשלוח
+    if (!userInfo) {
+      setShowLoginModal(true);
+      return;
+    }
+
     // עדיפות לתיבת אישור התקנון אם היא חסרה
     const targetId = formErrors?.acceptedTerms ? "terms-accept-section" : null;
     let element = targetId ? document.getElementById(targetId) : null;
 
-    /*
-     * שדות האורח.
-     *
-     * בלי הענף הזה נוצר כפתור מת: השדה guestCity אינו רשום ב-react-hook-form,
-     * ולכן שגיאה ידנית שנקבעה עליו (setError) אינה מתנקה בוולידציה הבאה —
-     * ‏handleSubmit רואה טופס לא תקין, לא קורא ל-submitHandler, ומגיע לכאן.
-     * כשאין תקנון חסר, element היה null ושום דבר לא קרה: הלחיצה השנייה נראתה
-     * כאילו הכפתור פשוט לא מגיב.
-     */
-    if (!element && Object.keys(formErrors || {}).some((k) => k.startsWith("guest"))) {
-      element = guestAddressFormRef?.current || null;
-    }
 
     if (element) {
       // קיזוז לפי גובה ההידר הנעוץ האמיתי (--header-h) + מרווח, כדי שהשדה לא ייחבא
@@ -278,8 +271,7 @@ const Checkout = () => {
         element.getBoundingClientRect().top + window.pageYOffset - headerH - 33;
       window.scrollTo({ top: offsetPosition, behavior: "smooth" });
 
-      // מיקוד לנגישות — רק כשהיעד הוא באמת תיבת התקנון. בלי התנאי הזה גלילה
-      // לטופס האורח הייתה ממקדת את הצ'קבוקס שבתחתית העמוד
+      // מיקוד לנגישות — רק כשהיעד הוא באמת תיבת התקנון
       if (targetId) {
         const checkbox = document.getElementById("checkoutAcceptedTerms");
         if (checkbox) {
@@ -570,6 +562,7 @@ const Checkout = () => {
                               storeCustomizationSetting={storeCustomizationSetting}
                               showingTranslateValue={showingTranslateValue}
                               minimumOrderAmount={minimumOrderAmount}
+                              onLoginRequired={() => setShowLoginModal(true)}
                             />
                           </>
                         )}

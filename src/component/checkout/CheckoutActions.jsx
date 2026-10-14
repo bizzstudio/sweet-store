@@ -1,7 +1,7 @@
 // src/component/checkout/CheckoutActions.jsx
 import React from "react";
 import Link from "next/link";
-import { IoReturnUpBackOutline, IoCheckmarkCircle } from "react-icons/io5";
+import { IoReturnUpBackOutline, IoCheckmarkCircle, IoPersonCircle } from "react-icons/io5";
 import useTranslation from "next-translate/useTranslation";
 import Cookies from "js-cookie";
 import Calculating from "@component/cart/Calculating";
@@ -17,6 +17,10 @@ const CheckoutActions = ({
     showingTranslateValue,
     minimumOrderAmount,
     formId = "checkout-form",
+    // אורח: אין רכישה בלי חשבון (מ-14/10/2026). הכפתור נשאר במקומו, אבל במקום
+    // לשלוח את הטופס הוא פותח התחברות. type="button" ולא submit — אחרת
+    // ולידציית שדות האורח הייתה רצה ודורשת פרטים שההתחברות ממילא ממלאת.
+    onLoginRequired,
 }) => {
     const { t } = useTranslation();
 
@@ -35,7 +39,12 @@ const CheckoutActions = ({
 
     const paymentButtonContent = (
         <div className="w-full flex items-center justify-center relative z-10">
-            {typeof customCartTotal !== 'number' ? (
+            {onLoginRequired ? (
+                <span className={currentLang ? "flex justify-center gap-2 text-center items-center" : "flex flex-row-reverse justify-center gap-2 text-center items-center"}>
+                    <IoPersonCircle className="text-2xl" />
+                    {t("common:loginToSaveOrder")}
+                </span>
+            ) : typeof customCartTotal !== 'number' ? (
                 <Calculating />
             ) : isCheckoutSubmit ? (
                 <span className="flex flex-row-reverse justify-center text-center items-center gap-2">
@@ -78,6 +87,11 @@ const CheckoutActions = ({
     // חסימת הכפתור עצמו (עגלה ריקה / שליחה בתהליך) — לא קשור למתג PAYMENT_DISABLED
     const isSubmitBlocked = isEmpty || isCheckoutSubmit || typeof customCartTotal !== 'number';
 
+    // מאפייני הכפתור — זהים לכפתור בשורה ולכפתור הצף במובייל
+    const buttonProps = onLoginRequired
+        ? { type: "button", onClick: onLoginRequired, disabled: isEmpty }
+        : { type: "submit", form: formId, disabled: isSubmitBlocked };
+
     return (
         <>
             {/* שורת כפתורים בתוך הזרימה - רק כפתור חזרה, כפתור התשלום עבר לצף */}
@@ -99,8 +113,7 @@ const CheckoutActions = ({
                 {/* במובייל: מקום שמור (הכפתור הצף למטה). בדסקטופ: כפתור תשלום בשורה */}
                 <div className="flex-1 hidden sm:block">
                     <button
-                        type="submit"
-                        disabled={isSubmitBlocked}
+                        {...buttonProps}
                         className="payment-glow-btn text-sm font-serif font-medium flex justify-center items-center w-full"
                     >
                         {paymentButtonContent}
@@ -114,9 +127,7 @@ const CheckoutActions = ({
             {/* כפתור תשלום צף - רק במובייל */}
             <div className="checkout-floating-payment sm:hidden">
                 <button
-                    type="submit"
-                    form={formId}
-                    disabled={isSubmitBlocked}
+                    {...buttonProps}
                     className="payment-glow-btn payment-glow-btn--floating text-sm font-serif font-medium flex justify-center items-center w-full"
                 >
                     {paymentButtonContent}

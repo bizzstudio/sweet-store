@@ -529,6 +529,7 @@
   "proceedToOrderBtn": "Continue to order",
   "completeOrderNoPayment": "Complete order",
   "saveOrder": "Save order",
+  "loginToSaveOrder": "Log in to save your order",
   "orderSavedSuccessfully": "Order saved successfully",
   "thankYouForOrder": "Thank you for your order!",
   "orderSavedInProcess": "Your order has been received and passed to our team. An order summary email is on its way.",

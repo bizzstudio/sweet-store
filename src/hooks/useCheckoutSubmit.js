@@ -261,60 +261,12 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
     try {
       // console.log('items :>> ', items);
 
-      // וולידציות לפני שליחת ההזמנה
-      // וולידציה לאורחים
-      if (!userInfo) {
-        const phoneRegex = /^05\d{8}$/;
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        let hasError = false;
-
-        // בדיקת כל השדות בבת אחת
-        if (!data.guestName?.trim()) {
-          setFormError("guestName", {
-            type: "manual",
-            message: t("invalidName"),
-          });
-          hasError = true;
-        }
-
-        if (!data.guestLastName?.trim()) {
-          setFormError("guestLastName", {
-            type: "manual",
-            message: t("invalidLastName"),
-          });
-          hasError = true;
-        }
-
-        if (!data.guestPhone || !phoneRegex.test(data.guestPhone)) {
-          setFormError("guestPhone", {
-            type: "manual",
-            message: t("invalidPhone"),
-          });
-          hasError = true;
-        }
-
-        if (!data.guestEmail || !emailRegex.test(data.guestEmail)) {
-          setFormError("guestEmail", {
-            type: "manual",
-            message: t("invalidEmail"),
-          });
-          hasError = true;
-        }
-
-        // אם יש שגיאות, גלול לטופס ועצור את השליחה
-        if (hasError) {
-          if (guestAddressFormRef?.current) {
-            const element = guestAddressFormRef.current;
-            const elementPosition = element.getBoundingClientRect().top;
-            const offsetPosition = elementPosition + window.pageYOffset - 160;
-
-            window.scrollTo({
-              top: offsetPosition,
-              behavior: "smooth"
-            });
-          }
-          return; // עצור את הביצוע
-        }
+      // אין רכישה כאורח (מ-14/10/2026): בלי חשבון אין שמירה — פותחים התחברות.
+      // הכפתור של אורח ממילא אינו שולח את הטופס; זו הגנה גם מ-Enter בשדה.
+      // הקופה פועלת בשם לקוחות אחרים ולכן אינה כפופה לכלל.
+      if (!userInfo && !isCashierMode) {
+        setShowLoginModal(true);
+        return;
       }
 
       // מינימום הזמנה: בחנות ללא מחירים הכלל אינו נאכף כלל. הלקוח לא רואה
@@ -385,7 +337,7 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
         let orderInfo;
         let orderService;
 
-        if (userInfo) { // משתמש מחובר - הזמנה רגילה
+        { // לקוח מחובר בלבד — אורח נעצר בתחילת submitHandler
           userDetails = {
             name: userInfo.name,
             lastName: userInfo.lastName || '',
@@ -413,29 +365,6 @@ const useCheckoutSubmit = (isCashierMode = false, newsletterOptIn = false) => {
           };
 
           orderService = OrderServices.addOrder(orderInfo);
-        } else { // משתמש אורח - הזמנה כאורח
-          orderInfo = {
-            // פרטי היוזר האורח
-            name: data.guestName,
-            lastName: data.guestLastName,
-            email: data.guestEmail,
-            phone: data.guestPhone,
-
-            // פרטי ההזמנה
-            // אורח מזמין בלי כתובת, ולכן ההזמנה נרשמת כאיסוף ("1") ולא כמשלוח
-            shippingOption: "1",
-            callOnArrival: data.callOnArrival,
-            paymentMethod: "creditCard",
-            status: "Pending",
-            cart: items.sort((a, b) => a.barcode - b.barcode) || items,
-            subTotal: Number(customCartTotal.toFixed(2)),
-            shippingCost: shippingCost,
-            discount: discountAmount,
-            total: total,
-            coupon: couponInfo._id || null,
-          };
-
-          orderService = OrderServices.addGuestOrder(orderInfo);
         }
 
         /*

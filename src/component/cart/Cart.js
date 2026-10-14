@@ -18,7 +18,6 @@ import MainBT from "@component/button/MainBT";
 import ThresholdDiscountSlider from "./ThresholdDiscountSlider";
 import { HIDE_PRICES } from "@utils/priceVisibility";
 import { PAYMENT_DISABLED } from "@utils/paymentDisabled";
-import { LOGIN_PATH } from "@utils/storeMode";
 
 const Cart = () => {
   const router = useRouter();
@@ -54,14 +53,7 @@ const Cart = () => {
 
     closeCartDrawer(); // Call the closeCartDrawer function
 
-    // רק לקוח רשום מסיים הזמנה — אורח עובר לעמוד ההתחברות וחוזר משם לצ'קאאוט.
-    // עמוד ולא חלון התחברות: אחרי הכניסה useLoginSubmit מרענן את הדף, ורק
-    // ב-‎/login?redirect=‎ ה-middleware יודע להשלים את המעבר לצ'קאאוט.
-    if (!userInfo) {
-      router.push({ pathname: LOGIN_PATH, query: { redirect: "/checkout" } });
-      return;
-    }
-
+    // גם אורח עובר לצ'קאאוט; ההתחברות נדרשת שם, בכפתור שמירת ההזמנה
     if (userInfo && !userInfo?.address?.city) {
       localStorage.setItem("firstTime", true);
     } else {

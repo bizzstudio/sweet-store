@@ -2,7 +2,7 @@
 //
 // עמוד ההתחברות הייעודי (ראו src/utils/storeMode.js). עומד בפני עצמו בלי
 // ה-Layout של החנות — אין ניווט, חיפוש, קטגוריות או עגלה. הניתוב אליו נעשה
-// ב-middleware: בחנות סגורה לכל מבקר, ובחנות פתוחה לאורח שמנסה לסיים הזמנה.
+// ב-middleware: בחנות סגורה לכל מבקר, ובחנות פתוחה למי שניגש לאזור האישי.
 import Head from "next/head";
 import Image from "@component/common/Img";
 import Cookies from "js-cookie";
@@ -72,14 +72,14 @@ const LoginPage = () => {
             <p className="text-center text-sm text-gray-600 leading-6">
               {STORE_CLOSED
                 ? "החנות סגורה כרגע להזמנות. הכניסה מיועדת לאזור האישי — צפייה בהזמנות שלכם ועדכון פרטים."
-                : "ההזמנה באתר זמינה ללקוחות רשומים בלבד. התחברו כדי להשלים את ההזמנה — העגלה שלכם שמורה."}
+                : "כניסה ללקוחות רשומים — שמירת הזמנות, צפייה בהזמנות שלכם ועדכון פרטים."}
             </p>
 
             {/* setModalOpen מקבל פונקציה ריקה: כאן אין מודאל לסגור */}
             <Common setModalOpen={() => {}} />
           </div>
 
-          {/* בחנות פתוחה העמוד הוא תחנת ביניים בדרך לצ'קאאוט — דרך חזרה לקטלוג */}
+          {/* בחנות פתוחה העמוד הוא תחנת ביניים בדרך לאזור האישי — דרך חזרה לקטלוג */}
           {!STORE_CLOSED && (
             <p className="text-center mt-4">
               <Link href="/" className="text-sm text-gray-700 underline hover:text-gray-900">
